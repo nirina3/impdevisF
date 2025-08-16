@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
 import { Calculator, Plus, Trash2, Save, DollarSign, TrendingUp, ArrowRight, FileText, History } from 'lucide-react';
 import { formatNumberWithSpaces, parseFormattedNumber } from '../utils/formatters';
 import { useCostCalculation } from '../hooks/useCostCalculation';
 import { useCostHistory } from '../hooks/useCostHistory';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 interface CostItem {
   id: number;
@@ -29,8 +30,13 @@ interface ExchangeRates {
 
 const CostCalculation: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { saveCalculation, hasCalculation, calculationData } = useCostCalculation();
-  const { calculations } = useCostHistory();
+  const { calculations, getCalculationById } = useCostHistory();
+  
+  // Vérifier si on est en mode édition
+  const editId = searchParams.get('edit');
+  const isEditing = !!editId;
 
   const [exchangeRates, setExchangeRates] = useState<ExchangeRates>({
     USD: 4500, // 1 USD = 4500 MGA
@@ -55,6 +61,36 @@ const CostCalculation: React.FC = () => {
       originCountry: 'Chine'
     }
   ]);
+
+  // Charger les données du calcul à modifier si on est en mode édition
+  useEffect(() => {
+    if (editId && calculations.length > 0) {
+      const calculationToEdit = getCalculationById(editId);
+      if (calculationToEdit) {
+        // Pré-remplir les taux de change
+        setExchangeRates(calculationToEdit.exchangeRates);
+        
+        // Pré-remplir les articles
+        const editItems = calculationToEdit.items.map((item, index) => ({
+          id: index + 1,
+          description: item.description,
+          quantity: item.quantity,
+          purchasePrice: item.purchasePrice,
+          mainCurrency: item.mainCurrency,
+          transportFees: item.transportFees,
+          transportFeesOriginal: item.transportFeesOriginal,
+          transportCurrency: item.transportCurrency,
+          miscFees: item.miscFees,
+          customsFees: item.customsFees,
+          margin: item.margin || 20,
+          sellingPrice: item.sellingPrice,
+          originCountry: item.originCountry
+        }));
+        
+        setItems(editItems);
+      }
+    }
+  }, [editId, calculations, getCalculationById]);
 
   const convertToMGA = (amount: number, currency: 'USD' | 'EUR' | 'CNY' | 'MGA'): number => {
     if (currency === 'MGA') return amount;
@@ -215,7 +251,16 @@ const CostCalculation: React.FC = () => {
           <div className="p-2 bg-blue-100 rounded-lg">
             <Calculator className="w-6 h-6 text-blue-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Calcul des Coûts</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {isEditing ? 'Modifier le Calcul' : 'Calcul des Coûts'}
+            </h1>
+            {isEditing && (
+              <p className="text-sm text-gray-500">
+                Modification du calcul • Les modifications seront sauvegardées comme un nouveau calcul
+              </p>
+            )}
+          </div>
         </div>
         <div className="flex space-x-3">
           <button
@@ -230,7 +275,7 @@ const CostCalculation: React.FC = () => {
             className="btn-secondary flex items-center space-x-2"
           >
             <Save className="w-4 h-4" />
-            <span>Sauvegarder</span>
+            <span>{isEditing ? 'Sauvegarder comme nouveau' : 'Sauvegarder'}</span>
           </button>
           <button
             onClick={handleSaveAndCreateQuote}
@@ -244,8 +289,33 @@ const CostCalculation: React.FC = () => {
         </div>
       </div>
 
-      {/* Notification si des données sont déjà sauvegardées */}
-      {(hasCalculation() && calculationData) || calculations.length > 0 ? (
+      {/* Notification si on est en mode édition */}
+      {isEditing ? (
+        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-orange-100 rounded-lg">
+              <Edit className="w-5 h-5 text-orange-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-orange-900">Mode édition</h3>
+              <p className="text-sm text-orange-700">
+                Vous modifiez un calcul existant. Les modifications seront sauvegardées comme un nouveau calcul dans votre historique.
+              </p>
+            </div>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => navigate('/cost-history')}
+                className="btn-secondary text-sm flex items-center space-x-2"
+              >
+                <History className="w-4 h-4" />
+                <span>Retour à l'historique</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Notification si des données sont déjà sauvegardées */
+        (hasCalculation() && calculationData) || calculations.length > 0 ? (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-blue-100 rounded-lg">
@@ -287,7 +357,8 @@ const CostCalculation: React.FC = () => {
             </div>
           </div>
         </div>
-      ) : null}
+        ) : null
+      )}
 
       {/* Section des taux de change */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">

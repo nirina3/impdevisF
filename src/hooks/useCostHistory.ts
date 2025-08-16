@@ -110,7 +110,7 @@ export const useCostHistory = () => {
   // Rafraîchir les calculs
   const refreshCalculations = async () => {
     try {
-      setLoading(false);
+      setLoading(true);
       setError(null);
       const calculationsData = await costCalculationsService.getAll();
       setCalculations(calculationsData);

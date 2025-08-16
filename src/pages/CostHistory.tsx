@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react';
 import { useCostHistory } from '../hooks/useCostHistory';
 import { 
   History, 
@@ -20,6 +21,7 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ErrorMessage from '../components/ui/ErrorMessage';
 import Modal from '../components/ui/Modal';
 import { formatNumberWithSpaces, formatAriary } from '../utils/formatters';
 import { CostCalculationData } from '../hooks/useCostCalculation';
@@ -43,6 +45,11 @@ const CostHistory: React.FC = () => {
   const [calculationToDelete, setCalculationToDelete] = useState<string | null>(null);
   const [editingName, setEditingName] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
+
+  // Rafraîchir les calculs à chaque fois que le composant est monté
+  useEffect(() => {
+    refreshCalculations();
+  }, []);
 
   if (loading) {
     return (
@@ -95,6 +102,11 @@ const CostHistory: React.FC = () => {
     // Sauvegarder temporairement le calcul pour l'utiliser dans un nouveau devis
     localStorage.setItem('temp_cost_calculation', JSON.stringify(calculation));
     navigate('/quotes/new?from=cost-calculation');
+  };
+
+  const handleEditCalculation = (calculation: CostCalculationData) => {
+    // Naviguer vers la page de calcul avec l'ID du calcul à modifier
+    navigate(`/cost-calculation?edit=${calculation.id}`);
   };
 
   const getTotalItems = (calculation: CostCalculationData) => {
@@ -209,6 +221,13 @@ const CostHistory: React.FC = () => {
                     title="Voir les détails"
                   >
                     <Eye className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleEditCalculation(calculation)}
+                    className="p-1 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded transition-all duration-200"
+                    title="Modifier"
+                  >
+                    <Edit className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDuplicate(calculation)}
