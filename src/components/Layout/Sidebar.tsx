@@ -19,6 +19,7 @@ const Sidebar: React.FC = () => {
     { path: '/quotes', icon: FileText, label: 'Devis', color: 'text-emerald-500' },
     { path: '/quotes/new', icon: Plus, label: 'Nouveau Devis', color: 'text-violet-500' },
     { path: '/cost-calculation', icon: Calculator, label: 'Calcul des coûts', color: 'text-amber-500' },
+    { path: '/cost-calculation', icon: Calculator, label: 'Calcul → Devis', color: 'text-orange-500', isFlow: true },
     { path: '/analytics', icon: TrendingUp, label: 'Analyses', color: 'text-rose-500' },
     { path: '/clients', icon: Users, label: 'Clients', color: 'text-cyan-500' },
     { path: '/settings', icon: Settings, label: 'Paramètres', color: 'text-neutral-500' },
@@ -45,6 +46,9 @@ const Sidebar: React.FC = () => {
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
+            
+            // Ne pas afficher l'élément de flux dans la navigation normale
+            if (item.isFlow) return null;
             
             return (
               <Link

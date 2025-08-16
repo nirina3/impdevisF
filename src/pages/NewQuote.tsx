@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuotes } from '../hooks/useQuotes';
+import { useCostCalculation } from '../hooks/useCostCalculation';
 import { Plus, Trash2, Save, ArrowLeft, Eye, FileText } from 'lucide-react';
 import { Quote, QuoteItem } from '../types';
 import { formatNumberWithSpaces, parseFormattedNumber } from '../utils/formatters';
@@ -8,7 +9,9 @@ import { generateQuotePDF, printQuote } from '../utils/pdf';
 
 const NewQuote: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { addQuote } = useQuotes();
+  const { calculationData, clearCalculation } = useCostCalculation();
   
   const [activeTab, setActiveTab] = useState<'form' | 'preview'>('form');
   
@@ -45,11 +48,45 @@ const NewQuote: React.FC = () => {
       dimensions: { length: 0, width: 0, height: 0 },
       hsCode: '',
       category: '',
-      productLink: ''
+      productLink: '',
+      margin: 20
     }
   ]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Vérifier si on vient du calcul des coûts
+  const fromCostCalculation = searchParams.get('from') === 'cost-calculation';
+
+  // Charger les données du calcul des coûts si disponibles
+  useEffect(() => {
+    if (fromCostCalculation && calculationData) {
+      // Convertir les données du calcul des coûts vers le format du devis
+      const convertedItems = calculationData.items.map(costItem => ({
+        description: costItem.description,
+        quantity: costItem.quantity,
+        unitPrice: costItem.sellingPrice,
+        purchasePrice: costItem.purchasePrice,
+        miscFees: costItem.miscFees,
+        customsFees: costItem.customsFees,
+        sellingPrice: costItem.sellingPrice,
+        weight: costItem.weight || 0,
+        dimensions: costItem.dimensions || { length: 0, width: 0, height: 0 },
+        hsCode: costItem.hsCode || '',
+        category: costItem.category || '',
+        productLink: costItem.productLink || '',
+        margin: costItem.margin
+      }));
+
+      setItems(convertedItems);
+
+      // Pré-remplir le pays d'origine si tous les articles viennent du même pays
+      const countries = [...new Set(calculationData.items.map(item => item.originCountry))];
+      if (countries.length === 1) {
+        setFormData(prev => ({ ...prev, originCountry: countries[0] }));
+      }
+    }
+  }, [fromCostCalculation, calculationData]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -85,7 +122,16 @@ const NewQuote: React.FC = () => {
           const miscFees = field === 'miscFees' ? value : updatedItem.miscFees;
           const customsFees = field === 'customsFees' ? value : updatedItem.customsFees;
           
-          updatedItem.sellingPrice = purchasePrice + miscFees + customsFees;
+          const totalCost = purchasePrice + miscFees + customsFees;
+          const margin = updatedItem.margin || 0;
+          updatedItem.sellingPrice = totalCost + (totalCost * margin / 100);
+          updatedItem.unitPrice = updatedItem.sellingPrice;
+        }
+        
+        // Recalcul du prix de vente si la marge change
+        if (field === 'margin') {
+          const totalCost = updatedItem.purchasePrice + updatedItem.miscFees + updatedItem.customsFees;
+          updatedItem.sellingPrice = totalCost + (totalCost * value / 100);
           updatedItem.unitPrice = updatedItem.sellingPrice;
         }
         
@@ -116,7 +162,8 @@ const NewQuote: React.FC = () => {
       dimensions: { length: 0, width: 0, height: 0 },
       hsCode: '',
       category: '',
-      productLink: ''
+      productLink: '',
+      margin: 20
     }]);
   };
 
@@ -191,6 +238,26 @@ const NewQuote: React.FC = () => {
     navigate('/quotes');
   };
 
+  const handleClearCostData = () => {
+    clearCalculation();
+    // Réinitialiser les articles à un article vide
+    setItems([{
+      description: '',
+      quantity: 1,
+      unitPrice: 0,
+      purchasePrice: 0,
+      miscFees: 0,
+      customsFees: 0,
+      sellingPrice: 0,
+      weight: 0,
+      dimensions: { length: 0, width: 0, height: 0 },
+      hsCode: '',
+      category: '',
+      productLink: '',
+      margin: 20
+    }]);
+  };
+
   const generatePreviewQuote = (): Quote => {
     const totalAmount = calculateTotal();
     const remainingAmount = totalAmount - downPaymentData.amount;
@@ -241,6 +308,41 @@ const NewQuote: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">Nouveau Devis</h1>
         </div>
       </div>
+
+      {/* Notification si les données viennent du calcul des coûts */}
+      {fromCostCalculation && calculationData && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <FileText className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-green-900">Données importées du calcul des coûts</h3>
+                <p className="text-sm text-green-700">
+                  {calculationData.items.length} article(s) importé(s) • 
+                  Calculé le {calculationData.calculatedAt.toLocaleString('fr-FR')} • 
+                  Total : {formatNumberWithSpaces(Math.round(calculationData.totalSellingPrice))} Ar
+                </p>
+              </div>
+            </div>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => navigate('/cost-calculation')}
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              >
+                Retour au calcul
+              </button>
+              <button
+                onClick={handleClearCostData}
+                className="text-sm text-red-600 hover:text-red-800 font-medium"
+              >
+                Effacer les données
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Onglets */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -445,14 +547,38 @@ const NewQuote: React.FC = () => {
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Prix de vente unitaire (Ar)
+                           {fromCostCalculation && (
+                             <span className="text-xs text-green-600 ml-1">(Calculé automatiquement)</span>
+                           )}
                           </label>
                           <input
                             type="text"
                             value={formatNumberWithSpaces(item.sellingPrice)}
                             onChange={(e) => handleItemChange(index, 'sellingPrice', parseFormattedNumber(e.target.value))}
-                            className="input-field bg-gray-50"
+                           className={`input-field ${fromCostCalculation ? 'bg-green-50 border-green-200' : 'bg-gray-50'}`}
                             placeholder="0"
-                            readOnly
+                           readOnly={fromCostCalculation}
+                          />
+                         {fromCostCalculation && (
+                           <p className="text-xs text-green-600 mt-1">
+                             Prix calculé avec marge de {formatNumberWithSpaces(item.margin || 0)}%
+                           </p>
+                         )}
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Marge en pourcentage (%)
+                           {fromCostCalculation && (
+                             <span className="text-xs text-green-600 ml-1">(Importée du calcul)</span>
+                           )}
+                          </label>
+                          <input
+                            type="text"
+                            value={formatNumberWithSpaces(item.margin || 0)}
+                            onChange={(e) => handleItemChange(index, 'margin', parseFormattedNumber(e.target.value))}
+                           className={`input-field ${fromCostCalculation ? 'bg-green-50 border-green-200' : ''}`}
+                            placeholder="20"
                           />
                         </div>
 
@@ -541,11 +667,27 @@ const NewQuote: React.FC = () => {
 
                       {/* Résumé de l'article */}
                       <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-gray-600">Total pour cet article:</span>
-                          <span className="font-semibold text-gray-900">
-                            {formatNumberWithSpaces(item.quantity * item.sellingPrice)} Ar
-                          </span>
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center text-xs text-gray-500">
+                            <span>Coût unitaire (sans marge):</span>
+                            <span>{formatNumberWithSpaces(item.purchasePrice + item.miscFees + item.customsFees)} Ar</span>
+                          </div>
+                          <div className="flex justify-between items-center text-xs text-gray-500">
+                            <span>Marge ({formatNumberWithSpaces(item.margin || 0)}%):</span>
+                            <span>+{formatNumberWithSpaces(Math.round((item.purchasePrice + item.miscFees + item.customsFees) * (item.margin || 0) / 100))} Ar</span>
+                          </div>
+                          <div className="flex justify-between items-center border-t border-gray-200 pt-2">
+                            <span className="text-sm font-medium text-gray-700">Prix de vente unitaire:</span>
+                            <span className="font-semibold text-gray-900">
+                              {formatNumberWithSpaces(item.sellingPrice)} Ar
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-gray-700">Total pour cet article:</span>
+                            <span className="font-bold text-blue-600">
+                              {formatNumberWithSpaces(item.quantity * item.sellingPrice)} Ar
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
