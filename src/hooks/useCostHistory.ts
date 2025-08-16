@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CostCalculationData } from './useCostCalculation';
+import { costCalculationsService } from '../services/firestore';
 
 export interface SavedCostCalculation extends CostCalculationData {
   id: string;
@@ -8,33 +9,25 @@ export interface SavedCostCalculation extends CostCalculationData {
   updatedAt: Date;
 }
 
-const STORAGE_KEY = 'cost_calculations_history';
-
 export const useCostHistory = () => {
   const [calculations, setCalculations] = useState<SavedCostCalculation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Charger les calculs depuis le localStorage au démarrage
+  // Charger les calculs depuis Firebase au démarrage
   useEffect(() => {
-    const loadCalculations = () => {
+    const loadCalculations = async () => {
       try {
-        const savedData = localStorage.getItem(STORAGE_KEY);
-        if (savedData) {
-          const parsed = JSON.parse(savedData);
-          const calculationsWithDates = parsed.map((calc: any) => ({
-            ...calc,
-            calculatedAt: new Date(calc.calculatedAt),
-            createdAt: new Date(calc.createdAt),
-            updatedAt: new Date(calc.updatedAt)
-          }));
-          // Trier par date de création décroissante
-          calculationsWithDates.sort((a: SavedCostCalculation, b: SavedCostCalculation) => 
-            b.createdAt.getTime() - a.createdAt.getTime()
-          );
-          setCalculations(calculationsWithDates);
-        }
-      } catch (error) {
-        console.error('Erreur lors du chargement de l\'historique des calculs:', error);
+        setLoading(true);
+        setError(null);
+        console.log('useCostHistory - Starting to load calculations from Firebase...');
+        const calculationsData = await costCalculationsService.getAll();
+        console.log('useCostHistory - Loaded calculations:', calculationsData.length);
+        setCalculations(calculationsData);
+      } catch (err) {
+        console.error('useCostHistory - Error loading calculations:', err);
+        setError('Erreur lors du chargement de l\'historique des calculs');
+        setCalculations([]);
       } finally {
         setLoading(false);
       }
@@ -43,71 +36,93 @@ export const useCostHistory = () => {
     loadCalculations();
   }, []);
 
-  // Sauvegarder dans le localStorage
-  const saveToStorage = (calculationsList: SavedCostCalculation[]) => {
+  // Ajouter un nouveau calcul
+  const addCalculation = async (calculation: CostCalculationData, name?: string) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(calculationsList));
-    } catch (error) {
-      console.error('Erreur lors de la sauvegarde:', error);
+      const now = new Date();
+      const calculationName = name || `Calcul du ${now.toLocaleDateString('fr-FR')} à ${now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+      
+      console.log('useCostHistory - Adding new calculation...');
+      const newCalculation = await costCalculationsService.add(calculation, calculationName);
+      setCalculations(prev => [newCalculation, ...prev]);
+      
+      return newCalculation;
+    } catch (err) {
+      console.error('useCostHistory - Error adding calculation:', err);
+      setError('Erreur lors de la sauvegarde du calcul');
+      throw err;
     }
   };
 
-  // Ajouter un nouveau calcul
-  const addCalculation = (calculation: CostCalculationData, name?: string) => {
-    const now = new Date();
-    const newCalculation: SavedCostCalculation = {
-      ...calculation,
-      id: `calc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      name: name || `Calcul du ${now.toLocaleDateString('fr-FR')} à ${now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`,
-      createdAt: now,
-      updatedAt: now
-    };
-
-    const updatedCalculations = [newCalculation, ...calculations];
-    setCalculations(updatedCalculations);
-    saveToStorage(updatedCalculations);
-    
-    return newCalculation;
-  };
-
   // Supprimer un calcul
-  const deleteCalculation = (id: string) => {
-    const updatedCalculations = calculations.filter(calc => calc.id !== id);
-    setCalculations(updatedCalculations);
-    saveToStorage(updatedCalculations);
+  const deleteCalculation = async (id: string) => {
+    try {
+      console.log('useCostHistory - Deleting calculation:', id);
+      await costCalculationsService.delete(id);
+      setCalculations(prev => prev.filter(calc => calc.id !== id));
+    } catch (err) {
+      console.error('useCostHistory - Error deleting calculation:', err);
+      setError('Erreur lors de la suppression du calcul');
+      throw err;
+    }
   };
 
   // Dupliquer un calcul
-  const duplicateCalculation = (calculation: SavedCostCalculation) => {
-    const now = new Date();
-    const duplicatedCalculation: SavedCostCalculation = {
-      ...calculation,
-      id: `calc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      name: `${calculation.name} (Copie)`,
-      createdAt: now,
-      updatedAt: now,
-      calculatedAt: now
-    };
+  const duplicateCalculation = async (calculation: SavedCostCalculation) => {
+    try {
+      const now = new Date();
+      const duplicatedData = {
+        ...calculation,
+        calculatedAt: now
+      };
+      
+      const duplicatedCalculation = await costCalculationsService.add(
+        duplicatedData, 
+        `${calculation.name} (Copie)`
+      );
 
-    const updatedCalculations = [duplicatedCalculation, ...calculations];
-    setCalculations(updatedCalculations);
-    saveToStorage(updatedCalculations);
-    
-    return duplicatedCalculation;
+      setCalculations(prev => [duplicatedCalculation, ...prev]);
+      return duplicatedCalculation;
+    } catch (err) {
+      console.error('useCostHistory - Error duplicating calculation:', err);
+      setError('Erreur lors de la duplication du calcul');
+      throw err;
+    }
   };
 
   // Mettre à jour le nom d'un calcul
-  const updateCalculationName = (id: string, newName: string) => {
-    const updatedCalculations = calculations.map(calc => 
-      calc.id === id 
-        ? { ...calc, name: newName, updatedAt: new Date() }
-        : calc
-    );
-    setCalculations(updatedCalculations);
-    saveToStorage(updatedCalculations);
+  const updateCalculationName = async (id: string, newName: string) => {
+    try {
+      console.log('useCostHistory - Updating calculation name:', id);
+      await costCalculationsService.update(id, { name: newName });
+      setCalculations(prev => prev.map(calc => 
+        calc.id === id 
+          ? { ...calc, name: newName, updatedAt: new Date() }
+          : calc
+      ));
+    } catch (err) {
+      console.error('useCostHistory - Error updating calculation name:', err);
+      setError('Erreur lors de la mise à jour du nom');
+      throw err;
+    }
   };
 
-  // Exporter un calcul
+  // Rafraîchir les calculs
+  const refreshCalculations = async () => {
+    try {
+      setLoading(false);
+      setError(null);
+      const calculationsData = await costCalculationsService.getAll();
+      setCalculations(calculationsData);
+    } catch (err) {
+      console.error('useCostHistory - Error refreshing calculations:', err);
+      setError('Erreur lors du rafraîchissement des calculs');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Exporter un calcul (reste inchangé car c'est un export local)
   const exportCalculation = (calculation: SavedCostCalculation) => {
     const exportData = {
       name: calculation.name,
@@ -179,9 +194,11 @@ export const useCostHistory = () => {
     return calculations.find(calc => calc.id === id);
   };
 
+  console.log('useCostHistory - Current state:', { calculationsCount: calculations.length, loading });
   return {
     calculations,
     loading,
+    error,
     addCalculation,
     deleteCalculation,
     duplicateCalculation,
@@ -189,6 +206,7 @@ export const useCostHistory = () => {
     exportCalculation,
     getStatistics,
     searchCalculations,
-    getCalculationById
+    getCalculationById,
+    refreshCalculations
   };
 };

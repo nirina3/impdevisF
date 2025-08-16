@@ -29,10 +29,12 @@ const CostHistory: React.FC = () => {
   const { 
     calculations, 
     loading, 
+    error,
     deleteCalculation, 
     duplicateCalculation, 
     updateCalculationName,
-    exportCalculation 
+    exportCalculation,
+    refreshCalculations
   } = useCostHistory();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,6 +49,12 @@ const CostHistory: React.FC = () => {
       <div className="flex items-center justify-center h-64">
         <LoadingSpinner size="lg" />
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <ErrorMessage message={error} onRetry={refreshCalculations} />
     );
   }
 

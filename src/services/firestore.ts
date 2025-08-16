@@ -40,6 +40,7 @@ const cleanUndefinedFields = (obj: any): any => {
 // Collections
 const QUOTES_COLLECTION = 'quotes';
 const CLIENTS_COLLECTION = 'clients';
+const COST_CALCULATIONS_COLLECTION = 'costCalculations';
 
 // Helper function to convert Firestore timestamp to Date
 const convertTimestamp = (timestamp: any): Date => {
@@ -317,6 +318,111 @@ export const clientsService = {
       await updateDoc(docRef, cleanedData);
     } catch (error) {
       console.error('Error updating client stats:', error);
+      throw error;
+    }
+  }
+};
+
+// Cost Calculations services
+export const costCalculationsService = {
+  // Get all cost calculations
+  async getAll(): Promise<any[]> {
+    try {
+      const q = query(collection(db, COST_CALCULATIONS_COLLECTION), orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      
+      return querySnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          createdAt: convertTimestamp(data.createdAt),
+          updatedAt: convertTimestamp(data.updatedAt),
+          calculatedAt: convertTimestamp(data.calculatedAt)
+        };
+      });
+    } catch (error) {
+      console.error('Error fetching cost calculations:', error);
+      throw error;
+    }
+  },
+
+  // Get cost calculation by ID
+  async getById(id: string): Promise<any | null> {
+    try {
+      const docRef = doc(db, COST_CALCULATIONS_COLLECTION, id);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        return {
+          id: docSnap.id,
+          ...data,
+          createdAt: convertTimestamp(data.createdAt),
+          updatedAt: convertTimestamp(data.updatedAt),
+          calculatedAt: convertTimestamp(data.calculatedAt)
+        };
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching cost calculation:', error);
+      throw error;
+    }
+  },
+
+  // Add new cost calculation
+  async add(calculationData: any, name: string): Promise<any> {
+    try {
+      const now = new Date();
+      const dataToSave = {
+        ...calculationData,
+        name,
+        createdAt: convertToTimestamp(now),
+        updatedAt: convertToTimestamp(now),
+        calculatedAt: convertToTimestamp(calculationData.calculatedAt || now)
+      };
+
+      const cleanedData = cleanUndefinedFields(dataToSave);
+      const docRef = await addDoc(collection(db, COST_CALCULATIONS_COLLECTION), cleanedData);
+      
+      return {
+        id: docRef.id,
+        ...calculationData,
+        name,
+        createdAt: now,
+        updatedAt: now,
+        calculatedAt: calculationData.calculatedAt || now
+      };
+    } catch (error) {
+      console.error('Error adding cost calculation:', error);
+      throw error;
+    }
+  },
+
+  // Update cost calculation
+  async update(id: string, updates: any): Promise<void> {
+    try {
+      const docRef = doc(db, COST_CALCULATIONS_COLLECTION, id);
+      const updateData = {
+        ...updates,
+        updatedAt: convertToTimestamp(new Date())
+      };
+
+      const cleanedData = cleanUndefinedFields(updateData);
+      await updateDoc(docRef, cleanedData);
+    } catch (error) {
+      console.error('Error updating cost calculation:', error);
+      throw error;
+    }
+  },
+
+  // Delete cost calculation
+  async delete(id: string): Promise<void> {
+    try {
+      const docRef = doc(db, COST_CALCULATIONS_COLLECTION, id);
+      await deleteDoc(docRef);
+    } catch (error) {
+      console.error('Error deleting cost calculation:', error);
       throw error;
     }
   }
