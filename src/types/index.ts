@@ -59,6 +59,11 @@ export interface QuoteItem {
   hsCode?: string;
   category: string;
   productLink?: string;
+  mainCurrency?: string;
+  exchangeRates?: { [key: string]: number };
+  transportFees?: number;
+  transportFeesOriginal?: number;
+  transportCurrency?: string;
 }
 
 export interface Client {
