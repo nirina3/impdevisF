@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Calculator, Plus, Trash2, Save, DollarSign, TrendingUp, ArrowRight, FileText } from 'lucide-react';
+import { Calculator, Plus, Trash2, Save, DollarSign, TrendingUp, ArrowRight, FileText, History } from 'lucide-react';
 import { formatNumberWithSpaces, parseFormattedNumber } from '../utils/formatters';
 import { useCostCalculation } from '../hooks/useCostCalculation';
+import { useCostHistory } from '../hooks/useCostHistory';
 import { useNavigate } from 'react-router-dom';
 
 interface CostItem {
@@ -29,6 +30,7 @@ interface ExchangeRates {
 const CostCalculation: React.FC = () => {
   const navigate = useNavigate();
   const { saveCalculation, hasCalculation, calculationData } = useCostCalculation();
+  const { calculations } = useCostHistory();
 
   const [exchangeRates, setExchangeRates] = useState<ExchangeRates>({
     USD: 4500, // 1 USD = 4500 MGA
@@ -243,30 +245,49 @@ const CostCalculation: React.FC = () => {
       </div>
 
       {/* Notification si des données sont déjà sauvegardées */}
-      {hasCalculation() && calculationData && (
+      {(hasCalculation() && calculationData) || calculations.length > 0 ? (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-blue-100 rounded-lg">
               <Calculator className="w-5 h-5 text-blue-600" />
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-medium text-blue-900">Calcul précédent disponible</h3>
-              <p className="text-sm text-blue-700">
-                Dernière sauvegarde : {calculationData.calculatedAt.toLocaleString('fr-FR')} 
-                • {calculationData.items.length} article(s) 
-                • Total : {formatNumberWithSpaces(Math.round(calculationData.totalSellingPrice))} Ar
-              </p>
+              <h3 className="text-sm font-medium text-blue-900">
+                {hasCalculation() && calculationData ? 'Calcul précédent disponible' : 'Historique des calculs'}
+              </h3>
+              {hasCalculation() && calculationData ? (
+                <p className="text-sm text-blue-700">
+                  Dernière sauvegarde : {calculationData.calculatedAt.toLocaleString('fr-FR')} 
+                  • {calculationData.items.length} article(s) 
+                  • Total : {formatNumberWithSpaces(Math.round(calculationData.totalSellingPrice))} Ar
+                </p>
+              ) : (
+                <p className="text-sm text-blue-700">
+                  {calculations.length} calcul{calculations.length > 1 ? 's' : ''} sauvegardé{calculations.length > 1 ? 's' : ''}
+                </p>
+              )}
             </div>
-            <button
-              onClick={() => navigate('/quotes/new?from=cost-calculation')}
-              className="btn-primary text-sm flex items-center space-x-2"
-            >
-              <FileText className="w-4 h-4" />
-              <span>Utiliser pour un devis</span>
-            </button>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => navigate('/cost-history')}
+                className="btn-secondary text-sm flex items-center space-x-2"
+              >
+                <History className="w-4 h-4" />
+                <span>Voir l'historique</span>
+              </button>
+              {hasCalculation() && calculationData && (
+                <button
+                  onClick={() => navigate('/quotes/new?from=cost-calculation')}
+                  className="btn-primary text-sm flex items-center space-x-2"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Utiliser pour un devis</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* Section des taux de change */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">

@@ -18,7 +18,7 @@ import Modal from '../components/ui/Modal';
 import ErrorMessage from '../components/ui/ErrorMessage';
 import PaymentStatusBadge from '../components/ui/PaymentStatusBadge';
 import { Quote } from '../types';
-import { formatAriary } from '../utils/formatters';
+import { formatAriary, formatNumberWithSpaces } from '../utils/formatters';
 
 const QuotesList: React.FC = () => {
   const navigate = useNavigate();

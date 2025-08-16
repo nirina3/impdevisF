@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import QuotesList from './pages/QuotesList';
 import NewQuote from './pages/NewQuote';
 import EditQuote from './pages/EditQuote';
+import CostHistory from './pages/CostHistory';
 import Clients from './pages/Clients';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
@@ -23,6 +24,7 @@ function App() {
             <Route path="/quotes/new" element={<NewQuote />} />
             <Route path="/quotes/edit/:id" element={<EditQuote />} />
             <Route path="/cost-calculation" element={<CostCalculation />} />
+            <Route path="/cost-history" element={<CostHistory />} />
             <Route path="/clients" element={<Clients />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/settings" element={<Settings />} />

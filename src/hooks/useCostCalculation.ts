@@ -64,6 +64,37 @@ export const useCostCalculation = () => {
     
     setCalculationData(calculationWithDate);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(calculationWithDate));
+    
+    // Également sauvegarder dans l'historique
+    const historyData = localStorage.getItem('cost_calculations_history');
+    let history: any[] = [];
+    
+    if (historyData) {
+      try {
+        history = JSON.parse(historyData);
+      } catch (error) {
+        console.error('Erreur lors du chargement de l\'historique:', error);
+      }
+    }
+    
+    const now = new Date();
+    const historyEntry = {
+      ...calculationWithDate,
+      id: `calc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      name: `Calcul du ${now.toLocaleDateString('fr-FR')} à ${now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`,
+      createdAt: now,
+      updatedAt: now
+    };
+    
+    // Ajouter au début de l'historique
+    history.unshift(historyEntry);
+    
+    // Limiter l'historique à 50 entrées pour éviter un localStorage trop volumineux
+    if (history.length > 50) {
+      history = history.slice(0, 50);
+    }
+    
+    localStorage.setItem('cost_calculations_history', JSON.stringify(history));
   };
 
   const clearCalculation = () => {
