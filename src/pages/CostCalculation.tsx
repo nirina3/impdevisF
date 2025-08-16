@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useEffect } from 'react';
-import { Calculator, Plus, Trash2, Save, DollarSign, TrendingUp, ArrowRight, FileText, History } from 'lucide-react';
+import { Calculator, Plus, Trash2, Save, DollarSign, TrendingUp, ArrowRight, FileText, History, Edit } from 'lucide-react';
 import { formatNumberWithSpaces, parseFormattedNumber } from '../utils/formatters';
 import { useCostCalculation } from '../hooks/useCostCalculation';
 import { useCostHistory } from '../hooks/useCostHistory';

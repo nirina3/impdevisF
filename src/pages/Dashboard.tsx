@@ -252,11 +252,17 @@ const Dashboard: React.FC = () => {
                   </td>
                   <td className="table-cell">
                     <div className="font-semibold text-neutral-900">
-                      {formatNumberWithSpaces(Math.round(quote.totalAmount / 1000000))} M Ar
+                      {quote.totalAmount >= 1000000 
+                        ? `${formatNumberWithSpaces(Math.round(quote.totalAmount / 1000000))} M Ar`
+                        : formatAriary(quote.totalAmount)
+                      }
                     </div>
                     {quote.remainingAmount > 0 && (
                       <div className="text-xs text-amber-600">
-                        Reste: {formatNumberWithSpaces(Math.round(quote.remainingAmount / 1000000))} M Ar
+                        Reste: {quote.remainingAmount >= 1000000 
+                          ? `${formatNumberWithSpaces(Math.round(quote.remainingAmount / 1000000))} M Ar`
+                          : formatAriary(quote.remainingAmount)
+                        }
                       </div>
                     )}
                   </td>
