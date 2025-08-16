@@ -13,12 +13,13 @@ import {
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ErrorMessage from '../components/ui/ErrorMessage';
 import Modal from '../components/ui/Modal';
 import { Client } from '../types';
 import { formatNumberWithSpaces, formatAriary } from '../utils/formatters';
 
 const Clients: React.FC = () => {
-  const { clients, loading, addClient, updateClient, deleteClient } = useClients();
+  const { clients, loading, error, addClient, updateClient, deleteClient, refreshClients } = useClients();
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -35,11 +36,17 @@ const Clients: React.FC = () => {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  if (loading) {
+  if (loading && clients.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
         <LoadingSpinner size="lg" />
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <ErrorMessage message={error} onRetry={refreshClients} />
     );
   }
 

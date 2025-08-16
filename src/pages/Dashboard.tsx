@@ -21,16 +21,31 @@ import { Link } from 'react-router-dom';
 import StatusBadge from '../components/ui/StatusBadge';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import PaymentStatusBadge from '../components/ui/PaymentStatusBadge';
+import ErrorMessage from '../components/ui/ErrorMessage';
 import { formatNumberWithSpaces, formatAriary } from '../utils/formatters';
 
 const Dashboard: React.FC = () => {
-  const { quotes, loading: quotesLoading } = useQuotes();
-  const { clients, loading: clientsLoading } = useClients();
+  const { quotes, loading: quotesLoading, error: quotesError, refreshQuotes } = useQuotes();
+  const { clients, loading: clientsLoading, error: clientsError, refreshClients } = useClients();
 
-  if (quotesLoading || clientsLoading) {
+  if ((quotesLoading || clientsLoading) && quotes.length === 0 && clients.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
         <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  // Afficher les erreurs s'il y en a
+  if (quotesError || clientsError) {
+    return (
+      <div className="space-y-4">
+        {quotesError && (
+          <ErrorMessage message={quotesError} onRetry={refreshQuotes} />
+        )}
+        {clientsError && (
+          <ErrorMessage message={clientsError} onRetry={refreshClients} />
+        )}
       </div>
     );
   }

@@ -15,24 +15,31 @@ import { Link, useNavigate } from 'react-router-dom';
 import StatusBadge from '../components/ui/StatusBadge';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import Modal from '../components/ui/Modal';
+import ErrorMessage from '../components/ui/ErrorMessage';
 import PaymentStatusBadge from '../components/ui/PaymentStatusBadge';
 import { Quote } from '../types';
 import { formatAriary } from '../utils/formatters';
 
 const QuotesList: React.FC = () => {
   const navigate = useNavigate();
-  const { quotes, loading, deleteQuote } = useQuotes();
+  const { quotes, loading, error, deleteQuote, refreshQuotes } = useQuotes();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [quoteToDelete, setQuoteToDelete] = useState<string | null>(null);
 
-  if (loading) {
+  if (loading && quotes.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
         <LoadingSpinner size="lg" />
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <ErrorMessage message={error} onRetry={refreshQuotes} />
     );
   }
 
