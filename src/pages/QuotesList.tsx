@@ -19,6 +19,7 @@ import ErrorMessage from '../components/ui/ErrorMessage';
 import PaymentStatusBadge from '../components/ui/PaymentStatusBadge';
 import { Quote } from '../types';
 import { formatAriary, formatNumberWithSpaces } from '../utils/formatters';
+import { generateQuotePDF } from '../utils/pdf';
 
 const QuotesList: React.FC = () => {
   const navigate = useNavigate();
@@ -59,8 +60,7 @@ const QuotesList: React.FC = () => {
   };
 
   const exportQuote = (quote: Quote) => {
-    // Simuler l'export PDF
-    console.log('Export PDF pour le devis:', quote.quoteNumber);
+    generateQuotePDF(quote);
   };
 
   return (
@@ -194,6 +194,7 @@ const QuotesList: React.FC = () => {
                         <Download className="w-4 h-4" />
                       </button>
                       <button
+                        onClick={() => navigate(`/quotes/edit/${quote.id}`)}
                         className="text-blue-600 hover:text-blue-900 p-1"
                         title="Modifier"
                       >

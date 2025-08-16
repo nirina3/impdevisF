@@ -1,7 +1,25 @@
 import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../config/firebase';
 import { Bell, Search, User, Settings, LogOut } from 'lucide-react';
 
 const Header: React.FC = () => {
+  const navigate = useNavigate();
+  const [user] = useAuthState(auth);
+
+  const handleLogout = async () => {
+    try {
+      console.log('Attempting to sign out user...');
+      await signOut(auth);
+      console.log('User signed out successfully');
+      navigate('/login');
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    }
+  };
+
   return (
     <header className="bg-white/80 backdrop-blur-md shadow-soft border-b border-neutral-200/50 px-6 py-4">
       <div className="flex items-center justify-between">
@@ -30,7 +48,9 @@ const Header: React.FC = () => {
           {/* User Menu */}
           <div className="flex items-center space-x-3 pl-4 border-l border-neutral-200">
             <div className="text-right">
-              <p className="text-sm font-semibold text-neutral-900">Admin User</p>
+              <p className="text-sm font-semibold text-neutral-900">
+                {user?.email || 'Utilisateur'}
+              </p>
               <p className="text-xs text-neutral-500">Gestionnaire Principal</p>
             </div>
             <div className="relative group">
@@ -41,16 +61,19 @@ const Header: React.FC = () => {
               {/* Dropdown Menu */}
               <div className="absolute right-0 top-12 w-48 bg-white rounded-xl shadow-strong border border-neutral-200/50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                 <div className="p-2">
-                  <button className="w-full flex items-center px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 rounded-lg transition-colors duration-200">
+                  <Link to="/profile" className="w-full flex items-center px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 rounded-lg transition-colors duration-200">
                     <User className="w-4 h-4 mr-3" />
                     Mon Profil
-                  </button>
-                  <button className="w-full flex items-center px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 rounded-lg transition-colors duration-200">
+                  </Link>
+                  <Link to="/settings" className="w-full flex items-center px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 rounded-lg transition-colors duration-200">
                     <Settings className="w-4 h-4 mr-3" />
                     Paramètres
-                  </button>
+                  </Link>
                   <hr className="my-2 border-neutral-200" />
-                  <button className="w-full flex items-center px-3 py-2 text-sm text-error-600 hover:bg-error-50 rounded-lg transition-colors duration-200">
+                  <button 
+                    onClick={handleLogout}
+                    className="w-full flex items-center px-3 py-2 text-sm text-error-600 hover:bg-error-50 rounded-lg transition-colors duration-200"
+                  >
                     <LogOut className="w-4 h-4 mr-3" />
                     Déconnexion
                   </button>
