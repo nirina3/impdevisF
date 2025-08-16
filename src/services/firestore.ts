@@ -16,6 +16,27 @@ import {
 import { db } from '../config/firebase';
 import { Quote, Client } from '../types';
 
+// Helper function to clean undefined values from objects
+const cleanUndefinedFields = (obj: any): any => {
+  if (obj === null || obj === undefined) return null;
+  if (obj instanceof Date) return obj;
+  if (obj instanceof Timestamp) return obj;
+  if (Array.isArray(obj)) {
+    return obj.map(item => cleanUndefinedFields(item));
+  }
+  if (typeof obj === 'object' && obj.constructor === Object) {
+    const cleaned: any = {};
+    Object.keys(obj).forEach(key => {
+      const value = obj[key];
+      if (value !== undefined) {
+        cleaned[key] = cleanUndefinedFields(value);
+      }
+    });
+    return cleaned;
+  }
+  return obj;
+};
+
 // Collections
 const QUOTES_COLLECTION = 'quotes';
 const CLIENTS_COLLECTION = 'clients';
@@ -100,13 +121,16 @@ export const quotesService = {
         updatedAt: convertToTimestamp(now),
         validUntil: convertToTimestamp(quote.validUntil),
         estimatedDelivery: convertToTimestamp(quote.estimatedDelivery),
-        downPayment: quote.downPayment ? {
-          ...quote.downPayment,
-          paidDate: quote.downPayment.paidDate ? convertToTimestamp(quote.downPayment.paidDate) : undefined
-        } : undefined
+        ...(quote.downPayment && {
+          downPayment: {
+            ...quote.downPayment,
+            paidDate: quote.downPayment.paidDate ? convertToTimestamp(quote.downPayment.paidDate) : null
+          }
+        })
       };
 
-      const docRef = await addDoc(collection(db, QUOTES_COLLECTION), quoteData);
+      const cleanedData = cleanUndefinedFields(quoteData);
+      const docRef = await addDoc(collection(db, QUOTES_COLLECTION), cleanedData);
       
       return {
         id: docRef.id,
@@ -130,14 +154,15 @@ export const quotesService = {
         ...(updates.validUntil && { validUntil: convertToTimestamp(updates.validUntil) }),
         ...(updates.estimatedDelivery && { estimatedDelivery: convertToTimestamp(updates.estimatedDelivery) }),
         ...(updates.downPayment && {
-          downPayment: {
+          downPayment: cleanUndefinedFields({
             ...updates.downPayment,
-            paidDate: updates.downPayment.paidDate ? convertToTimestamp(updates.downPayment.paidDate) : undefined
-          }
+            paidDate: updates.downPayment.paidDate ? convertToTimestamp(updates.downPayment.paidDate) : null
+          })
         })
       };
 
-      await updateDoc(docRef, updateData);
+      const cleanedData = cleanUndefinedFields(updateData);
+      await updateDoc(docRef, cleanedData);
     } catch (error) {
       console.error('Error updating quote:', error);
       throw error;
@@ -241,7 +266,8 @@ export const clientsService = {
         totalValue: 0
       };
 
-      const docRef = await addDoc(collection(db, CLIENTS_COLLECTION), clientData);
+      const cleanedData = cleanUndefinedFields(clientData);
+      const docRef = await addDoc(collection(db, CLIENTS_COLLECTION), cleanedData);
       
       return {
         id: docRef.id,
@@ -260,7 +286,8 @@ export const clientsService = {
   async update(id: string, updates: Partial<Client>): Promise<void> {
     try {
       const docRef = doc(db, CLIENTS_COLLECTION, id);
-      await updateDoc(docRef, updates);
+      const cleanedData = cleanUndefinedFields(updates);
+      await updateDoc(docRef, cleanedData);
     } catch (error) {
       console.error('Error updating client:', error);
       throw error;
@@ -282,10 +309,12 @@ export const clientsService = {
   async updateStats(clientId: string, totalQuotes: number, totalValue: number): Promise<void> {
     try {
       const docRef = doc(db, CLIENTS_COLLECTION, clientId);
-      await updateDoc(docRef, {
+      const updateData = {
         totalQuotes,
         totalValue
-      });
+      };
+      const cleanedData = cleanUndefinedFields(updateData);
+      await updateDoc(docRef, cleanedData);
     } catch (error) {
       console.error('Error updating client stats:', error);
       throw error;

@@ -211,7 +211,7 @@ const NewQuote: React.FC = () => {
     if (downPaymentData.amount === totalAmount) paymentStatus = 'paid';
     else if (downPaymentData.amount > 0) paymentStatus = 'partial';
 
-    const newQuote: Omit<Quote, 'id' | 'createdAt' | 'updatedAt'> = {
+    const baseQuote: Omit<Quote, 'id' | 'createdAt' | 'updatedAt'> = {
       quoteNumber: `QT-${new Date().getFullYear()}-${String(Date.now()).slice(-3)}`,
       ...formData,
       validUntil: new Date(formData.validUntil),
@@ -221,18 +221,24 @@ const NewQuote: React.FC = () => {
       paymentStatus,
       remainingAmount,
       destinationPort: '', // Valeur par défaut vide puisque le champ est supprimé
-      downPayment: downPaymentData.amount > 0 ? {
-        id: `dp_${Date.now()}`,
-        amount: downPaymentData.amount,
-        percentage: downPaymentData.percentage,
-        paymentMethod: downPaymentData.paymentMethod,
-        notes: downPaymentData.notes
-      } : undefined,
       items: items.map((item, index) => ({
         ...item,
         id: `item_${index}_${Date.now()}`
       }))
     };
+
+    // Only include downPayment if there's an actual down payment amount
+    const newQuote = downPaymentData.amount > 0 ? {
+      ...baseQuote,
+      downPayment: {
+        id: `dp_${Date.now()}`,
+        amount: downPaymentData.amount,
+        percentage: downPaymentData.percentage,
+        paymentMethod: downPaymentData.paymentMethod,
+        notes: downPaymentData.notes,
+        paidDate: null
+      }
+    } : baseQuote;
 
     addQuote(newQuote);
     navigate('/quotes');

@@ -198,25 +198,31 @@ const EditQuote: React.FC = () => {
     if (downPaymentData.amount === totalAmount) paymentStatus = 'paid';
     else if (downPaymentData.amount > 0) paymentStatus = 'partial';
 
-    const updatedQuote: Partial<Quote> = {
+    const baseUpdatedQuote: Partial<Quote> = {
       ...formData,
       validUntil: new Date(formData.validUntil),
       estimatedDelivery: new Date(formData.estimatedDelivery),
       totalAmount,
       paymentStatus,
       remainingAmount,
-      downPayment: downPaymentData.amount > 0 ? {
-        id: quote.downPayment?.id || `dp_${Date.now()}`,
-        amount: downPaymentData.amount,
-        percentage: downPaymentData.percentage,
-        paymentMethod: downPaymentData.paymentMethod,
-        notes: downPaymentData.notes
-      } : undefined,
       items: items.map((item, index) => ({
         ...item,
         id: quote.items[index]?.id || `item_${index}_${Date.now()}`
       }))
     };
+
+    // Only include downPayment if there's an actual down payment amount
+    const updatedQuote = downPaymentData.amount > 0 ? {
+      ...baseUpdatedQuote,
+      downPayment: {
+        id: quote.downPayment?.id || `dp_${Date.now()}`,
+        amount: downPaymentData.amount,
+        percentage: downPaymentData.percentage,
+        paymentMethod: downPaymentData.paymentMethod,
+        notes: downPaymentData.notes,
+        paidDate: null
+      }
+    } : baseUpdatedQuote;
 
     updateQuote(quote.id, updatedQuote);
     navigate('/quotes');
