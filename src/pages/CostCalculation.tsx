@@ -250,7 +250,7 @@ const CostCalculation: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 px-4 sm:px-0">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-blue-100 rounded-lg">
@@ -267,28 +267,31 @@ const CostCalculation: React.FC = () => {
             )}
           </div>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
           <button
             onClick={addItem}
-            className="btn-secondary flex items-center space-x-2"
+            className="btn-secondary flex items-center justify-center space-x-2 w-full sm:w-auto text-sm"
           >
             <Plus className="w-4 h-4" />
-            <span>Ajouter un article</span>
+            <span className="hidden sm:inline">Ajouter un article</span>
+            <span className="sm:hidden">Ajouter</span>
           </button>
           <button
             onClick={handleSaveCalculation}
-            className="btn-secondary flex items-center space-x-2"
+            className="btn-secondary flex items-center justify-center space-x-2 w-full sm:w-auto text-sm"
           >
             <Save className="w-4 h-4" />
-            <span>{isEditing ? 'Sauvegarder comme nouveau' : 'Sauvegarder'}</span>
+            <span className="hidden sm:inline">{isEditing ? 'Sauvegarder comme nouveau' : 'Sauvegarder'}</span>
+            <span className="sm:hidden">Sauvegarder</span>
           </button>
           <button
             onClick={handleSaveAndCreateQuote}
-            className="btn-primary flex items-center space-x-2"
+            className="btn-primary flex items-center justify-center space-x-2 w-full sm:w-auto text-sm"
             disabled={items.length === 0 || items.some(item => !item.description.trim())}
           >
             <FileText className="w-4 h-4" />
-            <span>Créer un devis</span>
+            <span className="hidden sm:inline">Créer un devis</span>
+            <span className="sm:hidden">Devis</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -296,7 +299,7 @@ const CostCalculation: React.FC = () => {
 
       {/* Notification si on est en mode édition */}
       {isEditing ? (
-        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mx-0 sm:mx-0">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-orange-100 rounded-lg">
               <Edit className="w-5 h-5 text-orange-600" />
@@ -307,13 +310,14 @@ const CostCalculation: React.FC = () => {
                 Vous modifiez un calcul existant. Les modifications seront sauvegardées comme un nouveau calcul dans votre historique.
               </p>
             </div>
-            <div className="flex space-x-2">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
               <button
                 onClick={() => navigate('/cost-history')}
-                className="btn-secondary text-sm flex items-center space-x-2"
+                className="btn-secondary text-sm flex items-center justify-center space-x-2 w-full sm:w-auto"
               >
                 <History className="w-4 h-4" />
-                <span>Retour à l'historique</span>
+                <span className="hidden sm:inline">Retour à l'historique</span>
+                <span className="sm:hidden">Historique</span>
               </button>
             </div>
           </div>
@@ -321,7 +325,7 @@ const CostCalculation: React.FC = () => {
       ) : (
         /* Notification si des données sont déjà sauvegardées */
         (hasCalculation() && calculationData) || calculations.length > 0 ? (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mx-0 sm:mx-0">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-blue-100 rounded-lg">
               <Calculator className="w-5 h-5 text-blue-600" />
@@ -342,21 +346,23 @@ const CostCalculation: React.FC = () => {
                 </p>
               )}
             </div>
-            <div className="flex space-x-2">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
               <button
                 onClick={() => navigate('/cost-history')}
-                className="btn-secondary text-sm flex items-center space-x-2"
+                className="btn-secondary text-sm flex items-center justify-center space-x-2 w-full sm:w-auto"
               >
                 <History className="w-4 h-4" />
-                <span>Voir l'historique</span>
+                <span className="hidden sm:inline">Voir l'historique</span>
+                <span className="sm:hidden">Historique</span>
               </button>
               {hasCalculation() && calculationData && (
                 <button
                   onClick={() => navigate('/quotes/new?from=cost-calculation')}
-                  className="btn-primary text-sm flex items-center space-x-2"
+                  className="btn-primary text-sm flex items-center justify-center space-x-2 w-full sm:w-auto"
                 >
                   <FileText className="w-4 h-4" />
-                  <span>Utiliser pour un devis</span>
+                  <span className="hidden sm:inline">Utiliser pour un devis</span>
+                  <span className="sm:hidden">Créer devis</span>
                 </button>
               )}
             </div>
@@ -366,7 +372,7 @@ const CostCalculation: React.FC = () => {
       )}
 
       {/* Section des taux de change */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mx-0 sm:mx-0">
         <div className="flex items-center space-x-3 mb-4">
           <div className="p-2 bg-green-100 rounded-lg">
             <TrendingUp className="w-5 h-5 text-green-600" />
@@ -428,7 +434,7 @@ const CostCalculation: React.FC = () => {
       {/* Articles */}
       <div className="space-y-6">
         {items.map((item, index) => (
-          <div key={item.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div key={item.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mx-0 sm:mx-0">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-gray-900">Article {index + 1}</h2>
               {items.length > 1 && (
@@ -761,7 +767,7 @@ const CostCalculation: React.FC = () => {
 
       {/* Résumé global */}
       {items.length > 1 && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mx-0 sm:mx-0">
           <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
             <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full text-sm font-medium mr-3">📊</span>
             Résumé Global

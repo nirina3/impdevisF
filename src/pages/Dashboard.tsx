@@ -95,7 +95,7 @@ const Dashboard: React.FC = () => {
   );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8 px-4 sm:px-0">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -215,7 +215,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Devis récents */}
-      <div className="card-elevated">
+      <div className="card-elevated mx-0 sm:mx-0">
         <div className="px-4 sm:px-6 py-4 border-b border-neutral-200/50 bg-gradient-to-r from-neutral-50 to-neutral-100/50">
           <div className="flex items-center justify-between">
             <h2 className="text-lg sm:text-xl font-bold text-neutral-900">Devis Récents</h2>

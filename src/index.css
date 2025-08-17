@@ -116,21 +116,88 @@
 
 /* Mobile-specific improvements */
 @media (max-width: 768px) {
+  /* Prevent horizontal overflow */
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Container fixes */
+  .container {
+    padding: 0 16px;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Button responsive fixes */
+  .btn-primary, .btn-secondary, .btn-accent {
+    min-height: 48px;
+    min-width: 48px;
+    font-size: 14px;
+    padding: 12px 16px;
+  }
+  
+  /* Card responsive fixes */
+  .card, .card-elevated, .stat-card {
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Calcul des coûts specific fixes */
+  .calcul-couts-container {
+    padding: 0 16px;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Grid responsive fixes */
+  .grid {
+    gap: 1rem;
+  }
+  
+  /* Flex responsive fixes */
+  .flex {
+    flex-wrap: wrap;
+  }
+  
+  /* Text responsive fixes */
+  .text-2xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+  
+  .text-3xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+  
   .input-field {
     font-size: 16px; /* Prevent zoom on iOS */
   }
   
-  /* Improve touch targets */
-  button, .btn-primary, .btn-secondary, .btn-accent {
-    min-height: 48px;
-    min-width: 48px;
+  /* Space responsive fixes */
+  .space-y-8 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-y-reverse: 0;
+    margin-top: calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));
+    margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));
   }
   
-  /* Better spacing for mobile */
   .space-y-6 > :not([hidden]) ~ :not([hidden]) {
     --tw-space-y-reverse: 0;
     margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
     margin-bottom: calc(1rem * var(--tw-space-y-reverse));
+  }
+  
+  /* Overflow fixes */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Padding fixes for main containers */
+  main {
+    padding-left: 0;
+    padding-right: 0;
   }
 }
 

@@ -70,7 +70,7 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 px-4 sm:px-0">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Paramètres</h1>
         <button onClick={handleSave} className="btn-primary flex items-center space-x-2">
@@ -81,7 +81,7 @@ const Settings: React.FC = () => {
 
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Navigation des onglets */}
-        <div className="lg:w-64">
+        <div className="lg:w-64 mx-0 sm:mx-0">
           <nav className="space-y-1">
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -104,9 +104,9 @@ const Settings: React.FC = () => {
         </div>
 
         {/* Contenu des onglets */}
-        <div className="flex-1">
+        <div className="flex-1 mx-0 sm:mx-0">
           {activeTab === 'profile' && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-6">Informations Personnelles</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -191,7 +191,7 @@ const Settings: React.FC = () => {
           )}
 
           {activeTab === 'business' && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-6">Paramètres Entreprise</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -293,7 +293,7 @@ const Settings: React.FC = () => {
           )}
 
           {activeTab === 'notifications' && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-6">Préférences de Notification</h2>
               <div className="space-y-6">
                 <div>
@@ -348,7 +348,7 @@ const Settings: React.FC = () => {
           )}
 
           {activeTab === 'security' && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-6">Sécurité</h2>
               <div className="space-y-6">
                 <div>
@@ -420,7 +420,7 @@ const Settings: React.FC = () => {
           )}
 
           {activeTab === 'appearance' && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-6">Apparence</h2>
               <div className="space-y-6">
                 <div>

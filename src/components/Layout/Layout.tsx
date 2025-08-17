@@ -42,7 +42,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header onMenuClick={() => setSidebarOpen(true)} />
         
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+        <main className="flex-1 overflow-y-auto p-0 sm:p-6 space-y-4 sm:space-y-6">
           <div className="animate-fade-in">
             {children}
           </div>

@@ -64,7 +64,7 @@ const QuotesList: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 px-4 sm:px-0">
       <div className="flex items-center justify-between">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Liste des Devis</h1>
         <div className="hidden sm:block">
@@ -87,7 +87,7 @@ const QuotesList: React.FC = () => {
       </div>
 
       {/* Filtres et recherche */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mx-0 sm:mx-0">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
@@ -121,7 +121,7 @@ const QuotesList: React.FC = () => {
       </div>
 
       {/* Liste des devis */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mx-0 sm:mx-0">
         {/* Desktop table view */}
         <div className="overflow-x-auto hidden lg:block">
           <table className="min-w-full divide-y divide-gray-200">

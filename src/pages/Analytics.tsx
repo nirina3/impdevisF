@@ -110,7 +110,7 @@ const Analytics: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6 px-4 sm:px-0">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Analyses</h1>
         <div className="text-sm text-gray-500">
@@ -293,7 +293,7 @@ const Analytics: React.FC = () => {
       </div>
 
       {/* Top clients */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mx-0 sm:mx-0">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Top 5 Clients</h2>
         <div className="overflow-x-auto">
           <table className="min-w-full">
