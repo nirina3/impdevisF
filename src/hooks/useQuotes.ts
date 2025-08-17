@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Quote, QuoteItem } from '../types';
+import { Quote } from '../types';
 import { quotesService } from '../services/firestore';
 
 export const useQuotes = () => {

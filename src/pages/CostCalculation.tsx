@@ -20,6 +20,11 @@ interface CostItem {
   margin: number;
   sellingPrice: number;
   originCountry: string;
+  weight?: number;
+  dimensions?: { length: number; width: number; height: number };
+  hsCode?: string;
+  category?: string;
+  productLink?: string;
 }
 
 interface ExchangeRates {

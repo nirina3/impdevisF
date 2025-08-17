@@ -48,9 +48,6 @@ const Sidebar: React.FC = () => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
             
-            // Ne pas afficher l'élément de flux dans la navigation normale
-            if (item.isFlow) return null;
-            
             return (
               <Link
                 key={item.path}
