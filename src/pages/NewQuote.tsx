@@ -307,11 +307,11 @@ const NewQuote: React.FC = () => {
         <div className="flex items-center space-x-4">
           <button
             onClick={() => navigate('/quotes')}
-            className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">Nouveau Devis</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Nouveau Devis</h1>
         </div>
       </div>
 
@@ -353,7 +353,7 @@ const NewQuote: React.FC = () => {
       {/* Onglets */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6">
+          <nav className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 overflow-x-auto">
             <button
               onClick={() => setActiveTab('form')}
               className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
@@ -362,7 +362,7 @@ const NewQuote: React.FC = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 whitespace-nowrap">
                 <FileText className="w-4 h-4" />
                 <span>Formulaire</span>
               </div>
@@ -375,7 +375,7 @@ const NewQuote: React.FC = () => {
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 whitespace-nowrap">
                 <Eye className="w-4 h-4" />
                 <span>Aperçu Devis</span>
               </div>
@@ -383,13 +383,13 @@ const NewQuote: React.FC = () => {
           </nav>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {activeTab === 'form' ? (
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Informations Client */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Informations Client</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Nom du client *
@@ -449,37 +449,38 @@ const NewQuote: React.FC = () => {
               </div>
 
               {/* Articles */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold text-gray-900">Articles</h2>
                   <button
                     type="button"
                     onClick={addItem}
-                    className="btn-primary flex items-center space-x-2"
+                    className="btn-primary flex items-center space-x-2 text-sm sm:text-base"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>Ajouter un article</span>
+                    <span className="hidden sm:inline">Ajouter un article</span>
+                    <span className="sm:hidden">Ajouter</span>
                   </button>
                 </div>
 
                 <div className="space-y-6">
                   {items.map((item, index) => (
-                    <div key={index} className="border border-gray-200 rounded-lg p-4">
+                    <div key={index} className="border border-gray-200 rounded-lg p-3 sm:p-4">
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-md font-medium text-gray-900">Article {index + 1}</h3>
+                        <h3 className="text-sm sm:text-md font-medium text-gray-900">Article {index + 1}</h3>
                         {items.length > 1 && (
                           <button
                             type="button"
                             onClick={() => removeItem(index)}
-                            className="text-red-600 hover:text-red-800 p-1"
+                            className="text-red-600 hover:text-red-800 p-1.5 hover:bg-red-50 rounded-lg transition-all duration-200"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
                         )}
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div className="lg:col-span-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="sm:col-span-2 lg:col-span-3">
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Description *
                           </label>
@@ -628,11 +629,11 @@ const NewQuote: React.FC = () => {
                         </div>
 
                         {/* Dimensions */}
-                        <div className="lg:col-span-3">
+                        <div className="sm:col-span-2 lg:col-span-3">
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Dimensions (cm)
                           </label>
-                          <div className="grid grid-cols-3 gap-2">
+                          <div className="grid grid-cols-3 gap-2 sm:gap-4">
                             <input
                               type="text"
                               value={formatNumberWithSpaces(item.dimensions.length)}
@@ -657,7 +658,7 @@ const NewQuote: React.FC = () => {
                           </div>
                         </div>
 
-                        <div className="lg:col-span-3">
+                        <div className="sm:col-span-2 lg:col-span-3">
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Lien produit (optionnel)
                           </label>
@@ -672,7 +673,7 @@ const NewQuote: React.FC = () => {
                       </div>
 
                       {/* Résumé de l'article */}
-                      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                      <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm">
                         <div className="space-y-2">
                           <div className="flex justify-between items-center text-xs text-gray-500">
                             <span>Coût unitaire (sans marge):</span>
@@ -683,14 +684,14 @@ const NewQuote: React.FC = () => {
                             <span>+{formatNumberWithSpaces(Math.round((item.purchasePrice + item.miscFees + item.customsFees) * (item.margin || 0) / 100))} Ar</span>
                           </div>
                           <div className="flex justify-between items-center border-t border-gray-200 pt-2">
-                            <span className="text-sm font-medium text-gray-700">Prix de vente unitaire:</span>
-                            <span className="font-semibold text-gray-900">
+                            <span className="text-xs sm:text-sm font-medium text-gray-700">Prix de vente unitaire:</span>
+                            <span className="font-semibold text-gray-900 text-sm">
                               {formatNumberWithSpaces(item.sellingPrice)} Ar
                             </span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span className="text-sm font-medium text-gray-700">Total pour cet article:</span>
-                            <span className="font-bold text-blue-600">
+                            <span className="text-xs sm:text-sm font-medium text-gray-700">Total pour cet article:</span>
+                            <span className="font-bold text-blue-600 text-sm">
                               {formatNumberWithSpaces(item.quantity * item.sellingPrice)} Ar
                             </span>
                           </div>
@@ -702,9 +703,9 @@ const NewQuote: React.FC = () => {
               </div>
 
               {/* Expédition - Section corrigée */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Expédition</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Pays d'origine *
@@ -760,7 +761,7 @@ const NewQuote: React.FC = () => {
                     {errors.estimatedDelivery && <p className="text-red-500 text-xs mt-1">{errors.estimatedDelivery}</p>}
                   </div>
 
-                  <div className="md:col-span-2">
+                  <div className="sm:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Notes générales
                     </label>
@@ -776,9 +777,9 @@ const NewQuote: React.FC = () => {
               </div>
 
               {/* Acompte */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Acompte (Optionnel)</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Pourcentage d'acompte (%)
@@ -839,22 +840,22 @@ const NewQuote: React.FC = () => {
               </div>
 
               {/* Résumé */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-6">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-4 sm:p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Résumé</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="text-center">
                     <p className="text-sm text-gray-600">Total articles</p>
-                    <p className="text-2xl font-bold text-gray-900">{formatNumberWithSpaces(items.length)}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-gray-900">{formatNumberWithSpaces(items.length)}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-sm text-gray-600">Montant total</p>
-                    <p className="text-2xl font-bold text-blue-600">
+                    <p className="text-xl sm:text-2xl font-bold text-blue-600">
                       {formatNumberWithSpaces(calculateTotal())} Ar
                     </p>
                   </div>
                   <div className="text-center">
                     <p className="text-sm text-gray-600">Solde restant</p>
-                    <p className="text-2xl font-bold text-orange-600">
+                    <p className="text-xl sm:text-2xl font-bold text-orange-600">
                       {formatNumberWithSpaces(calculateTotal() - downPaymentData.amount)} Ar
                     </p>
                   </div>
@@ -862,17 +863,17 @@ const NewQuote: React.FC = () => {
               </div>
 
               {/* Actions */}
-              <div className="flex justify-end space-x-4">
+              <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
                 <button
                   type="button"
                   onClick={() => navigate('/quotes')}
-                  className="btn-secondary"
+                  className="btn-secondary w-full sm:w-auto"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
-                  className="btn-primary flex items-center space-x-2"
+                  className="btn-primary flex items-center justify-center space-x-2 w-full sm:w-auto"
                 >
                   <Save className="w-4 h-4" />
                   <span>Créer le devis</span>
@@ -883,18 +884,18 @@ const NewQuote: React.FC = () => {
             /* Aperçu du devis - Section réparée */
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-900">Aperçu du Devis</h2>
-                <div className="flex space-x-3">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Aperçu du Devis</h2>
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
                   <button
                     onClick={() => printQuote(previewQuote)}
-                    className="btn-secondary flex items-center space-x-2"
+                    className="btn-secondary flex items-center justify-center space-x-2 text-sm"
                   >
                     <FileText className="w-4 h-4" />
                     <span>Imprimer</span>
                   </button>
                   <button
                     onClick={() => generateQuotePDF(previewQuote)}
-                    className="btn-primary flex items-center space-x-2"
+                    className="btn-primary flex items-center justify-center space-x-2 text-sm"
                   >
                     <FileText className="w-4 h-4" />
                     <span>Télécharger PDF</span>
@@ -903,17 +904,17 @@ const NewQuote: React.FC = () => {
               </div>
 
               {/* Aperçu du devis */}
-              <div className="bg-white border border-gray-300 rounded-lg p-8 shadow-sm">
+              <div className="bg-white border border-gray-300 rounded-lg p-4 sm:p-8 shadow-sm">
                 {/* En-tête du devis */}
                 <div className="text-center mb-8 border-b border-gray-200 pb-6">
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">DEVIS D'IMPORTATION</h1>
-                  <p className="text-xl text-gray-600">{previewQuote.quoteNumber}</p>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">DEVIS D'IMPORTATION</h1>
+                  <p className="text-lg sm:text-xl text-gray-600">{previewQuote.quoteNumber}</p>
                 </div>
 
                 {/* Informations client et devis */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 mb-8">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Informations Client</h3>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Informations Client</h3>
                     <div className="space-y-2 text-sm">
                       <p><span className="font-medium">Nom:</span> {previewQuote.clientName || 'Non renseigné'}</p>
                       <p><span className="font-medium">Email:</span> {previewQuote.clientEmail || 'Non renseigné'}</p>
@@ -923,7 +924,7 @@ const NewQuote: React.FC = () => {
                   </div>
                   
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Informations Devis</h3>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Informations Devis</h3>
                     <div className="space-y-2 text-sm">
                       <p><span className="font-medium">Date de création:</span> {previewQuote.createdAt.toLocaleDateString('fr-FR')}</p>
                       <p><span className="font-medium">Valide jusqu'au:</span> {previewQuote.validUntil.toLocaleDateString('fr-FR')}</p>
@@ -939,9 +940,9 @@ const NewQuote: React.FC = () => {
 
                 {/* Articles */}
                 <div className="mb-8">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Articles</h3>
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Articles</h3>
                   <div className="overflow-x-auto">
-                    <table className="min-w-full border border-gray-300">
+                    <table className="min-w-full border border-gray-300 hidden sm:table">
                       <thead className="bg-gray-50">
                         <tr>
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase border-b border-gray-300">Description</th>
@@ -973,16 +974,43 @@ const NewQuote: React.FC = () => {
                         ))}
                       </tbody>
                     </table>
+
+                    {/* Mobile articles view */}
+                    <div className="sm:hidden space-y-4">
+                      {previewQuote.items.map((item, index) => (
+                        <div key={index} className="border border-gray-200 rounded-lg p-3">
+                          <div className="font-medium text-gray-900 mb-2">
+                            {item.description || 'Article sans description'}
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                              <span className="text-gray-500">Quantité:</span>
+                              <span className="ml-1 font-medium">{formatNumberWithSpaces(item.quantity)}</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Prix unitaire:</span>
+                              <span className="ml-1 font-medium">{formatNumberWithSpaces(item.sellingPrice)} Ar</span>
+                            </div>
+                            <div className="col-span-2 pt-2 border-t border-gray-200">
+                              <span className="text-gray-500">Total:</span>
+                              <span className="ml-1 font-bold text-blue-600">
+                                {formatNumberWithSpaces(item.quantity * item.sellingPrice)} Ar
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
                 {/* Total et paiement */}
                 <div className="border-t border-gray-300 pt-6">
                   <div className="flex justify-end">
-                    <div className="w-full max-w-sm space-y-3">
-                      <div className="flex justify-between items-center text-lg">
+                    <div className="w-full max-w-xs sm:max-w-sm space-y-3">
+                      <div className="flex justify-between items-center text-base sm:text-lg">
                         <span className="font-semibold text-gray-900">TOTAL:</span>
-                        <span className="font-bold text-gray-900 text-xl">
+                        <span className="font-bold text-gray-900 text-lg sm:text-xl">
                           {formatNumberWithSpaces(previewQuote.totalAmount)} Ar
                         </span>
                       </div>
@@ -1012,7 +1040,7 @@ const NewQuote: React.FC = () => {
                 {/* Notes */}
                 {previewQuote.notes && (
                   <div className="mt-8 border-t border-gray-200 pt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Notes</h3>
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Notes</h3>
                     <p className="text-sm text-gray-700 bg-gray-50 p-4 rounded-lg">
                       {previewQuote.notes}
                     </p>
@@ -1021,7 +1049,7 @@ const NewQuote: React.FC = () => {
 
                 {/* Conditions */}
                 <div className="mt-8 border-t border-gray-200 pt-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Conditions</h3>
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Conditions</h3>
                   <div className="text-sm text-gray-700 space-y-2">
                     <p>• Ce devis est valable jusqu'au {previewQuote.validUntil.toLocaleDateString('fr-FR')}</p>
                     <p>• Livraison estimée: {previewQuote.estimatedDelivery.toLocaleDateString('fr-FR')}</p>

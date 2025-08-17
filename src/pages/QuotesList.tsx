@@ -66,14 +66,24 @@ const QuotesList: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Liste des Devis</h1>
-        <Link
-          to="/quotes/new"
-          className="btn-primary flex items-center space-x-2"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Nouveau Devis</span>
-        </Link>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Liste des Devis</h1>
+        <div className="hidden sm:block">
+          <Link
+            to="/quotes/new"
+            className="btn-primary flex items-center space-x-2"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Nouveau Devis</span>
+          </Link>
+        </div>
+        <div className="sm:hidden">
+          <Link
+            to="/quotes/new"
+            className="btn-primary p-3 rounded-xl"
+          >
+            <Plus className="w-5 h-5" />
+          </Link>
+        </div>
       </div>
 
       {/* Filtres et recherche */}
@@ -87,17 +97,17 @@ const QuotesList: React.FC = () => {
                 placeholder="Rechercher par numéro ou client..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-full"
+                className="pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-full text-sm"
               />
             </div>
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 flex-shrink-0">
             <Filter className="w-4 h-4 text-gray-400" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              className="border border-gray-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm min-w-0"
             >
               <option value="all">Tous les statuts</option>
               <option value="draft">Brouillon</option>
@@ -112,35 +122,36 @@ const QuotesList: React.FC = () => {
 
       {/* Liste des devis */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Desktop table view */}
+        <div className="overflow-x-auto hidden lg:block">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Numéro
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Client
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Statut
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Paiement
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Montant
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
                   Solde Restant
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
                   Date Création
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 xl:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
                   Livraison Estimée
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-4 xl:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -148,54 +159,54 @@ const QuotesList: React.FC = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredQuotes.map((quote) => (
                 <tr key={quote.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {quote.quoteNumber}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-4 xl:px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900">{quote.clientName}</div>
-                      <div className="text-sm text-gray-500">{quote.clientEmail}</div>
+                      <div className="text-xs text-gray-500 hidden xl:block">{quote.clientEmail}</div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-4 xl:px-6 py-4 whitespace-nowrap">
                     <StatusBadge status={quote.status} />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-4 xl:px-6 py-4 whitespace-nowrap">
                     <PaymentStatusBadge status={quote.paymentStatus} />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {formatAriary(quote.totalAmount)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden xl:table-cell">
                     <span className={quote.remainingAmount > 0 ? 'text-orange-600 font-medium' : 'text-green-600'}>
                       {formatAriary(quote.remainingAmount)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden xl:table-cell">
                     {format(quote.createdAt, 'dd/MM/yyyy', { locale: fr })}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden xl:table-cell">
                     {format(quote.estimatedDelivery, 'dd/MM/yyyy', { locale: fr })}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex items-center justify-end space-x-2">
+                  <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div className="flex items-center justify-end space-x-1">
                       <button
                         onClick={() => setSelectedQuote(quote)}
-                        className="text-indigo-600 hover:text-indigo-900 p-1"
+                        className="text-indigo-600 hover:text-indigo-900 p-1.5 hover:bg-indigo-50 rounded-lg transition-all duration-200"
                         title="Voir les détails"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => exportQuote(quote)}
-                        className="text-green-600 hover:text-green-900 p-1"
+                        className="text-green-600 hover:text-green-900 p-1.5 hover:bg-green-50 rounded-lg transition-all duration-200 hidden sm:block"
                         title="Exporter PDF"
                       >
                         <Download className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => navigate(`/quotes/edit/${quote.id}`)}
-                        className="text-blue-600 hover:text-blue-900 p-1"
+                        className="text-blue-600 hover:text-blue-900 p-1.5 hover:bg-blue-50 rounded-lg transition-all duration-200"
                         title="Modifier"
                       >
                         <Edit className="w-4 h-4" />
@@ -205,7 +216,7 @@ const QuotesList: React.FC = () => {
                           setQuoteToDelete(quote.id);
                           setShowDeleteModal(true);
                         }}
-                        className="text-red-600 hover:text-red-900 p-1"
+                        className="text-red-600 hover:text-red-900 p-1.5 hover:bg-red-50 rounded-lg transition-all duration-200"
                         title="Supprimer"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -216,6 +227,59 @@ const QuotesList: React.FC = () => {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile/Tablet card view */}
+        <div className="lg:hidden divide-y divide-gray-200">
+          {filteredQuotes.map((quote) => (
+            <div key={quote.id} className="p-4 hover:bg-gray-50 transition-colors duration-200">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <span className="font-semibold text-primary-600 text-sm">{quote.quoteNumber}</span>
+                    <StatusBadge status={quote.status} />
+                  </div>
+                  <p className="text-sm font-medium text-gray-900 truncate">{quote.clientName}</p>
+                  <p className="text-xs text-gray-500 truncate">{quote.clientEmail}</p>
+                </div>
+                <div className="flex items-center space-x-1 ml-2">
+                  <button
+                    onClick={() => setSelectedQuote(quote)}
+                    className="text-indigo-600 hover:text-indigo-900 p-2 hover:bg-indigo-50 rounded-lg transition-all duration-200"
+                    title="Voir les détails"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => navigate(`/quotes/edit/${quote.id}`)}
+                    className="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                    title="Modifier"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between mb-2">
+                <PaymentStatusBadge status={quote.paymentStatus} />
+                <div className="text-right">
+                  <div className="font-semibold text-gray-900 text-sm">
+                    {formatAriary(quote.totalAmount)}
+                  </div>
+                  {quote.remainingAmount > 0 && (
+                    <div className="text-xs text-orange-600">
+                      Reste: {formatAriary(quote.remainingAmount)}
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between text-xs text-gray-500">
+                <span>Créé le {format(quote.createdAt, 'dd/MM/yyyy', { locale: fr })}</span>
+                <span>Livraison: {format(quote.estimatedDelivery, 'dd/MM/yyyy', { locale: fr })}</span>
+              </div>
+            </div>
+          ))}
         </div>
 
         {filteredQuotes.length === 0 && (

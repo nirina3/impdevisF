@@ -22,14 +22,17 @@
 @layer components {
   .btn-primary {
     @apply bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-medium py-2.5 px-5 rounded-xl shadow-soft hover:shadow-medium transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98];
+    min-height: 44px; /* Touch-friendly minimum height */
   }
   
   .btn-secondary {
     @apply bg-white hover:bg-neutral-50 text-neutral-700 font-medium py-2.5 px-5 rounded-xl border border-neutral-300 shadow-soft hover:shadow-medium transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98];
+    min-height: 44px; /* Touch-friendly minimum height */
   }
 
   .btn-accent {
     @apply bg-gradient-to-r from-accent-500 to-accent-600 hover:from-accent-600 hover:to-accent-700 text-white font-medium py-2.5 px-5 rounded-xl shadow-soft hover:shadow-medium transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98];
+    min-height: 44px; /* Touch-friendly minimum height */
   }
   
   .card {
@@ -42,6 +45,7 @@
   
   .input-field {
     @apply w-full px-4 py-3 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-200 bg-white placeholder-neutral-400 text-neutral-900;
+    min-height: 44px; /* Touch-friendly minimum height */
   }
 
   .input-field:focus {
@@ -50,6 +54,7 @@
 
   .sidebar-item {
     @apply flex items-center px-4 py-3 mx-3 text-sm font-medium rounded-xl transition-all duration-200;
+    min-height: 44px; /* Touch-friendly minimum height */
   }
 
   .sidebar-item-active {
@@ -78,6 +83,7 @@
 
   .badge {
     @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border;
+    min-height: 24px; /* Minimum height for readability */
   }
 
   .gradient-bg {
@@ -105,6 +111,33 @@
   @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-10px); }
+  }
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+  .input-field {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  /* Improve touch targets */
+  button, .btn-primary, .btn-secondary, .btn-accent {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  /* Better spacing for mobile */
+  .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-y-reverse: 0;
+    margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
+    margin-bottom: calc(1rem * var(--tw-space-y-reverse));
+  }
+}
+
+/* Tablet-specific improvements */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .sidebar-item {
+    padding: 0.75rem 1rem;
   }
 }
 

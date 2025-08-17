@@ -99,22 +99,32 @@ const Dashboard: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gradient">Dashboard</h1>
-          <p className="text-neutral-500 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gradient">Dashboard</h1>
+          <p className="text-neutral-500 mt-1 text-sm sm:text-base">
             Vue d'ensemble de votre activité • {format(new Date(), 'dd MMMM yyyy', { locale: fr })}
           </p>
         </div>
-        <Link
-          to="/quotes/new"
-          className="btn-primary flex items-center space-x-2"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Nouveau Devis</span>
-        </Link>
+        <div className="hidden sm:block">
+          <Link
+            to="/quotes/new"
+            className="btn-primary flex items-center space-x-2"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Nouveau Devis</span>
+          </Link>
+        </div>
+        <div className="sm:hidden">
+          <Link
+            to="/quotes/new"
+            className="btn-primary p-3 rounded-xl"
+          >
+            <Plus className="w-5 h-5" />
+          </Link>
+        </div>
       </div>
 
       {/* Statistiques principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <StatCard
           icon={FileText}
           title="Total Devis"
@@ -153,7 +163,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Statistiques financières */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="card-elevated p-6 bg-gradient-to-br from-success-50 to-emerald-50 border-success-200">
           <div className="flex items-center space-x-4">
             <div className="stat-icon bg-success-100">
@@ -161,7 +171,7 @@ const Dashboard: React.FC = () => {
             </div>
             <div>
               <h3 className="text-sm font-medium text-success-700">Chiffre d'Affaires</h3>
-              <p className="text-3xl font-bold text-success-900 mt-1">
+              <p className="text-2xl sm:text-3xl font-bold text-success-900 mt-1">
                 {formatNumberWithSpaces(Math.round(stats.totalValue / 1000000))} M Ar
               </p>
               <p className="text-xs text-success-600 mt-1">
@@ -171,14 +181,14 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="card-elevated p-6 bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200">
+        <div className="card-elevated p-6 bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 sm:col-span-1 lg:col-span-1">
           <div className="flex items-center space-x-4">
             <div className="stat-icon bg-blue-100">
               <Users className="w-7 h-7 text-blue-600" />
             </div>
             <div>
               <h3 className="text-sm font-medium text-blue-700">Clients Actifs</h3>
-              <p className="text-3xl font-bold text-blue-900 mt-1">{formatNumberWithSpaces(stats.totalClients)}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-blue-900 mt-1">{formatNumberWithSpaces(stats.totalClients)}</p>
               <p className="text-xs text-blue-600 mt-1">
                 {formatNumberWithSpaces(Math.round(stats.totalValue / stats.totalClients / 1000000))} M Ar par client
               </p>
@@ -186,14 +196,14 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="card-elevated p-6 bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
+        <div className="card-elevated p-6 bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200 sm:col-span-2 lg:col-span-1">
           <div className="flex items-center space-x-4">
             <div className="stat-icon bg-amber-100">
               <Calendar className="w-7 h-7 text-amber-600" />
             </div>
             <div>
               <h3 className="text-sm font-medium text-amber-700">Soldes Restants</h3>
-              <p className="text-3xl font-bold text-amber-900 mt-1">
+              <p className="text-2xl sm:text-3xl font-bold text-amber-900 mt-1">
                 {formatNumberWithSpaces(Math.round(stats.totalRemaining / 1000000))} M Ar
               </p>
               <p className="text-xs text-amber-600 mt-1">
@@ -206,12 +216,12 @@ const Dashboard: React.FC = () => {
 
       {/* Devis récents */}
       <div className="card-elevated">
-        <div className="px-6 py-4 border-b border-neutral-200/50 bg-gradient-to-r from-neutral-50 to-neutral-100/50">
+        <div className="px-4 sm:px-6 py-4 border-b border-neutral-200/50 bg-gradient-to-r from-neutral-50 to-neutral-100/50">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-neutral-900">Devis Récents</h2>
+            <h2 className="text-lg sm:text-xl font-bold text-neutral-900">Devis Récents</h2>
             <Link
               to="/quotes"
-              className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center space-x-1 transition-colors duration-200"
+              className="text-primary-600 hover:text-primary-700 text-xs sm:text-sm font-medium flex items-center space-x-1 transition-colors duration-200"
             >
               <span>Voir tout</span>
               <ArrowUpRight className="w-4 h-4" />
@@ -220,7 +230,7 @@ const Dashboard: React.FC = () => {
         </div>
         
         <div className="overflow-x-auto">
-          <table className="min-w-full">
+          <table className="min-w-full hidden sm:table">
             <thead className="bg-neutral-50/50">
               <tr>
                 <th className="table-header">Numéro</th>
@@ -278,6 +288,51 @@ const Dashboard: React.FC = () => {
               ))}
             </tbody>
           </table>
+
+          {/* Mobile card view */}
+          <div className="sm:hidden divide-y divide-neutral-200/50">
+            {recentQuotes.map((quote, index) => (
+              <div key={quote.id} className="p-4 hover:bg-neutral-50/50 transition-colors duration-200">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <span className="font-semibold text-primary-600 text-sm">{quote.quoteNumber}</span>
+                    <p className="text-sm font-medium text-neutral-900 mt-1">{quote.clientName}</p>
+                    <p className="text-xs text-neutral-500">{quote.clientEmail}</p>
+                  </div>
+                  <button className="p-2 text-neutral-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg">
+                    <Eye className="w-4 h-4" />
+                  </button>
+                </div>
+                
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <StatusBadge status={quote.status} />
+                    <PaymentStatusBadge status={quote.paymentStatus} />
+                  </div>
+                  <div className="text-right">
+                    <div className="font-semibold text-neutral-900 text-sm">
+                      {quote.totalAmount >= 1000000 
+                        ? `${formatNumberWithSpaces(Math.round(quote.totalAmount / 1000000))} M Ar`
+                        : formatAriary(quote.totalAmount)
+                      }
+                    </div>
+                    {quote.remainingAmount > 0 && (
+                      <div className="text-xs text-amber-600">
+                        Reste: {quote.remainingAmount >= 1000000 
+                          ? `${formatNumberWithSpaces(Math.round(quote.remainingAmount / 1000000))} M Ar`
+                          : formatAriary(quote.remainingAmount)
+                        }
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="text-xs text-neutral-500">
+                  {format(quote.createdAt, 'dd/MM/yyyy', { locale: fr })}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>

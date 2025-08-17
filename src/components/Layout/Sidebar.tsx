@@ -12,7 +12,11 @@ import {
   Briefcase
 } from 'lucide-react';
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  onClose?: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const location = useLocation();
 
   const menuItems = [
@@ -26,23 +30,29 @@ const Sidebar: React.FC = () => {
     { path: '/settings', icon: Settings, label: 'Paramètres', color: 'text-neutral-500' },
   ];
 
+  const handleLinkClick = () => {
+    if (onClose) {
+      onClose();
+    }
+  };
+
   return (
     <div className="bg-white h-full shadow-strong border-r border-neutral-200/50 backdrop-blur-sm">
       {/* Header */}
-      <div className="p-6 border-b border-neutral-200/50">
+      <div className="p-4 sm:p-6 border-b border-neutral-200/50">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center shadow-soft">
             <Briefcase className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gradient">ImportPro</h1>
+            <h1 className="text-lg sm:text-xl font-bold text-gradient">ImportPro</h1>
             <p className="text-xs text-neutral-500 font-medium">Gestion des Devis</p>
           </div>
         </div>
       </div>
       
       {/* Navigation */}
-      <nav className="mt-6 pb-6">
+      <nav className="mt-4 sm:mt-6 pb-6 px-2 sm:px-0">
         <div className="space-y-1">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -52,6 +62,7 @@ const Sidebar: React.FC = () => {
               <Link
                 key={item.path}
                 to={item.path}
+                onClick={handleLinkClick}
                 className={`sidebar-item ${
                   isActive ? 'sidebar-item-active' : 'sidebar-item-inactive'
                 } group`}
@@ -59,7 +70,7 @@ const Sidebar: React.FC = () => {
                 <div className={`stat-icon ${isActive ? 'bg-white/20' : 'bg-neutral-100'} mr-3`}>
                   <Icon className={`w-5 h-5 ${isActive ? 'text-white' : item.color}`} />
                 </div>
-                <span className="font-medium">{item.label}</span>
+                <span className="font-medium text-sm sm:text-base">{item.label}</span>
                 {isActive && (
                   <div className="ml-auto w-2 h-2 bg-white rounded-full shadow-glow"></div>
                 )}
@@ -70,7 +81,7 @@ const Sidebar: React.FC = () => {
       </nav>
 
       {/* Footer */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-neutral-200/50">
+      <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 border-t border-neutral-200/50">
         <div className="bg-gradient-to-r from-primary-50 to-accent-50 p-4 rounded-xl border border-primary-200/50">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center">
