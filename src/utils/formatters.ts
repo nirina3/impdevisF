@@ -1,4 +1,6 @@
 // Utilitaires de formatage des nombres
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 /**
  * Formate un nombre en supprimant les zéros de tête et en ajoutant des espaces comme séparateurs de milliers
@@ -68,4 +70,14 @@ export const useFormattedNumberInput = (
   };
 
   return [displayValue, handleChange];
+};
+
+/**
+ * Formate une date en utilisant le format français
+ * @param date - La date à formater
+ * @param formatString - Le format de date (par défaut: 'dd/MM/yyyy')
+ * @returns La date formatée
+ */
+export const formatDate = (date: Date, formatString: string = 'dd/MM/yyyy'): string => {
+  return format(date, formatString, { locale: fr });
 };
