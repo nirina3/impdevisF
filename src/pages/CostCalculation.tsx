@@ -703,9 +703,16 @@ const CostCalculation: React.FC = () => {
                     </span>
                   </div>
 
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Prix de vente unitaire :</span>
+                    <span className="font-medium text-gray-900">
+                      {formatNumberWithSpaces(Math.round(item.sellingPrice / item.quantity))} Ar
+                    </span>
+                  </div>
+
                   <div className="border-t border-blue-200 pt-3">
                     <div className="flex justify-between items-center">
-                      <span className="text-lg font-semibold text-gray-900">Prix de vente :</span>
+                      <span className="text-lg font-semibold text-gray-900">Prix de vente total :</span>
                       <span className="text-2xl font-bold text-green-600">
                         {formatNumberWithSpaces(Math.round(item.sellingPrice))} Ar
                       </span>
