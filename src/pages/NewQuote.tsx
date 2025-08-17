@@ -1,26 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuotes } from '../hooks/useQuotes';
+import { useClients } from '../hooks/useClients';
 import { useCostCalculation } from '../hooks/useCostCalculation';
-import { Plus, Trash2, Save, ArrowLeft, Eye, FileText } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, Calculator, DollarSign } from 'lucide-react';
 import { Quote, QuoteItem } from '../types';
 import { formatNumberWithSpaces, parseFormattedNumber } from '../utils/formatters';
-import { generateQuotePDF, printQuote } from '../utils/pdf';
 
 const NewQuote: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { addQuote } = useQuotes();
-  const { calculationData, clearCalculation } = useCostCalculation();
+  const { clients } = useClients();
+  const { calculationData, hasCalculation } = useCostCalculation();
   
-  const [activeTab, setActiveTab] = useState<'form' | 'preview'>('form');
-  
+  // Vérifier si on vient du calcul des coûts
+  const fromCostCalculation = searchParams.get('from') === 'cost-calculation';
+
+  // Taux de change (identiques à ceux du calcul des coûts)
+  const [exchangeRates] = useState({
+    USD: 4500,
+    EUR: 4900,
+    CNY: 620
+  });
+
   const [formData, setFormData] = useState({
     clientName: '',
     clientEmail: '',
     clientPhone: '',
     clientAddress: '',
-    originCountry: '',
+    originCountry: 'Chine',
+    destinationPort: 'Toamasina',
     shippingMethod: 'sea' as Quote['shippingMethod'],
     currency: 'MGA' as Quote['currency'],
     validUntil: '',
@@ -49,44 +59,75 @@ const NewQuote: React.FC = () => {
       hsCode: '',
       category: '',
       productLink: '',
+      mainCurrency: 'CNY',
+      exchangeRates: exchangeRates,
+      transportFees: 0,
+      transportFeesOriginal: 0,
+      transportCurrency: 'MGA',
       margin: 20
     }
   ]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Vérifier si on vient du calcul des coûts
-  const fromCostCalculation = searchParams.get('from') === 'cost-calculation';
-
-  // Charger les données du calcul des coûts si disponibles
+  // Charger les données du calcul des coûts si disponible
   useEffect(() => {
-    if (fromCostCalculation && calculationData) {
-      // Convertir les données du calcul des coûts vers le format du devis
-      const convertedItems = calculationData.items.map(costItem => ({
-        description: costItem.description,
-        quantity: costItem.quantity,
-        unitPrice: costItem.sellingPrice,
-        purchasePrice: costItem.purchasePrice,
-        miscFees: costItem.miscFees,
-        customsFees: costItem.customsFees,
-        sellingPrice: costItem.sellingPrice,
-        weight: costItem.weight || 0,
-        dimensions: costItem.dimensions || { length: 0, width: 0, height: 0 },
-        hsCode: costItem.hsCode || '',
-        category: costItem.category || '',
-        productLink: costItem.productLink || '',
-        margin: costItem.margin
+    if (fromCostCalculation && hasCalculation() && calculationData) {
+      console.log('Chargement des données du calcul des coûts...');
+      
+      // Convertir les données du calcul vers le format des items de devis
+      const calculatedItems = calculationData.items.map((calcItem, index) => ({
+        description: calcItem.description,
+        quantity: calcItem.quantity,
+        unitPrice: calcItem.sellingPrice / calcItem.quantity, // Prix unitaire de vente
+        purchasePrice: calcItem.purchasePrice,
+        miscFees: calcItem.miscFees,
+        customsFees: calcItem.customsFees,
+        sellingPrice: calcItem.sellingPrice,
+        weight: calcItem.weight || 0,
+        dimensions: calcItem.dimensions || { length: 0, width: 0, height: 0 },
+        hsCode: calcItem.hsCode || '',
+        category: calcItem.category || '',
+        productLink: calcItem.productLink || '',
+        mainCurrency: calcItem.mainCurrency,
+        exchangeRates: calculationData.exchangeRates,
+        transportFees: calcItem.transportFees,
+        transportFeesOriginal: calcItem.transportFeesOriginal,
+        transportCurrency: calcItem.transportCurrency,
+        margin: calcItem.margin || 20
       }));
 
-      setItems(convertedItems);
-
-      // Pré-remplir le pays d'origine si tous les articles viennent du même pays
+      setItems(calculatedItems);
+      
+      // Pré-remplir le pays d'origine basé sur les articles
       const countries = [...new Set(calculationData.items.map(item => item.originCountry))];
       if (countries.length === 1) {
         setFormData(prev => ({ ...prev, originCountry: countries[0] }));
       }
     }
-  }, [fromCostCalculation, calculationData]);
+  }, [fromCostCalculation, hasCalculation, calculationData]);
+
+  // Fonction de conversion de devise vers MGA (identique au calcul des coûts)
+  const convertToMGA = (amount: number, currency: 'USD' | 'EUR' | 'CNY' | 'MGA'): number => {
+    if (currency === 'MGA') return amount;
+    return amount * exchangeRates[currency];
+  };
+
+  // Fonction de calcul du prix de vente (identique au calcul des coûts)
+  const calculateSellingPrice = (item: Omit<QuoteItem, 'id'>): number => {
+    // Convertir le prix d'achat en MGA
+    const purchasePriceMGA = convertToMGA(item.purchasePrice, item.mainCurrency as 'USD' | 'EUR' | 'CNY');
+    
+    // Convertir les frais de transport en MGA
+    const transportFeesMGA = convertToMGA(item.transportFeesOriginal || 0, item.transportCurrency as 'USD' | 'EUR' | 'CNY' | 'MGA');
+    
+    // Coût total en MGA
+    const totalCostMGA = (purchasePriceMGA * item.quantity) + transportFeesMGA + (item.miscFees || 0) + (item.customsFees || 0);
+    
+    // Ajouter la marge
+    const margin = item.margin || 20;
+    return totalCostMGA + (totalCostMGA * margin / 100);
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -116,24 +157,29 @@ const NewQuote: React.FC = () => {
       if (i === index) {
         const updatedItem = { ...item, [field]: value };
         
-        // Calcul automatique du prix de vente
-        if (['purchasePrice', 'miscFees', 'customsFees'].includes(field)) {
-          const purchasePrice = field === 'purchasePrice' ? value : updatedItem.purchasePrice;
-          const miscFees = field === 'miscFees' ? value : updatedItem.miscFees;
-          const customsFees = field === 'customsFees' ? value : updatedItem.customsFees;
-          
-          const totalCost = purchasePrice + miscFees + customsFees;
-          const margin = updatedItem.margin || 0;
-          updatedItem.sellingPrice = totalCost + (totalCost * margin / 100);
-          updatedItem.unitPrice = updatedItem.sellingPrice;
+        // Logique spéciale pour les frais de transport selon l'origine
+        if (field === 'originCountry') {
+          if (value === 'Chine') {
+            updatedItem.transportCurrency = 'MGA';
+            updatedItem.transportFeesOriginal = updatedItem.transportFees || 0;
+          } else {
+            updatedItem.transportCurrency = 'USD';
+            updatedItem.transportFeesOriginal = (updatedItem.transportFees || 0) / exchangeRates.USD;
+          }
         }
         
-        // Recalcul du prix de vente si la marge change
-        if (field === 'margin') {
-          const totalCost = updatedItem.purchasePrice + updatedItem.miscFees + updatedItem.customsFees;
-          updatedItem.sellingPrice = totalCost + (totalCost * value / 100);
-          updatedItem.unitPrice = updatedItem.sellingPrice;
+        // Mise à jour des frais de transport en MGA
+        if (field === 'transportFeesOriginal' || field === 'transportCurrency') {
+          updatedItem.transportFees = convertToMGA(
+            field === 'transportFeesOriginal' ? value : updatedItem.transportFeesOriginal || 0,
+            field === 'transportCurrency' ? value : updatedItem.transportCurrency as 'USD' | 'EUR' | 'CNY' | 'MGA'
+          );
         }
+        
+        // Recalculer le prix de vente avec la formule exacte du calcul des coûts
+        const newSellingPrice = calculateSellingPrice(updatedItem);
+        updatedItem.sellingPrice = newSellingPrice;
+        updatedItem.unitPrice = newSellingPrice / updatedItem.quantity;
         
         return updatedItem;
       }
@@ -163,6 +209,11 @@ const NewQuote: React.FC = () => {
       hsCode: '',
       category: '',
       productLink: '',
+      mainCurrency: 'CNY',
+      exchangeRates: exchangeRates,
+      transportFees: 0,
+      transportFeesOriginal: 0,
+      transportCurrency: 'MGA',
       margin: 20
     }]);
   };
@@ -174,7 +225,16 @@ const NewQuote: React.FC = () => {
   };
 
   const calculateTotal = () => {
-    return items.reduce((sum, item) => sum + (item.quantity * item.sellingPrice), 0);
+    return items.reduce((sum, item) => sum + item.sellingPrice, 0);
+  };
+
+  const generateQuoteNumber = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const time = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
+    return `QT${year}${month}${day}${time}`;
   };
 
   const validateForm = () => {
@@ -212,15 +272,14 @@ const NewQuote: React.FC = () => {
     else if (downPaymentData.amount > 0) paymentStatus = 'partial';
 
     const baseQuote: Omit<Quote, 'id' | 'createdAt' | 'updatedAt'> = {
-      quoteNumber: `QT-${new Date().getFullYear()}-${String(Date.now()).slice(-3)}`,
+      quoteNumber: generateQuoteNumber(),
       ...formData,
+      status: 'draft',
       validUntil: new Date(formData.validUntil),
       estimatedDelivery: new Date(formData.estimatedDelivery),
-      status: 'draft',
       totalAmount,
       paymentStatus,
       remainingAmount,
-      destinationPort: '', // Valeur par défaut vide puisque le champ est supprimé
       items: items.map((item, index) => ({
         ...item,
         id: `item_${index}_${Date.now()}`
@@ -244,564 +303,267 @@ const NewQuote: React.FC = () => {
     navigate('/quotes');
   };
 
-  const handleClearCostData = () => {
-    clearCalculation();
-    // Réinitialiser les articles à un article vide
-    setItems([{
-      description: '',
-      quantity: 1,
-      unitPrice: 0,
-      purchasePrice: 0,
-      miscFees: 0,
-      customsFees: 0,
-      sellingPrice: 0,
-      weight: 0,
-      dimensions: { length: 0, width: 0, height: 0 },
-      hsCode: '',
-      category: '',
-      productLink: '',
-      margin: 20
-    }]);
-  };
+  const countries = [
+    'Chine', 'États-Unis', 'Allemagne', 'France', 'Italie', 'Japon', 
+    'Corée du Sud', 'Royaume-Uni', 'Espagne', 'Pays-Bas', 'Belgique', 'Autre'
+  ];
 
-  const generatePreviewQuote = (): Quote => {
-    const totalAmount = calculateTotal();
-    const remainingAmount = totalAmount - downPaymentData.amount;
-    
-    let paymentStatus: Quote['paymentStatus'] = 'unpaid';
-    if (downPaymentData.amount === totalAmount) paymentStatus = 'paid';
-    else if (downPaymentData.amount > 0) paymentStatus = 'partial';
-
-    return {
-      id: 'preview',
-      quoteNumber: `QT-${new Date().getFullYear()}-${String(Date.now()).slice(-3)}`,
-      ...formData,
-      validUntil: formData.validUntil ? new Date(formData.validUntil) : new Date(),
-      estimatedDelivery: formData.estimatedDelivery ? new Date(formData.estimatedDelivery) : new Date(),
-      status: 'draft',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      totalAmount,
-      paymentStatus,
-      remainingAmount,
-      destinationPort: '',
-      downPayment: downPaymentData.amount > 0 ? {
-        id: `dp_preview`,
-        amount: downPaymentData.amount,
-        percentage: downPaymentData.percentage,
-        paymentMethod: downPaymentData.paymentMethod,
-        notes: downPaymentData.notes
-      } : undefined,
-      items: items.map((item, index) => ({
-        ...item,
-        id: `item_${index}_preview`
-      }))
-    };
-  };
-
-  const previewQuote = generatePreviewQuote();
+  const ports = [
+    'Toamasina', 'Mahajanga', 'Antsiranana', 'Toliara', 'Sambava', 'Antalaha'
+  ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-4 sm:px-0">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <button
             onClick={() => navigate('/quotes')}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200"
+            className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Nouveau Devis</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Nouveau Devis</h1>
         </div>
+        {fromCostCalculation && hasCalculation() && (
+          <div className="flex items-center space-x-2 text-sm text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
+            <Calculator className="w-4 h-4" />
+            <span>Données importées du calcul des coûts</span>
+          </div>
+        )}
       </div>
 
-      {/* Notification si les données viennent du calcul des coûts */}
-      {fromCostCalculation && calculationData && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <FileText className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <h3 className="text-sm font-medium text-green-900">Données importées du calcul des coûts</h3>
-                <p className="text-sm text-green-700">
-                  {calculationData.items.length} article(s) importé(s) • 
-                  Calculé le {calculationData.calculatedAt.toLocaleString('fr-FR')} • 
-                  Total : {formatNumberWithSpaces(Math.round(calculationData.totalSellingPrice))} Ar
-                </p>
-              </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Informations Client */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Informations Client</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Nom du client *
+              </label>
+              <input
+                type="text"
+                value={formData.clientName}
+                onChange={(e) => handleInputChange('clientName', e.target.value)}
+                className={`input-field ${errors.clientName ? 'border-red-500' : ''}`}
+                placeholder="Nom complet du client"
+              />
+              {errors.clientName && <p className="text-red-500 text-xs mt-1">{errors.clientName}</p>}
             </div>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => navigate('/cost-calculation')}
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-              >
-                Retour au calcul
-              </button>
-              <button
-                onClick={handleClearCostData}
-                className="text-sm text-red-600 hover:text-red-800 font-medium"
-              >
-                Effacer les données
-              </button>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email *
+              </label>
+              <input
+                type="email"
+                value={formData.clientEmail}
+                onChange={(e) => handleInputChange('clientEmail', e.target.value)}
+                className={`input-field ${errors.clientEmail ? 'border-red-500' : ''}`}
+                placeholder="email@exemple.com"
+              />
+              {errors.clientEmail && <p className="text-red-500 text-xs mt-1">{errors.clientEmail}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Téléphone *
+              </label>
+              <input
+                type="tel"
+                value={formData.clientPhone}
+                onChange={(e) => handleInputChange('clientPhone', e.target.value)}
+                className={`input-field ${errors.clientPhone ? 'border-red-500' : ''}`}
+                placeholder="+261 34 12 345 67"
+              />
+              {errors.clientPhone && <p className="text-red-500 text-xs mt-1">{errors.clientPhone}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Adresse *
+              </label>
+              <input
+                type="text"
+                value={formData.clientAddress}
+                onChange={(e) => handleInputChange('clientAddress', e.target.value)}
+                className={`input-field ${errors.clientAddress ? 'border-red-500' : ''}`}
+                placeholder="Adresse complète"
+              />
+              {errors.clientAddress && <p className="text-red-500 text-xs mt-1">{errors.clientAddress}</p>}
             </div>
           </div>
         </div>
-      )}
 
-      {/* Onglets */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="border-b border-gray-200">
-          <nav className="flex space-x-4 sm:space-x-8 px-4 sm:px-6 overflow-x-auto">
-            <button
-              onClick={() => setActiveTab('form')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'form'
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center space-x-2 whitespace-nowrap">
-                <FileText className="w-4 h-4" />
-                <span>Formulaire</span>
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('preview')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'preview'
-                  ? 'border-primary-500 text-primary-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center space-x-2 whitespace-nowrap">
-                <Eye className="w-4 h-4" />
-                <span>Aperçu Devis</span>
-              </div>
-            </button>
-          </nav>
+        {/* Informations Expédition */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Informations Expédition</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Pays d'origine *
+              </label>
+              <select
+                value={formData.originCountry}
+                onChange={(e) => handleInputChange('originCountry', e.target.value)}
+                className={`input-field ${errors.originCountry ? 'border-red-500' : ''}`}
+              >
+                {countries.map(country => (
+                  <option key={country} value={country}>{country}</option>
+                ))}
+              </select>
+              {errors.originCountry && <p className="text-red-500 text-xs mt-1">{errors.originCountry}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Port de destination
+              </label>
+              <select
+                value={formData.destinationPort}
+                onChange={(e) => handleInputChange('destinationPort', e.target.value)}
+                className="input-field"
+              >
+                {ports.map(port => (
+                  <option key={port} value={port}>{port}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Mode d'expédition
+              </label>
+              <select
+                value={formData.shippingMethod}
+                onChange={(e) => handleInputChange('shippingMethod', e.target.value)}
+                className="input-field"
+              >
+                <option value="sea">Maritime</option>
+                <option value="air">Aérien</option>
+                <option value="land">Terrestre</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        <div className="p-4 sm:p-6">
-          {activeTab === 'form' ? (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Informations Client */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Informations Client</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Nom du client *
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.clientName}
-                      onChange={(e) => handleInputChange('clientName', e.target.value)}
-                      className={`input-field ${errors.clientName ? 'border-red-500' : ''}`}
-                      placeholder="Nom complet du client"
-                    />
-                    {errors.clientName && <p className="text-red-500 text-xs mt-1">{errors.clientName}</p>}
-                  </div>
+        {/* Articles */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">Articles</h2>
+            <button
+              type="button"
+              onClick={addItem}
+              className="btn-secondary flex items-center space-x-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Ajouter un article</span>
+            </button>
+          </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email *
-                    </label>
-                    <input
-                      type="email"
-                      value={formData.clientEmail}
-                      onChange={(e) => handleInputChange('clientEmail', e.target.value)}
-                      className={`input-field ${errors.clientEmail ? 'border-red-500' : ''}`}
-                      placeholder="email@exemple.com"
-                    />
-                    {errors.clientEmail && <p className="text-red-500 text-xs mt-1">{errors.clientEmail}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Téléphone *
-                    </label>
-                    <input
-                      type="tel"
-                      value={formData.clientPhone}
-                      onChange={(e) => handleInputChange('clientPhone', e.target.value)}
-                      className={`input-field ${errors.clientPhone ? 'border-red-500' : ''}`}
-                      placeholder="+261 34 12 345 67"
-                    />
-                    {errors.clientPhone && <p className="text-red-500 text-xs mt-1">{errors.clientPhone}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Adresse *
-                    </label>
-                    <textarea
-                      value={formData.clientAddress}
-                      onChange={(e) => handleInputChange('clientAddress', e.target.value)}
-                      rows={3}
-                      className={`input-field ${errors.clientAddress ? 'border-red-500' : ''}`}
-                      placeholder="Adresse complète du client"
-                    />
-                    {errors.clientAddress && <p className="text-red-500 text-xs mt-1">{errors.clientAddress}</p>}
-                  </div>
-                </div>
-              </div>
-
-              {/* Articles */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+          <div className="space-y-6">
+            {items.map((item, index) => (
+              <div key={index} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900">Articles</h2>
-                  <button
-                    type="button"
-                    onClick={addItem}
-                    className="btn-primary flex items-center space-x-2 text-sm sm:text-base"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span className="hidden sm:inline">Ajouter un article</span>
-                    <span className="sm:hidden">Ajouter</span>
-                  </button>
+                  <h3 className="text-md font-medium text-gray-900">Article {index + 1}</h3>
+                  {items.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeItem(index)}
+                      className="text-red-600 hover:text-red-800 p-1"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
 
-                <div className="space-y-6">
-                  {items.map((item, index) => (
-                    <div key={index} className="border border-gray-200 rounded-lg p-3 sm:p-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm sm:text-md font-medium text-gray-900">Article {index + 1}</h3>
-                        {items.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeItem(index)}
-                            className="text-red-600 hover:text-red-800 p-1.5 hover:bg-red-50 rounded-lg transition-all duration-200"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div className="sm:col-span-2 lg:col-span-3">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Description *
-                          </label>
-                          <input
-                            type="text"
-                            value={item.description}
-                            onChange={(e) => handleItemChange(index, 'description', e.target.value)}
-                            className={`input-field ${errors[`item_${index}_description`] ? 'border-red-500' : ''}`}
-                            placeholder="Description de l'article"
-                          />
-                          {errors[`item_${index}_description`] && (
-                            <p className="text-red-500 text-xs mt-1">{errors[`item_${index}_description`]}</p>
-                          )}
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Quantité *
-                          </label>
-                          <input
-                            type="text"
-                            value={formatNumberWithSpaces(item.quantity)}
-                            onChange={(e) => handleItemChange(index, 'quantity', parseFormattedNumber(e.target.value))}
-                            className={`input-field ${errors[`item_${index}_quantity`] ? 'border-red-500' : ''}`}
-                            placeholder="1"
-                          />
-                          {errors[`item_${index}_quantity`] && (
-                            <p className="text-red-500 text-xs mt-1">{errors[`item_${index}_quantity`]}</p>
-                          )}
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Prix d'achat (Ar)
-                          </label>
-                          <input
-                            type="text"
-                            value={formatNumberWithSpaces(item.purchasePrice)}
-                            onChange={(e) => handleItemChange(index, 'purchasePrice', parseFormattedNumber(e.target.value))}
-                            className="input-field"
-                            placeholder="0"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Frais divers (Ar)
-                          </label>
-                          <input
-                            type="text"
-                            value={formatNumberWithSpaces(item.miscFees)}
-                            onChange={(e) => handleItemChange(index, 'miscFees', parseFormattedNumber(e.target.value))}
-                            className="input-field"
-                            placeholder="0"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Frais de douane (Ar)
-                          </label>
-                          <input
-                            type="text"
-                            value={formatNumberWithSpaces(item.customsFees)}
-                            onChange={(e) => handleItemChange(index, 'customsFees', parseFormattedNumber(e.target.value))}
-                            className="input-field"
-                            placeholder="0"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Prix de vente unitaire (Ar)
-                           {fromCostCalculation && (
-                             <span className="text-xs text-green-600 ml-1">(Calculé automatiquement)</span>
-                           )}
-                          </label>
-                          <input
-                            type="text"
-                            value={formatNumberWithSpaces(item.sellingPrice)}
-                            onChange={(e) => handleItemChange(index, 'sellingPrice', parseFormattedNumber(e.target.value))}
-                           className={`input-field ${fromCostCalculation ? 'bg-green-50 border-green-200' : 'bg-gray-50'}`}
-                            placeholder="0"
-                           readOnly={fromCostCalculation}
-                          />
-                         {fromCostCalculation && (
-                           <p className="text-xs text-green-600 mt-1">
-                             Prix calculé avec marge de {formatNumberWithSpaces(item.margin || 0)}%
-                           </p>
-                         )}
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Marge en pourcentage (%)
-                           {fromCostCalculation && (
-                             <span className="text-xs text-green-600 ml-1">(Importée du calcul)</span>
-                           )}
-                          </label>
-                          <input
-                            type="text"
-                            value={formatNumberWithSpaces(item.margin || 0)}
-                            onChange={(e) => handleItemChange(index, 'margin', parseFormattedNumber(e.target.value))}
-                           className={`input-field ${fromCostCalculation ? 'bg-green-50 border-green-200' : ''}`}
-                            placeholder="20"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Poids (kg)
-                          </label>
-                          <input
-                            type="text"
-                            value={formatNumberWithSpaces(item.weight)}
-                            onChange={(e) => handleItemChange(index, 'weight', parseFormattedNumber(e.target.value))}
-                            className="input-field"
-                            placeholder="0"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Catégorie
-                          </label>
-                          <input
-                            type="text"
-                            value={item.category}
-                            onChange={(e) => handleItemChange(index, 'category', e.target.value)}
-                            className="input-field"
-                            placeholder="Électronique, Textile, etc."
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Code HS
-                          </label>
-                          <input
-                            type="text"
-                            value={item.hsCode || ''}
-                            onChange={(e) => handleItemChange(index, 'hsCode', e.target.value)}
-                            className="input-field"
-                            placeholder="8517.12.00"
-                          />
-                        </div>
-
-                        {/* Dimensions */}
-                        <div className="sm:col-span-2 lg:col-span-3">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Dimensions (cm)
-                          </label>
-                          <div className="grid grid-cols-3 gap-2 sm:gap-4">
-                            <input
-                              type="text"
-                              value={formatNumberWithSpaces(item.dimensions.length)}
-                              onChange={(e) => handleDimensionChange(index, 'length', parseFormattedNumber(e.target.value))}
-                              className="input-field"
-                              placeholder="Longueur"
-                            />
-                            <input
-                              type="text"
-                              value={formatNumberWithSpaces(item.dimensions.width)}
-                              onChange={(e) => handleDimensionChange(index, 'width', parseFormattedNumber(e.target.value))}
-                              className="input-field"
-                              placeholder="Largeur"
-                            />
-                            <input
-                              type="text"
-                              value={formatNumberWithSpaces(item.dimensions.height)}
-                              onChange={(e) => handleDimensionChange(index, 'height', parseFormattedNumber(e.target.value))}
-                              className="input-field"
-                              placeholder="Hauteur"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="sm:col-span-2 lg:col-span-3">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Lien produit (optionnel)
-                          </label>
-                          <input
-                            type="url"
-                            value={item.productLink || ''}
-                            onChange={(e) => handleItemChange(index, 'productLink', e.target.value)}
-                            className="input-field"
-                            placeholder="https://exemple.com/produit"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Résumé de l'article */}
-                      <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm">
-                        <div className="space-y-2">
-                          <div className="flex justify-between items-center text-xs text-gray-500">
-                            <span>Coût unitaire (sans marge):</span>
-                            <span>{formatNumberWithSpaces(item.purchasePrice + item.miscFees + item.customsFees)} Ar</span>
-                          </div>
-                          <div className="flex justify-between items-center text-xs text-gray-500">
-                            <span>Marge ({formatNumberWithSpaces(item.margin || 0)}%):</span>
-                            <span>+{formatNumberWithSpaces(Math.round((item.purchasePrice + item.miscFees + item.customsFees) * (item.margin || 0) / 100))} Ar</span>
-                          </div>
-                          <div className="flex justify-between items-center border-t border-gray-200 pt-2">
-                            <span className="text-xs sm:text-sm font-medium text-gray-700">Prix de vente unitaire:</span>
-                            <span className="font-semibold text-gray-900 text-sm">
-                              {formatNumberWithSpaces(item.sellingPrice)} Ar
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs sm:text-sm font-medium text-gray-700">Total pour cet article:</span>
-                            <span className="font-bold text-blue-600 text-sm">
-                              {formatNumberWithSpaces(item.quantity * item.sellingPrice)} Ar
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Expédition - Section corrigée */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Expédition</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="lg:col-span-3">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Pays d'origine *
+                      Description *
                     </label>
                     <input
                       type="text"
-                      value={formData.originCountry}
-                      onChange={(e) => handleInputChange('originCountry', e.target.value)}
-                      className={`input-field ${errors.originCountry ? 'border-red-500' : ''}`}
-                      placeholder="Chine, France, Allemagne..."
+                      value={item.description}
+                      onChange={(e) => handleItemChange(index, 'description', e.target.value)}
+                      className={`input-field ${errors[`item_${index}_description`] ? 'border-red-500' : ''}`}
+                      placeholder="Description de l'article"
                     />
-                    {errors.originCountry && <p className="text-red-500 text-xs mt-1">{errors.originCountry}</p>}
+                    {errors[`item_${index}_description`] && (
+                      <p className="text-red-500 text-xs mt-1">{errors[`item_${index}_description`]}</p>
+                    )}
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Mode d'expédition *
+                      Quantité *
+                    </label>
+                    <input
+                      type="text"
+                      value={formatNumberWithSpaces(item.quantity)}
+                      onChange={(e) => handleItemChange(index, 'quantity', parseFormattedNumber(e.target.value))}
+                      className={`input-field ${errors[`item_${index}_quantity`] ? 'border-red-500' : ''}`}
+                      placeholder="1"
+                    />
+                    {errors[`item_${index}_quantity`] && (
+                      <p className="text-red-500 text-xs mt-1">{errors[`item_${index}_quantity`]}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Devise principale articles
                     </label>
                     <select
-                      value={formData.shippingMethod}
-                      onChange={(e) => handleInputChange('shippingMethod', e.target.value)}
+                      value={item.mainCurrency}
+                      onChange={(e) => handleItemChange(index, 'mainCurrency', e.target.value)}
                       className="input-field"
                     >
-                      <option value="sea">Maritime</option>
-                      <option value="air">Aérien</option>
-                      <option value="land">Terrestre</option>
+                      <option value="CNY">CNY (¥)</option>
+                      <option value="USD">USD ($)</option>
+                      <option value="EUR">EUR (€)</option>
+                      <option value="MGA">MGA (Ar)</option>
                     </select>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Date de validité *
+                      Prix d'achat unitaire ({item.mainCurrency})
                     </label>
-                    <input
-                      type="date"
-                      value={formData.validUntil}
-                      onChange={(e) => handleInputChange('validUntil', e.target.value)}
-                      className={`input-field ${errors.validUntil ? 'border-red-500' : ''}`}
-                    />
-                    {errors.validUntil && <p className="text-red-500 text-xs mt-1">{errors.validUntil}</p>}
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
+                        {item.mainCurrency === 'USD' ? '$' : 
+                         item.mainCurrency === 'EUR' ? '€' : 
+                         item.mainCurrency === 'CNY' ? '¥' : 'Ar'}
+                      </span>
+                      <input
+                        type="text"
+                        value={formatNumberWithSpaces(item.purchasePrice)}
+                        onChange={(e) => handleItemChange(index, 'purchasePrice', parseFormattedNumber(e.target.value))}
+                        className="pl-10 input-field"
+                        placeholder="0"
+                      />
+                    </div>
+                    {item.mainCurrency !== 'MGA' && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Équivalent: {formatNumberWithSpaces(Math.round(convertToMGA(item.purchasePrice, item.mainCurrency as 'USD' | 'EUR' | 'CNY')))} Ar
+                      </p>
+                    )}
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Livraison estimée *
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.estimatedDelivery}
-                      onChange={(e) => handleInputChange('estimatedDelivery', e.target.value)}
-                      className={`input-field ${errors.estimatedDelivery ? 'border-red-500' : ''}`}
-                    />
-                    {errors.estimatedDelivery && <p className="text-red-500 text-xs mt-1">{errors.estimatedDelivery}</p>}
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Notes générales
-                    </label>
-                    <textarea
-                      value={formData.notes}
-                      onChange={(e) => handleInputChange('notes', e.target.value)}
-                      rows={3}
-                      className="input-field"
-                      placeholder="Notes ou instructions spéciales..."
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Acompte */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Acompte (Optionnel)</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Pourcentage d'acompte (%)
+                      Frais de transport (MGA)
                     </label>
                     <input
                       type="text"
-                      value={formatNumberWithSpaces(downPaymentData.percentage)}
-                      onChange={(e) => handleDownPaymentChange('percentage', parseFormattedNumber(e.target.value))}
-                      className={`input-field ${errors.downPaymentPercentage ? 'border-red-500' : ''}`}
-                      placeholder="30"
-                    />
-                    {errors.downPaymentPercentage && <p className="text-red-500 text-xs mt-1">{errors.downPaymentPercentage}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Montant d'acompte (Ar)
-                    </label>
-                    <input
-                      type="text"
-                      value={formatNumberWithSpaces(downPaymentData.amount)}
-                      onChange={(e) => handleDownPaymentChange('amount', parseFormattedNumber(e.target.value))}
+                      value={formatNumberWithSpaces(item.transportFeesOriginal || 0)}
+                      onChange={(e) => {
+                        const value = parseFormattedNumber(e.target.value);
+                        handleItemChange(index, 'transportFeesOriginal', value);
+                        handleItemChange(index, 'transportFees', value);
+                        handleItemChange(index, 'transportCurrency', 'MGA');
+                      }}
                       className="input-field"
                       placeholder="0"
                     />
@@ -809,262 +571,353 @@ const NewQuote: React.FC = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Mode de paiement
+                      Marge (%)
                     </label>
-                    <select
-                      value={downPaymentData.paymentMethod}
-                      onChange={(e) => handleDownPaymentChange('paymentMethod', e.target.value)}
+                    <input
+                      type="text"
+                      value={formatNumberWithSpaces(item.margin || 20)}
+                      onChange={(e) => handleItemChange(index, 'margin', parseFormattedNumber(e.target.value))}
                       className="input-field"
-                    >
-                      <option value="">Sélectionner...</option>
-                      <option value="cash">Espèces</option>
-                      <option value="bank_transfer">Virement bancaire</option>
-                      <option value="check">Chèque</option>
-                      <option value="mobile_money">Mobile Money</option>
-                    </select>
+                      placeholder="20"
+                    />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Notes sur l'acompte
+                      Frais divers (Ar)
                     </label>
                     <input
                       type="text"
-                      value={downPaymentData.notes}
-                      onChange={(e) => handleDownPaymentChange('notes', e.target.value)}
+                      value={formatNumberWithSpaces(item.miscFees)}
+                      onChange={(e) => handleItemChange(index, 'miscFees', parseFormattedNumber(e.target.value))}
                       className="input-field"
-                      placeholder="Notes optionnelles..."
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Frais de douane (Ar)
+                    </label>
+                    <input
+                      type="text"
+                      value={formatNumberWithSpaces(item.customsFees)}
+                      onChange={(e) => handleItemChange(index, 'customsFees', parseFormattedNumber(e.target.value))}
+                      className="input-field"
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Prix de vente unitaire (Ar)
+                    </label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <input
+                        type="text"
+                        value={formatNumberWithSpaces(Math.round(item.unitPrice))}
+                        className="pl-10 input-field bg-gray-50"
+                        readOnly
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Calculé automatiquement
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Poids (kg)
+                    </label>
+                    <input
+                      type="text"
+                      value={formatNumberWithSpaces(item.weight)}
+                      onChange={(e) => handleItemChange(index, 'weight', parseFormattedNumber(e.target.value))}
+                      className="input-field"
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Catégorie
+                    </label>
+                    <input
+                      type="text"
+                      value={item.category}
+                      onChange={(e) => handleItemChange(index, 'category', e.target.value)}
+                      className="input-field"
+                      placeholder="Électronique, Textile, etc."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Code HS
+                    </label>
+                    <input
+                      type="text"
+                      value={item.hsCode}
+                      onChange={(e) => handleItemChange(index, 'hsCode', e.target.value)}
+                      className="input-field"
+                      placeholder="Code douanier"
+                    />
+                  </div>
+
+                  <div className="lg:col-span-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Dimensions (L × l × H en cm)
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <input
+                        type="text"
+                        value={formatNumberWithSpaces(item.dimensions.length)}
+                        onChange={(e) => handleDimensionChange(index, 'length', parseFormattedNumber(e.target.value))}
+                        className="input-field"
+                        placeholder="Longueur"
+                      />
+                      <input
+                        type="text"
+                        value={formatNumberWithSpaces(item.dimensions.width)}
+                        onChange={(e) => handleDimensionChange(index, 'width', parseFormattedNumber(e.target.value))}
+                        className="input-field"
+                        placeholder="Largeur"
+                      />
+                      <input
+                        type="text"
+                        value={formatNumberWithSpaces(item.dimensions.height)}
+                        onChange={(e) => handleDimensionChange(index, 'height', parseFormattedNumber(e.target.value))}
+                        className="input-field"
+                        placeholder="Hauteur"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Lien produit (optionnel)
+                    </label>
+                    <input
+                      type="url"
+                      value={item.productLink}
+                      onChange={(e) => handleItemChange(index, 'productLink', e.target.value)}
+                      className="input-field"
+                      placeholder="https://..."
                     />
                   </div>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
 
-              {/* Résumé */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-4 sm:p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Résumé</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="text-center">
-                    <p className="text-sm text-gray-600">Total articles</p>
-                    <p className="text-xl sm:text-2xl font-bold text-gray-900">{formatNumberWithSpaces(items.length)}</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm text-gray-600">Montant total</p>
-                    <p className="text-xl sm:text-2xl font-bold text-blue-600">
-                      {formatNumberWithSpaces(calculateTotal())} Ar
-                    </p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm text-gray-600">Solde restant</p>
-                    <p className="text-xl sm:text-2xl font-bold text-orange-600">
-                      {formatNumberWithSpaces(calculateTotal() - downPaymentData.amount)} Ar
-                    </p>
-                  </div>
-                </div>
+        {/* Dates et Validité */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Dates et Validité</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Valide jusqu'au *
+              </label>
+              <input
+                type="date"
+                value={formData.validUntil}
+                onChange={(e) => handleInputChange('validUntil', e.target.value)}
+                className={`input-field ${errors.validUntil ? 'border-red-500' : ''}`}
+              />
+              {errors.validUntil && <p className="text-red-500 text-xs mt-1">{errors.validUntil}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Livraison estimée *
+              </label>
+              <input
+                type="date"
+                value={formData.estimatedDelivery}
+                onChange={(e) => handleInputChange('estimatedDelivery', e.target.value)}
+                className={`input-field ${errors.estimatedDelivery ? 'border-red-500' : ''}`}
+              />
+              {errors.estimatedDelivery && <p className="text-red-500 text-xs mt-1">{errors.estimatedDelivery}</p>}
+            </div>
+          </div>
+        </div>
+
+        {/* Acompte */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Acompte (optionnel)</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Pourcentage d'acompte (%)
+              </label>
+              <input
+                type="text"
+                value={formatNumberWithSpaces(downPaymentData.percentage)}
+                onChange={(e) => handleDownPaymentChange('percentage', parseFormattedNumber(e.target.value))}
+                className={`input-field ${errors.downPaymentPercentage ? 'border-red-500' : ''}`}
+                placeholder="0"
+              />
+              {errors.downPaymentPercentage && <p className="text-red-500 text-xs mt-1">{errors.downPaymentPercentage}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Montant d'acompte (Ar)
+              </label>
+              <input
+                type="text"
+                value={formatNumberWithSpaces(downPaymentData.amount)}
+                onChange={(e) => handleDownPaymentChange('amount', parseFormattedNumber(e.target.value))}
+                className="input-field"
+                placeholder="0"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Mode de paiement
+              </label>
+              <select
+                value={downPaymentData.paymentMethod}
+                onChange={(e) => handleDownPaymentChange('paymentMethod', e.target.value)}
+                className="input-field"
+              >
+                <option value="">Sélectionner...</option>
+                <option value="cash">Espèces</option>
+                <option value="bank_transfer">Virement bancaire</option>
+                <option value="mobile_money">Mobile Money</option>
+                <option value="check">Chèque</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Notes sur l'acompte
+              </label>
+              <input
+                type="text"
+                value={downPaymentData.notes}
+                onChange={(e) => handleDownPaymentChange('notes', e.target.value)}
+                className="input-field"
+                placeholder="Notes optionnelles"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Notes */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Notes additionnelles</h2>
+          <textarea
+            value={formData.notes}
+            onChange={(e) => handleInputChange('notes', e.target.value)}
+            rows={4}
+            className="input-field"
+            placeholder="Notes, conditions particulières, etc."
+          />
+        </div>
+
+        {/* Aperçu du devis */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Aperçu du devis</h2>
+          
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Article
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Quantité
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Prix unitaire
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Total
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {items.map((item, index) => (
+                  <tr key={index}>
+                    <td className="px-4 py-4 text-sm text-gray-900">
+                      {item.description || `Article ${index + 1}`}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-900">
+                      {formatNumberWithSpaces(item.quantity)}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-900">
+                      {formatNumberWithSpaces(Math.round(item.unitPrice))} Ar
+                    </td>
+                    <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                      {formatNumberWithSpaces(Math.round(item.sellingPrice))} Ar
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-6 flex justify-end">
+            <div className="w-64">
+              <div className="flex justify-between py-2">
+                <span className="text-sm text-gray-600">Sous-total:</span>
+                <span className="text-sm font-medium text-gray-900">
+                  {formatNumberWithSpaces(Math.round(calculateTotal()))} Ar
+                </span>
               </div>
-
-              {/* Actions */}
-              <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
-                <button
-                  type="button"
-                  onClick={() => navigate('/quotes')}
-                  className="btn-secondary w-full sm:w-auto"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  className="btn-primary flex items-center justify-center space-x-2 w-full sm:w-auto"
-                >
-                  <Save className="w-4 h-4" />
-                  <span>Créer le devis</span>
-                </button>
-              </div>
-            </form>
-          ) : (
-            /* Aperçu du devis - Section réparée */
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Aperçu du Devis</h2>
-                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-                  <button
-                    onClick={() => printQuote(previewQuote)}
-                    className="btn-secondary flex items-center justify-center space-x-2 text-sm"
-                  >
-                    <FileText className="w-4 h-4" />
-                    <span>Imprimer</span>
-                  </button>
-                  <button
-                    onClick={() => generateQuotePDF(previewQuote)}
-                    className="btn-primary flex items-center justify-center space-x-2 text-sm"
-                  >
-                    <FileText className="w-4 h-4" />
-                    <span>Télécharger PDF</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Aperçu du devis */}
-              <div className="bg-white border border-gray-300 rounded-lg p-4 sm:p-8 shadow-sm">
-                {/* En-tête du devis */}
-                <div className="text-center mb-8 border-b border-gray-200 pb-6">
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">DEVIS D'IMPORTATION</h1>
-                  <p className="text-lg sm:text-xl text-gray-600">{previewQuote.quoteNumber}</p>
-                </div>
-
-                {/* Informations client et devis */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 mb-8">
-                  <div>
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Informations Client</h3>
-                    <div className="space-y-2 text-sm">
-                      <p><span className="font-medium">Nom:</span> {previewQuote.clientName || 'Non renseigné'}</p>
-                      <p><span className="font-medium">Email:</span> {previewQuote.clientEmail || 'Non renseigné'}</p>
-                      <p><span className="font-medium">Téléphone:</span> {previewQuote.clientPhone || 'Non renseigné'}</p>
-                      <p><span className="font-medium">Adresse:</span> {previewQuote.clientAddress || 'Non renseignée'}</p>
-                    </div>
+              
+              {downPaymentData.amount > 0 && (
+                <>
+                  <div className="flex justify-between py-2">
+                    <span className="text-sm text-gray-600">
+                      Acompte ({formatNumberWithSpaces(downPaymentData.percentage)}%):
+                    </span>
+                    <span className="text-sm font-medium text-orange-600">
+                      -{formatNumberWithSpaces(downPaymentData.amount)} Ar
+                    </span>
                   </div>
-                  
-                  <div>
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Informations Devis</h3>
-                    <div className="space-y-2 text-sm">
-                      <p><span className="font-medium">Date de création:</span> {previewQuote.createdAt.toLocaleDateString('fr-FR')}</p>
-                      <p><span className="font-medium">Valide jusqu'au:</span> {previewQuote.validUntil.toLocaleDateString('fr-FR')}</p>
-                      <p><span className="font-medium">Livraison estimée:</span> {previewQuote.estimatedDelivery.toLocaleDateString('fr-FR')}</p>
-                      <p><span className="font-medium">Origine:</span> {previewQuote.originCountry || 'Non renseigné'}</p>
-                      <p><span className="font-medium">Mode d'expédition:</span> {
-                        previewQuote.shippingMethod === 'sea' ? 'Maritime' :
-                        previewQuote.shippingMethod === 'air' ? 'Aérien' : 'Terrestre'
-                      }</p>
-                    </div>
+                  <div className="flex justify-between py-2 border-t border-gray-200">
+                    <span className="text-sm text-gray-600">Solde restant:</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {formatNumberWithSpaces(Math.round(calculateTotal() - downPaymentData.amount))} Ar
+                    </span>
                   </div>
-                </div>
-
-                {/* Articles */}
-                <div className="mb-8">
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Articles</h3>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full border border-gray-300 hidden sm:table">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase border-b border-gray-300">Description</th>
-                          <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase border-b border-gray-300">Quantité</th>
-                          <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase border-b border-gray-300">Prix Unitaire</th>
-                          <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase border-b border-gray-300">Total</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200">
-                        {previewQuote.items.map((item, index) => (
-                          <tr key={index}>
-                            <td className="px-4 py-3 text-sm text-gray-900 border-b border-gray-200">
-                              <div>
-                                <p className="font-medium">{item.description || 'Article sans description'}</p>
-                                {item.category && <p className="text-xs text-gray-500">{item.category}</p>}
-                                {item.hsCode && <p className="text-xs text-gray-500">Code HS: {item.hsCode}</p>}
-                              </div>
-                            </td>
-                            <td className="px-4 py-3 text-sm text-gray-900 text-center border-b border-gray-200">
-                              {formatNumberWithSpaces(item.quantity)}
-                            </td>
-                            <td className="px-4 py-3 text-sm text-gray-900 text-right border-b border-gray-200">
-                              {formatNumberWithSpaces(item.sellingPrice)} Ar
-                            </td>
-                            <td className="px-4 py-3 text-sm font-medium text-gray-900 text-right border-b border-gray-200">
-                              {formatNumberWithSpaces(item.quantity * item.sellingPrice)} Ar
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-
-                    {/* Mobile articles view */}
-                    <div className="sm:hidden space-y-4">
-                      {previewQuote.items.map((item, index) => (
-                        <div key={index} className="border border-gray-200 rounded-lg p-3">
-                          <div className="font-medium text-gray-900 mb-2">
-                            {item.description || 'Article sans description'}
-                          </div>
-                          <div className="grid grid-cols-2 gap-2 text-sm">
-                            <div>
-                              <span className="text-gray-500">Quantité:</span>
-                              <span className="ml-1 font-medium">{formatNumberWithSpaces(item.quantity)}</span>
-                            </div>
-                            <div>
-                              <span className="text-gray-500">Prix unitaire:</span>
-                              <span className="ml-1 font-medium">{formatNumberWithSpaces(item.sellingPrice)} Ar</span>
-                            </div>
-                            <div className="col-span-2 pt-2 border-t border-gray-200">
-                              <span className="text-gray-500">Total:</span>
-                              <span className="ml-1 font-bold text-blue-600">
-                                {formatNumberWithSpaces(item.quantity * item.sellingPrice)} Ar
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Total et paiement */}
-                <div className="border-t border-gray-300 pt-6">
-                  <div className="flex justify-end">
-                    <div className="w-full max-w-xs sm:max-w-sm space-y-3">
-                      <div className="flex justify-between items-center text-base sm:text-lg">
-                        <span className="font-semibold text-gray-900">TOTAL:</span>
-                        <span className="font-bold text-gray-900 text-lg sm:text-xl">
-                          {formatNumberWithSpaces(previewQuote.totalAmount)} Ar
-                        </span>
-                      </div>
-                      
-                      {previewQuote.downPayment && previewQuote.downPayment.amount > 0 && (
-                        <>
-                          <div className="flex justify-between items-center text-sm border-t border-gray-200 pt-3">
-                            <span className="text-gray-600">
-                              Acompte ({formatNumberWithSpaces(previewQuote.downPayment.percentage)}%):
-                            </span>
-                            <span className="font-medium text-gray-900">
-                              {formatNumberWithSpaces(previewQuote.downPayment.amount)} Ar
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-center text-sm">
-                            <span className="text-gray-600">Solde restant:</span>
-                            <span className="font-medium text-orange-600">
-                              {formatNumberWithSpaces(previewQuote.remainingAmount)} Ar
-                            </span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Notes */}
-                {previewQuote.notes && (
-                  <div className="mt-8 border-t border-gray-200 pt-6">
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Notes</h3>
-                    <p className="text-sm text-gray-700 bg-gray-50 p-4 rounded-lg">
-                      {previewQuote.notes}
-                    </p>
-                  </div>
-                )}
-
-                {/* Conditions */}
-                <div className="mt-8 border-t border-gray-200 pt-6">
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3">Conditions</h3>
-                  <div className="text-sm text-gray-700 space-y-2">
-                    <p>• Ce devis est valable jusqu'au {previewQuote.validUntil.toLocaleDateString('fr-FR')}</p>
-                    <p>• Livraison estimée: {previewQuote.estimatedDelivery.toLocaleDateString('fr-FR')}</p>
-                    <p>• Les prix sont exprimés en Ariary malgache (MGA)</p>
-                    <p>• Les frais de douane et taxes sont inclus dans les prix</p>
-                    {previewQuote.downPayment && previewQuote.downPayment.amount > 0 && (
-                      <p>• Un acompte de {formatNumberWithSpaces(previewQuote.downPayment.percentage)}% est requis à la commande</p>
-                    )}
-                  </div>
-                </div>
+                </>
+              )}
+              
+              <div className="flex justify-between py-2 border-t border-gray-200">
+                <span className="text-base font-semibold text-gray-900">Total:</span>
+                <span className="text-base font-bold text-gray-900">
+                  {formatNumberWithSpaces(Math.round(calculateTotal()))} Ar
+                </span>
               </div>
             </div>
-          )}
+          </div>
         </div>
-      </div>
+
+        {/* Actions */}
+        <div className="flex justify-end space-x-4">
+          <button
+            type="button"
+            onClick={() => navigate('/quotes')}
+            className="btn-secondary"
+          >
+            Annuler
+          </button>
+          <button
+            type="submit"
+            className="btn-primary flex items-center space-x-2"
+          >
+            <Save className="w-4 h-4" />
+            <span>Créer le devis</span>
+          </button>
+        </div>
+      </form>
     </div>
   );
 };
