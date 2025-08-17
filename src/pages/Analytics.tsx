@@ -1,4 +1,5 @@
 import React from 'react';
+import { useState } from 'react';
 import { useQuotes } from '../hooks/useQuotes';
 import { useClients } from '../hooks/useClients';
 import { 
@@ -9,17 +10,28 @@ import {
   DollarSign,
   Package,
   Globe,
-  Truck
+  Truck,
+  Target,
+  ShoppingCart,
+  Banknote
 } from 'lucide-react';
 import { format, subMonths, startOfMonth, endOfMonth, eachMonthOfInterval } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ErrorMessage from '../components/ui/ErrorMessage';
 import { formatNumberWithSpaces, formatAriary } from '../utils/formatters';
+import ProfitAnalysisChart from '../components/analytics/ProfitAnalysisChart';
 
 const Analytics: React.FC = () => {
   const { quotes, loading: quotesLoading, error: quotesError, refreshQuotes } = useQuotes();
   const { clients, loading: clientsLoading, error: clientsError, refreshClients } = useClients();
+  
+  // États pour les filtres d'analyse des bénéfices
+  const [periodType, setPeriodType] = useState<'day' | 'week' | 'month'>('month');
+  const [selectedMonth, setSelectedMonth] = useState(8); // Août
+  const [selectedYear, setSelectedYear] = useState(2025);
+  const [selectedWeek, setSelectedWeek] = useState(1);
+  const [selectedDay, setSelectedDay] = useState(new Date());
 
   if ((quotesLoading || clientsLoading) && quotes.length === 0 && clients.length === 0) {
     return (
@@ -88,6 +100,13 @@ const Analytics: React.FC = () => {
   const clientStats = clients
     .sort((a, b) => b.totalValue - a.totalValue)
     .slice(0, 5);
+
+  // Données simulées pour l'analyse des bénéfices (à remplacer par de vraies données)
+  const profitData = {
+    totalRevenue: 1914960,
+    totalCost: 1595800,
+    netProfit: 319160
+  };
 
   const getShippingMethodLabel = (method: string) => {
     switch (method) {
@@ -288,6 +307,179 @@ const Analytics: React.FC = () => {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Section d'analyse des bénéfices nets */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mx-0 sm:mx-0">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-green-100 rounded-lg">
+              <Target className="w-6 h-6 text-green-600" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900">Analyse des Bénéfices Nets</h2>
+          </div>
+        </div>
+
+        {/* Filtres */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Période
+            </label>
+            <select
+              value={periodType}
+              onChange={(e) => setPeriodType(e.target.value as 'day' | 'week' | 'month')}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
+            >
+              <option value="day">Par Jour</option>
+              <option value="week">Par Semaine</option>
+              <option value="month">Par Mois</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {periodType === 'day' ? 'Jour' : periodType === 'week' ? 'Semaine' : 'Mois'}
+            </label>
+            {periodType === 'month' ? (
+              <select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
+              >
+                {Array.from({ length: 12 }, (_, i) => (
+                  <option key={i + 1} value={i + 1}>
+                    {format(new Date(2025, i, 1), 'MMMM', { locale: fr })}
+                  </option>
+                ))}
+              </select>
+            ) : periodType === 'week' ? (
+              <select
+                value={selectedWeek}
+                onChange={(e) => setSelectedWeek(parseInt(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
+              >
+                <option value={1}>Semaine 1</option>
+                <option value={2}>Semaine 2</option>
+                <option value={3}>Semaine 3</option>
+                <option value={4}>Semaine 4</option>
+              </select>
+            ) : (
+              <input
+                type="date"
+                value={selectedDay.toISOString().split('T')[0]}
+                onChange={(e) => setSelectedDay(new Date(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
+              />
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Année
+            </label>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
+            >
+              <option value={2023}>2023</option>
+              <option value={2024}>2024</option>
+              <option value={2025}>2025</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Contenu principal : Graphique et cartes */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Graphique en donut */}
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
+              Répartition Coûts vs Bénéfices
+            </h3>
+            <ProfitAnalysisChart 
+              totalCost={profitData.totalCost}
+              netProfit={profitData.netProfit}
+            />
+          </div>
+
+          {/* Cartes d'information */}
+          <div className="space-y-4">
+            {/* Chiffre d'affaires total */}
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-xl border border-blue-200 hover:shadow-md transition-all duration-200 group">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 bg-blue-100 rounded-xl group-hover:scale-110 transition-transform duration-200">
+                    <DollarSign className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-blue-700">Chiffre d'Affaires Total</p>
+                    <p className="text-2xl font-bold text-blue-900">
+                      {formatAriary(profitData.totalRevenue)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Coût total des marchandises */}
+            <div className="bg-gradient-to-br from-orange-50 to-red-50 p-6 rounded-xl border border-orange-200 hover:shadow-md transition-all duration-200 group">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 bg-orange-100 rounded-xl group-hover:scale-110 transition-transform duration-200">
+                    <ShoppingCart className="w-6 h-6 text-orange-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-orange-700">Coût Total des Marchandises</p>
+                    <p className="text-2xl font-bold text-orange-900">
+                      {formatAriary(profitData.totalCost)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bénéfice net */}
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200 hover:shadow-md transition-all duration-200 group">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-3 bg-green-100 rounded-xl group-hover:scale-110 transition-transform duration-200">
+                    <Banknote className="w-6 h-6 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-green-700">Bénéfice Net</p>
+                    <p className="text-2xl font-bold text-green-900">
+                      {formatAriary(profitData.netProfit)}
+                    </p>
+                    <p className="text-xs text-green-600 mt-1">
+                      Marge: {Math.round((profitData.netProfit / profitData.totalRevenue) * 100)}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Informations supplémentaires */}
+        <div className="mt-6 p-4 bg-gradient-to-r from-neutral-50 to-gray-50 rounded-xl border border-gray-200">
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center space-x-4">
+              <span className="text-gray-600">
+                Période analysée: {periodType === 'month' ? format(new Date(selectedYear, selectedMonth - 1, 1), 'MMMM yyyy', { locale: fr }) : 
+                                 periodType === 'week' ? `Semaine ${selectedWeek} - ${format(new Date(selectedYear, selectedMonth - 1, 1), 'MMMM yyyy', { locale: fr })}` :
+                                 format(selectedDay, 'dd MMMM yyyy', { locale: fr })}
+              </span>
+              <span className="text-gray-400">•</span>
+              <span className="text-gray-600">
+                Taux de rentabilité: {Math.round((profitData.netProfit / profitData.totalCost) * 100)}%
+              </span>
+            </div>
+            <div className="text-right">
+              <span className="text-xs text-gray-500">Dernière mise à jour: {format(new Date(), 'dd/MM/yyyy HH:mm')}</span>
+            </div>
           </div>
         </div>
       </div>
