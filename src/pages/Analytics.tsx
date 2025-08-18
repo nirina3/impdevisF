@@ -93,6 +93,18 @@ const Analytics: React.FC = () => {
   }
 
   const availableYears = [...new Set(quotes.map(quote => new Date(quote.createdAt).getFullYear()))].sort((a, b) => b - a);
+  const availableYears = [...new Set(quotes
+    .map(quote => {
+      const date = new Date(quote.createdAt);
+      return isNaN(date.getTime()) ? new Date().getFullYear() : date.getFullYear();
+    })
+    .filter(year => !isNaN(year))
+  )].sort((a, b) => b - a);
+  
+  // S'assurer qu'il y a au moins l'année courante
+  if (availableYears.length === 0) {
+    availableYears.push(new Date().getFullYear());
+  }
   const months = [
     { value: 'all', label: 'Toute l\'année' },
     { value: 1, label: 'Janvier' },

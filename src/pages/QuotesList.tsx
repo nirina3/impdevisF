@@ -19,6 +19,7 @@ import ErrorMessage from '../components/ui/ErrorMessage';
 import PaymentStatusBadge from '../components/ui/PaymentStatusBadge';
 import { Quote } from '../types';
 import { formatAriary, formatNumberWithSpaces } from '../utils/formatters';
+import { safeFormatDate } from '../utils/formatters';
 import { generateQuotePDF } from '../utils/pdf';
 import { useUserSettings } from '../hooks/useUserSettings';
 
@@ -185,10 +186,10 @@ const QuotesList: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden xl:table-cell">
-                    {format(quote.createdAt, 'dd/MM/yyyy', { locale: fr })}
+                    {safeFormatDate(quote.createdAt, 'dd/MM/yyyy')}
                   </td>
                   <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden xl:table-cell">
-                    {format(quote.estimatedDelivery, 'dd/MM/yyyy', { locale: fr })}
+                    {safeFormatDate(quote.estimatedDelivery, 'dd/MM/yyyy')}
                   </td>
                   <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end space-x-1">
@@ -277,8 +278,8 @@ const QuotesList: React.FC = () => {
               </div>
               
               <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>Créé le {format(quote.createdAt, 'dd/MM/yyyy', { locale: fr })}</span>
-                <span>Livraison: {format(quote.estimatedDelivery, 'dd/MM/yyyy', { locale: fr })}</span>
+                <span>Créé le {safeFormatDate(quote.createdAt, 'dd/MM/yyyy')}</span>
+                <span>Livraison: {safeFormatDate(quote.estimatedDelivery, 'dd/MM/yyyy')}</span>
               </div>
             </div>
           ))}
@@ -317,7 +318,7 @@ const QuotesList: React.FC = () => {
                   <p><span className="font-medium">Origine:</span> {selectedQuote.originCountry}</p>
                   <p><span className="font-medium">Destination:</span> {selectedQuote.destinationPort}</p>
                   <p><span className="font-medium">Mode:</span> {selectedQuote.shippingMethod}</p>
-                  <p><span className="font-medium">Livraison estimée:</span> {format(selectedQuote.estimatedDelivery, 'dd/MM/yyyy', { locale: fr })}</p>
+                  <p><span className="font-medium">Livraison estimée:</span> {safeFormatDate(selectedQuote.estimatedDelivery, 'dd/MM/yyyy')}</p>
                 </div>
               </div>
               

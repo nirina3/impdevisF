@@ -16,12 +16,10 @@ import {
   Clock,
   CheckCircle
 } from 'lucide-react';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import ErrorMessage from '../ui/ErrorMessage';
 import Modal from '../ui/Modal';
-import { formatNumberWithSpaces } from '../../utils/formatters';
+import { formatNumberWithSpaces, safeFormatDate } from '../../utils/formatters';
 
 const BackupManager: React.FC = () => {
   const {
@@ -282,7 +280,7 @@ const BackupManager: React.FC = () => {
                         <div className="flex items-center space-x-4 text-sm text-gray-500">
                           <span className="flex items-center">
                             <Calendar className="w-4 h-4 mr-1" />
-                            {format(backup.createdAt, 'dd/MM/yyyy à HH:mm', { locale: fr })}
+                            {safeFormatDate(backup.createdAt, 'dd/MM/yyyy à HH:mm')}
                           </span>
                           <span className="flex items-center">
                             <HardDrive className="w-4 h-4 mr-1" />
@@ -447,7 +445,7 @@ const BackupManager: React.FC = () => {
                 return backup ? (
                   <div className="text-sm text-gray-700 space-y-1">
                     <p><strong>Nom :</strong> {backup.name}</p>
-                    <p><strong>Date :</strong> {format(backup.createdAt, 'dd/MM/yyyy à HH:mm', { locale: fr })}</p>
+                    <p><strong>Date :</strong> {safeFormatDate(backup.createdAt, 'dd/MM/yyyy à HH:mm')}</p>
                     <p><strong>Contenu :</strong> {backup.quotesCount} devis, {backup.clientsCount} clients, {backup.calculationsCount} calculs</p>
                   </div>
                 ) : null;

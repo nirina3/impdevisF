@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useBackup } from '../../hooks/useBackup';
 import { Clock, Play, Pause, Settings as SettingsIcon, AlertCircle } from 'lucide-react';
-import { format, addDays, addWeeks, addMonths } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { addDays, addWeeks, addMonths } from 'date-fns';
+import { safeFormatDate } from '../../utils/formatters';
 
 interface ScheduleSettings {
   enabled: boolean;
@@ -112,7 +112,7 @@ const BackupScheduler: React.FC = () => {
       const now = new Date();
       if (now >= nextBackupDate) {
         try {
-          const backupName = `Sauvegarde planifiée - ${format(now, 'dd/MM/yyyy HH:mm', { locale: fr })}`;
+          const backupName = `Sauvegarde planifiée - ${safeFormatDate(now, 'dd/MM/yyyy HH:mm')}`;
           await createBackup(backupName);
           
           // Mettre à jour la dernière sauvegarde
@@ -254,7 +254,7 @@ const BackupScheduler: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Prochaine sauvegarde :</span>
                 <span className="text-sm font-medium text-purple-600">
-                  {format(nextBackupDate, 'dd/MM/yyyy à HH:mm', { locale: fr })}
+                  {safeFormatDate(nextBackupDate, 'dd/MM/yyyy à HH:mm')}
                 </span>
               </div>
             )}
@@ -263,7 +263,7 @@ const BackupScheduler: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Dernière exécution :</span>
                 <span className="text-sm font-medium text-gray-900">
-                  {format(settings.lastScheduledBackup, 'dd/MM/yyyy à HH:mm', { locale: fr })}
+                  {safeFormatDate(settings.lastScheduledBackup, 'dd/MM/yyyy à HH:mm')}
                 </span>
               </div>
             )}

@@ -16,7 +16,7 @@ import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ErrorMessage from '../components/ui/ErrorMessage';
 import Modal from '../components/ui/Modal';
 import { Client } from '../types';
-import { formatNumberWithSpaces, formatAriary } from '../utils/formatters';
+import { formatNumberWithSpaces, formatAriary, safeFormatDate } from '../utils/formatters';
 
 const Clients: React.FC = () => {
   const { clients, loading, error, addClient, updateClient, deleteClient, refreshClients } = useClients();
@@ -222,7 +222,7 @@ const Clients: React.FC = () => {
               </div>
               <div className="mt-2">
                 <p className="text-xs text-gray-500">
-                  Client depuis le {format(client.createdAt, 'dd/MM/yyyy', { locale: fr })}
+                  Client depuis le {safeFormatDate(client.createdAt, 'dd/MM/yyyy')}
                 </p>
               </div>
             </div>

@@ -22,7 +22,7 @@ import StatusBadge from '../components/ui/StatusBadge';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import PaymentStatusBadge from '../components/ui/PaymentStatusBadge';
 import ErrorMessage from '../components/ui/ErrorMessage';
-import { formatNumberWithSpaces, formatAriary } from '../utils/formatters';
+import { formatNumberWithSpaces, formatAriary, safeFormatDate } from '../utils/formatters';
 
 const Dashboard: React.FC = () => {
   const { quotes, loading: quotesLoading, error: quotesError, refreshQuotes } = useQuotes();
@@ -101,7 +101,7 @@ const Dashboard: React.FC = () => {
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gradient">Dashboard</h1>
           <p className="text-neutral-500 mt-1 text-sm sm:text-base">
-            Vue d'ensemble de votre activité • {format(new Date(), 'dd MMMM yyyy', { locale: fr })}
+            Vue d'ensemble de votre activité • {safeFormatDate(new Date(), 'dd MMMM yyyy')}
           </p>
         </div>
         <div className="hidden sm:block">
@@ -277,7 +277,7 @@ const Dashboard: React.FC = () => {
                     )}
                   </td>
                   <td className="table-cell text-neutral-500">
-                    {format(quote.createdAt, 'dd/MM/yyyy', { locale: fr })}
+                    {safeFormatDate(quote.createdAt, 'dd/MM/yyyy')}
                   </td>
                   <td className="table-cell text-right">
                     <button className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-2 text-neutral-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg">
@@ -328,7 +328,7 @@ const Dashboard: React.FC = () => {
                 </div>
                 
                 <div className="text-xs text-neutral-500">
-                  {format(quote.createdAt, 'dd/MM/yyyy', { locale: fr })}
+                  {safeFormatDate(quote.createdAt, 'dd/MM/yyyy')}
                 </div>
               </div>
             ))}

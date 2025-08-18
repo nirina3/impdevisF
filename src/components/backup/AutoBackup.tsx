@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useBackup } from '../../hooks/useBackup';
 import { Clock, CheckCircle, AlertCircle, Settings } from 'lucide-react';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { safeFormatDate } from '../../utils/formatters';
 
 interface AutoBackupSettings {
   enabled: boolean;
@@ -67,6 +66,7 @@ const AutoBackup: React.FC = () => {
     try {
       const now = new Date();
       const backupName = `Sauvegarde automatique - ${format(now, 'dd/MM/yyyy HH:mm', { locale: fr })}`;
+      const backupName = `Sauvegarde automatique - ${safeFormatDate(now, 'dd/MM/yyyy HH:mm')}`;
       
       await createBackup(backupName);
       
@@ -233,7 +233,7 @@ const AutoBackup: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Dernière sauvegarde :</span>
                     <span className="text-sm font-medium text-gray-900">
-                      {format(settings.lastAutoBackup, 'dd/MM/yyyy à HH:mm', { locale: fr })}
+                      {safeFormatDate(settings.lastAutoBackup, 'dd/MM/yyyy à HH:mm')}
                     </span>
                   </div>
                 )}
@@ -242,7 +242,7 @@ const AutoBackup: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Prochaine sauvegarde :</span>
                     <span className="text-sm font-medium text-blue-600">
-                      {format(nextBackupDate, 'dd/MM/yyyy à HH:mm', { locale: fr })}
+                      {safeFormatDate(nextBackupDate, 'dd/MM/yyyy à HH:mm')}
                     </span>
                   </div>
                 )}

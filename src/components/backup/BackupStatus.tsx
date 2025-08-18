@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useBackup } from '../../hooks/useBackup';
 import { Shield, Clock, CheckCircle, AlertTriangle, Database } from 'lucide-react';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { safeFormatDate } from '../../utils/formatters';
 
 const BackupStatus: React.FC = () => {
   const { backups, getBackupStats } = useBackup();
@@ -89,7 +88,7 @@ const BackupStatus: React.FC = () => {
           </p>
           {lastBackup && (
             <p className="text-xs text-gray-500 mt-1">
-              Dernière sauvegarde : {format(lastBackup.createdAt, 'dd/MM/yyyy à HH:mm', { locale: fr })}
+              Dernière sauvegarde : {safeFormatDate(lastBackup.createdAt, 'dd/MM/yyyy à HH:mm')}
             </p>
           )}
         </div>

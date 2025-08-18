@@ -78,6 +78,38 @@ export const useFormattedNumberInput = (
  * @param formatString - Le format de date (par défaut: 'dd/MM/yyyy')
  * @returns La date formatée
  */
-export const formatDate = (date: Date, formatString: string = 'dd/MM/yyyy'): string => {
+export const formatDate = (date: Date | string | null | undefined, formatString: string = 'dd/MM/yyyy'): string => {
+  if (!date) {
+    return '';
+  }
+  
+  const dateObj = date instanceof Date ? date : new Date(date);
+  
+  // Vérifier si la date est valide
+  if (isNaN(dateObj.getTime())) {
+    return '';
+  }
+  
   return format(date, formatString, { locale: fr });
+};
+
+/**
+ * Formate une date de manière sécurisée en gérant les valeurs invalides
+ * @param date - La date à formater
+ * @param formatString - Le format de date (par défaut: 'dd/MM/yyyy')
+ * @returns La date formatée ou une chaîne vide si la date est invalide
+ */
+export const safeFormatDate = (date: Date | string | null | undefined, formatString: string = 'dd/MM/yyyy'): string => {
+  if (!date) {
+    return '';
+  }
+  
+  const dateObj = date instanceof Date ? date : new Date(date);
+  
+  // Vérifier si la date est valide
+  if (isNaN(dateObj.getTime())) {
+    return '';
+  }
+  
+  return format(dateObj, formatString, { locale: fr });
 };

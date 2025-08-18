@@ -1,5 +1,5 @@
 import { UserSettings } from '../services/userSettings';
-import { formatNumberWithSpaces } from './formatters';
+import { formatNumberWithSpaces, safeFormatDate } from './formatters';
 
 // Utilitaire pour la génération de PDF des devis au format HTML A5
 export const generateQuotePDF = (quote: any, userSettings?: UserSettings) => {
@@ -410,7 +410,7 @@ export const generateQuoteHTML = (quote: any, userSettings?: UserSettings) => {
                 </div>
                 <div class="info-item">
                     <div class="info-label">Date</div>
-                    <div class="info-value">${new Date(quote.createdAt).toLocaleDateString('fr-FR')}</div>
+                    <div class="info-value">${safeFormatDate(quote.createdAt, 'dd/MM/yyyy')}</div>
                 </div>
             </div>
             <div style="margin-top: 8px;">
@@ -478,8 +478,8 @@ export const generateQuoteHTML = (quote: any, userSettings?: UserSettings) => {
             </div>
             <div class="info-box">
                 <div class="info-box-title">Délais</div>
-                <div><strong>Valide jusqu'au:</strong><br>${new Date(quote.validUntil).toLocaleDateString('fr-FR')}</div>
-                <div><strong>Livraison estimée:</strong><br>${new Date(quote.estimatedDelivery).toLocaleDateString('fr-FR')}</div>
+                <div><strong>Valide jusqu'au:</strong><br>${safeFormatDate(quote.validUntil, 'dd/MM/yyyy')}</div>
+                <div><strong>Livraison estimée:</strong><br>${safeFormatDate(quote.estimatedDelivery, 'dd/MM/yyyy')}</div>
             </div>
         </div>
         
