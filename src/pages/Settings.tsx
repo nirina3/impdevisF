@@ -18,8 +18,11 @@ import {
   Palette,
   Database,
   AlertTriangle,
-  RefreshCw
+  RefreshCw,
+  HardDrive
 } from 'lucide-react';
+import BackupManager from '../components/backup/BackupManager';
+import BackupScheduler from '../components/backup/BackupScheduler';
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('profile');
@@ -84,6 +87,7 @@ const Settings: React.FC = () => {
   const tabs = [
     { id: 'profile', label: 'Profil', icon: User },
     { id: 'business', label: 'Entreprise', icon: Building },
+    { id: 'backup', label: 'Sauvegarde', icon: HardDrive },
     { id: 'data', label: 'Données', icon: Database },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'security', label: 'Sécurité', icon: Shield },
@@ -356,6 +360,50 @@ const Settings: React.FC = () => {
                   />
                 </div>
               </div>
+            </div>
+          )}
+
+          {activeTab === 'backup' && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-6">Sauvegarde et Restauration</h2>
+              
+              <div className="mb-6">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center space-x-3">
+                    <HardDrive className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <h3 className="text-sm font-medium text-blue-900">Protection de vos données</h3>
+                      <p className="text-sm text-blue-700 mt-1">
+                        Créez des sauvegardes régulières pour protéger vos devis, clients et calculs contre toute perte de données.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <BackupManager />
+            </div>
+          )}
+
+          {activeTab === 'backup' && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-6">Sauvegarde et Restauration</h2>
+              
+              <div className="mb-6">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center space-x-3">
+                    <HardDrive className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <h3 className="text-sm font-medium text-blue-900">Protection de vos données</h3>
+                      <p className="text-sm text-blue-700 mt-1">
+                        Créez des sauvegardes régulières pour protéger vos devis, clients et calculs contre toute perte de données.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <BackupManager />
             </div>
           )}
 

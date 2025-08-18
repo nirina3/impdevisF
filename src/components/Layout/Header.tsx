@@ -4,6 +4,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../config/firebase';
 import { Bell, Search, User, Settings, LogOut, Menu, Briefcase } from 'lucide-react';
+import QuickBackup from '../backup/QuickBackup';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -46,7 +47,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
 
         {/* Search bar - hidden on mobile */}
         <div className="hidden md:flex items-center flex-1 max-w-2xl lg:ml-0">
-          <div className="relative w-full">
+          <div className="relative w-full mr-4">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-neutral-400 w-5 h-5" />
             <input
               type="text"
@@ -54,6 +55,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
               className="pl-12 pr-4 py-2.5 border border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 w-full bg-white/50 backdrop-blur-sm transition-all duration-200 placeholder-neutral-400 text-sm"
             />
           </div>
+          <QuickBackup />
         </div>
         
         <div className="flex items-center space-x-2 sm:space-x-4 ml-2 sm:ml-6">
