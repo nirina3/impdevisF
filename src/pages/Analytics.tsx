@@ -25,7 +25,10 @@ import { formatAriary, formatNumberWithSpaces } from '../utils/formatters';
 
 const Analytics: React.FC = () => {
   const { quotes, loading, error, refreshQuotes } = useQuotes();
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedYear, setSelectedYear] = useState(() => {
+    const currentYear = new Date().getFullYear();
+    return isNaN(currentYear) ? 2025 : currentYear;
+  });
   const [selectedMonth, setSelectedMonth] = useState<number | 'all'>('all');
 
   // Filtrer les devis selon la période sélectionnée
@@ -92,19 +95,35 @@ const Analytics: React.FC = () => {
     );
   }
 
-  const availableYears = [...new Set(quotes.map(quote => new Date(quote.createdAt).getFullYear()))].sort((a, b) => b - a);
-  const availableYears = [...new Set(quotes
-    .map(quote => {
-      const date = new Date(quote.createdAt);
-      return isNaN(date.getTime()) ? new Date().getFullYear() : date.getFullYear();
-    })
-    .filter(year => !isNaN(year))
-  )].sort((a, b) => b - a);
-  
-  // S'assurer qu'il y a au moins l'année courante
-  if (availableYears.length === 0) {
-    availableYears.push(new Date().getFullYear());
-  }
+  // Calculer les années disponibles avec protection contre NaN
+  const availableYears = useMemo(() => {
+    const years = quotes
+      .map(quote => {
+        const date = new Date(quote.createdAt);
+        const year = date.getFullYear();
+        return isNaN(year) ? new Date().getFullYear() : year;
+      })
+      .filter(year => !isNaN(year) && year > 1900 && year < 3000); // Filtrer les années valides
+    
+    const uniqueYears = [...new Set(years)];
+    
+    // S'assurer qu'on a au moins l'année courante
+    const currentYear = new Date().getFullYear();
+    if (!uniqueYears.includes(currentYear)) {
+      uniqueYears.push(currentYear);
+    }
+    
+    return uniqueYears.sort((a, b) => b - a);
+  }, [quotes]);
+
+  // S'assurer que selectedYear est toujours valide
+  useEffect(() => {
+    if (isNaN(selectedYear) || !availableYears.includes(selectedYear)) {
+      const fallbackYear = availableYears.length > 0 ? availableYears[0] : new Date().getFullYear();
+      setSelectedYear(fallbackYear);
+    }
+  }, [selectedYear, availableYears]);
+
   const months = [
     { value: 'all', label: 'Toute l\'année' },
     { value: 1, label: 'Janvier' },
@@ -184,7 +203,14 @@ const Analytics: React.FC = () => {
             </label>
             <select
               value={selectedYear}
-              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              onChange={(e) => {
+                const year = parseInt(e.target.value);
+                if (!isNaN(year) && year > 1900 && year < 3000) {
+                  setSelectedYear(year);
+                } else {
+                  setSelectedYear(new Date().getFullYear());
+                }
+              }}
               className="input-field"
             >
               {availableYears.map(year => (
@@ -199,7 +225,17 @@ const Analytics: React.FC = () => {
             </label>
             <select
               value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === 'all') {
+                  setSelectedMonth('all');
+                } else {
+                  const month = parseInt(value);
+                  if (!isNaN(month) && month >= 1 && month <= 12) {
+                    setSelectedMonth(month);
+                  }
+                }
+              }}
               className="input-field"
             >
               {months.map(month => (
