@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuotes } from '../hooks/useQuotes';
-import { Plus, Trash2, Save, ArrowLeft } from 'lucide-react';
+import { Plus, Trash2, Save, ArrowLeft, DollarSign } from 'lucide-react';
 import { Quote, QuoteItem } from '../types';
+import { formatNumberWithSpaces, parseFormattedNumber } from '../utils/formatters';
 
 const EditQuote: React.FC = () => {
   const navigate = useNavigate();
@@ -12,12 +13,20 @@ const EditQuote: React.FC = () => {
   const [quote, setQuote] = useState<Quote | null>(null);
   const [loading, setLoading] = useState(true);
   
+  // Taux de change (identiques à ceux du nouveau devis)
+  const [exchangeRates] = useState({
+    USD: 4500,
+    EUR: 4900,
+    CNY: 620
+  });
+  
   const [formData, setFormData] = useState({
     clientName: '',
     clientEmail: '',
     clientPhone: '',
     clientAddress: '',
     originCountry: '',
+    destinationPort: '',
     shippingMethod: 'sea' as Quote['shippingMethod'],
     currency: 'MGA' as Quote['currency'],
     validUntil: '',
@@ -49,6 +58,7 @@ const EditQuote: React.FC = () => {
           clientPhone: foundQuote.clientPhone,
           clientAddress: foundQuote.clientAddress,
           originCountry: foundQuote.originCountry,
+          destinationPort: foundQuote.destinationPort,
           shippingMethod: foundQuote.shippingMethod,
           currency: foundQuote.currency,
           validUntil: foundQuote.validUntil.toISOString().split('T')[0],
@@ -66,24 +76,53 @@ const EditQuote: React.FC = () => {
           });
         }
 
+        // Mapper les items existants avec tous les champs nécessaires
         setItems(foundQuote.items.map(item => ({
           description: item.description,
           quantity: item.quantity,
           unitPrice: item.unitPrice,
-          purchasePrice: item.purchasePrice,
-          miscFees: item.miscFees,
-          customsFees: item.customsFees,
+          purchasePrice: item.purchasePrice || 0,
+          miscFees: item.miscFees || 0,
+          customsFees: item.customsFees || 0,
           sellingPrice: item.sellingPrice,
-          weight: item.weight,
-          dimensions: item.dimensions,
-          hsCode: item.hsCode,
-          category: item.category,
-          productLink: item.productLink
+          weight: item.weight || 0,
+          dimensions: item.dimensions || { length: 0, width: 0, height: 0 },
+          hsCode: item.hsCode || '',
+          category: item.category || '',
+          productLink: item.productLink || '',
+          mainCurrency: item.mainCurrency || 'CNY',
+          exchangeRates: item.exchangeRates || exchangeRates,
+          transportFees: item.transportFees || 0,
+          transportFeesOriginal: item.transportFeesOriginal || 0,
+          transportCurrency: item.transportCurrency || 'MGA',
+          margin: item.margin || 20
         })));
       }
       setLoading(false);
     }
-  }, [id, quotes]);
+  }, [id, quotes, exchangeRates]);
+
+  // Fonction de conversion de devise vers MGA (identique au nouveau devis)
+  const convertToMGA = (amount: number, currency: 'USD' | 'EUR' | 'CNY' | 'MGA'): number => {
+    if (currency === 'MGA') return amount;
+    return amount * exchangeRates[currency];
+  };
+
+  // Fonction de calcul du prix de vente (identique au nouveau devis)
+  const calculateSellingPrice = (item: Omit<QuoteItem, 'id'>): number => {
+    // Convertir le prix d'achat en MGA
+    const purchasePriceMGA = convertToMGA(item.purchasePrice, item.mainCurrency as 'USD' | 'EUR' | 'CNY');
+    
+    // Convertir les frais de transport en MGA
+    const transportFeesMGA = convertToMGA(item.transportFeesOriginal || 0, item.transportCurrency as 'USD' | 'EUR' | 'CNY' | 'MGA');
+    
+    // Coût total en MGA
+    const totalCostMGA = (purchasePriceMGA * item.quantity) + transportFeesMGA + (item.miscFees || 0) + (item.customsFees || 0);
+    
+    // Ajouter la marge
+    const margin = item.margin || 20;
+    return totalCostMGA + (totalCostMGA * margin / 100);
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -113,15 +152,29 @@ const EditQuote: React.FC = () => {
       if (i === index) {
         const updatedItem = { ...item, [field]: value };
         
-        // Calcul automatique du prix de vente
-        if (['purchasePrice', 'miscFees', 'customsFees'].includes(field)) {
-          const purchasePrice = field === 'purchasePrice' ? value : updatedItem.purchasePrice;
-          const miscFees = field === 'miscFees' ? value : updatedItem.miscFees;
-          const customsFees = field === 'customsFees' ? value : updatedItem.customsFees;
-          
-          updatedItem.sellingPrice = purchasePrice + miscFees + customsFees;
-          updatedItem.unitPrice = updatedItem.sellingPrice;
+        // Logique spéciale pour les frais de transport selon l'origine
+        if (field === 'originCountry') {
+          if (value === 'Chine') {
+            updatedItem.transportCurrency = 'MGA';
+            updatedItem.transportFeesOriginal = updatedItem.transportFees || 0;
+          } else {
+            updatedItem.transportCurrency = 'USD';
+            updatedItem.transportFeesOriginal = (updatedItem.transportFees || 0) / exchangeRates.USD;
+          }
         }
+        
+        // Mise à jour des frais de transport en MGA
+        if (field === 'transportFeesOriginal' || field === 'transportCurrency') {
+          updatedItem.transportFees = convertToMGA(
+            field === 'transportFeesOriginal' ? value : updatedItem.transportFeesOriginal || 0,
+            field === 'transportCurrency' ? value : updatedItem.transportCurrency as 'USD' | 'EUR' | 'CNY' | 'MGA'
+          );
+        }
+        
+        // Recalculer le prix de vente avec la formule exacte du nouveau devis
+        const newSellingPrice = calculateSellingPrice(updatedItem);
+        updatedItem.sellingPrice = newSellingPrice;
+        updatedItem.unitPrice = newSellingPrice / updatedItem.quantity;
         
         return updatedItem;
       }
@@ -150,7 +203,13 @@ const EditQuote: React.FC = () => {
       dimensions: { length: 0, width: 0, height: 0 },
       hsCode: '',
       category: '',
-      productLink: ''
+      productLink: '',
+      mainCurrency: 'CNY',
+      exchangeRates: exchangeRates,
+      transportFees: 0,
+      transportFeesOriginal: 0,
+      transportCurrency: 'MGA',
+      margin: 20
     }]);
   };
 
@@ -161,7 +220,7 @@ const EditQuote: React.FC = () => {
   };
 
   const calculateTotal = () => {
-    return items.reduce((sum, item) => sum + (item.quantity * item.sellingPrice), 0);
+    return items.reduce((sum, item) => sum + item.sellingPrice, 0);
   };
 
   const validateForm = () => {
@@ -220,7 +279,7 @@ const EditQuote: React.FC = () => {
         percentage: downPaymentData.percentage,
         paymentMethod: downPaymentData.paymentMethod,
         notes: downPaymentData.notes,
-        paidDate: null
+        paidDate: quote.downPayment?.paidDate || null
       }
     } : baseUpdatedQuote;
 
@@ -250,8 +309,12 @@ const EditQuote: React.FC = () => {
     );
   }
 
+  const countries = [
+    'Chine', 'France', 'USA'
+  ];
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-4 sm:px-0">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <button
@@ -268,7 +331,7 @@ const EditQuote: React.FC = () => {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Statut du devis */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Statut du devis</h2>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -287,8 +350,6 @@ const EditQuote: React.FC = () => {
             </select>
           </div>
         </div>
-
-        {/* Le reste du formulaire est identique à NewQuote mais avec les données pré-remplies */}
 
         {/* Informations Client */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
@@ -441,9 +502,9 @@ const EditQuote: React.FC = () => {
                       Quantité *
                     </label>
                     <input
-                      type="number"
-                      value={item.quantity}
-                      onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value) || 0)}
+                      type="text"
+                      value={formatNumberWithSpaces(item.quantity)}
+                      onChange={(e) => handleItemChange(index, 'quantity', parseFormattedNumber(e.target.value))}
                       className={`input-field ${errors[`item_${index}_quantity`] ? 'border-red-500' : ''}`}
                       placeholder="1"
                     />
@@ -454,12 +515,58 @@ const EditQuote: React.FC = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Prix unitaire (Ar)
+                      Devise principale articles
+                    </label>
+                    <select
+                      value={item.mainCurrency}
+                      onChange={(e) => handleItemChange(index, 'mainCurrency', e.target.value)}
+                      className="input-field"
+                    >
+                      <option value="CNY">CNY (¥)</option>
+                      <option value="USD">USD ($)</option>
+                      <option value="EUR">EUR (€)</option>
+                      <option value="MGA">MGA (Ar)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Prix d'achat unitaire ({item.mainCurrency})
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
+                        {item.mainCurrency === 'USD' ? '$' : 
+                         item.mainCurrency === 'EUR' ? '€' : 
+                         item.mainCurrency === 'CNY' ? '¥' : 'Ar'}
+                      </span>
+                      <input
+                        type="text"
+                        value={formatNumberWithSpaces(item.purchasePrice)}
+                        onChange={(e) => handleItemChange(index, 'purchasePrice', parseFormattedNumber(e.target.value))}
+                        className="pl-10 input-field"
+                        placeholder="0"
+                      />
+                    </div>
+                    {item.mainCurrency !== 'MGA' && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Équivalent: {formatNumberWithSpaces(Math.round(convertToMGA(item.purchasePrice, item.mainCurrency as 'USD' | 'EUR' | 'CNY')))} Ar
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Frais de transport (MGA)
                     </label>
                     <input
-                      type="number"
-                      value={item.unitPrice}
-                      onChange={(e) => handleItemChange(index, 'unitPrice', parseFloat(e.target.value) || 0)}
+                      type="text"
+                      value={formatNumberWithSpaces(item.transportFeesOriginal || 0)}
+                      onChange={(e) => {
+                        const value = parseFormattedNumber(e.target.value);
+                        handleItemChange(index, 'transportFeesOriginal', value);
+                        handleItemChange(index, 'transportFees', value);
+                        handleItemChange(index, 'transportCurrency', 'MGA');
+                      }}
                       className="input-field"
                       placeholder="0"
                     />
@@ -467,14 +574,14 @@ const EditQuote: React.FC = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Prix d'achat (Ar)
+                      Marge (%)
                     </label>
                     <input
-                      type="number"
-                      value={item.purchasePrice}
-                      onChange={(e) => handleItemChange(index, 'purchasePrice', parseFloat(e.target.value) || 0)}
+                      type="text"
+                      value={formatNumberWithSpaces(item.margin || 20)}
+                      onChange={(e) => handleItemChange(index, 'margin', parseFormattedNumber(e.target.value))}
                       className="input-field"
-                      placeholder="0"
+                      placeholder="20"
                     />
                   </div>
 
@@ -483,9 +590,9 @@ const EditQuote: React.FC = () => {
                       Frais divers (Ar)
                     </label>
                     <input
-                      type="number"
-                      value={item.miscFees}
-                      onChange={(e) => handleItemChange(index, 'miscFees', parseFloat(e.target.value) || 0)}
+                      type="text"
+                      value={formatNumberWithSpaces(item.miscFees)}
+                      onChange={(e) => handleItemChange(index, 'miscFees', parseFormattedNumber(e.target.value))}
                       className="input-field"
                       placeholder="0"
                     />
@@ -496,9 +603,9 @@ const EditQuote: React.FC = () => {
                       Frais de douane (Ar)
                     </label>
                     <input
-                      type="number"
-                      value={item.customsFees}
-                      onChange={(e) => handleItemChange(index, 'customsFees', parseFloat(e.target.value) || 0)}
+                      type="text"
+                      value={formatNumberWithSpaces(item.customsFees)}
+                      onChange={(e) => handleItemChange(index, 'customsFees', parseFormattedNumber(e.target.value))}
                       className="input-field"
                       placeholder="0"
                     />
@@ -506,12 +613,30 @@ const EditQuote: React.FC = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Prix de vente unitaire (Ar)
+                    </label>
+                    <div className="relative">
+                      <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                      <input
+                        type="text"
+                        value={formatNumberWithSpaces(Math.round(item.unitPrice))}
+                        className="pl-10 input-field bg-gray-50"
+                        readOnly
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Calculé automatiquement
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Poids (kg)
                     </label>
                     <input
-                      type="number"
-                      value={item.weight}
-                      onChange={(e) => handleItemChange(index, 'weight', parseFloat(e.target.value) || 0)}
+                      type="text"
+                      value={formatNumberWithSpaces(item.weight)}
+                      onChange={(e) => handleItemChange(index, 'weight', parseFormattedNumber(e.target.value))}
                       className="input-field"
                       placeholder="0"
                     />
@@ -549,23 +674,23 @@ const EditQuote: React.FC = () => {
                     </label>
                     <div className="grid grid-cols-3 gap-2">
                       <input
-                        type="number"
-                        value={item.dimensions.length}
-                        onChange={(e) => handleDimensionChange(index, 'length', parseFloat(e.target.value) || 0)}
+                        type="text"
+                        value={formatNumberWithSpaces(item.dimensions.length)}
+                        onChange={(e) => handleDimensionChange(index, 'length', parseFormattedNumber(e.target.value))}
                         className="input-field"
                         placeholder="Longueur"
                       />
                       <input
-                        type="number"
-                        value={item.dimensions.width}
-                        onChange={(e) => handleDimensionChange(index, 'width', parseFloat(e.target.value) || 0)}
+                        type="text"
+                        value={formatNumberWithSpaces(item.dimensions.width)}
+                        onChange={(e) => handleDimensionChange(index, 'width', parseFormattedNumber(e.target.value))}
                         className="input-field"
                         placeholder="Largeur"
                       />
                       <input
-                        type="number"
-                        value={item.dimensions.height}
-                        onChange={(e) => handleDimensionChange(index, 'height', parseFloat(e.target.value) || 0)}
+                        type="text"
+                        value={formatNumberWithSpaces(item.dimensions.height)}
+                        onChange={(e) => handleDimensionChange(index, 'height', parseFormattedNumber(e.target.value))}
                         className="input-field"
                         placeholder="Hauteur"
                       />
@@ -631,9 +756,9 @@ const EditQuote: React.FC = () => {
                 Pourcentage d'acompte (%)
               </label>
               <input
-                type="number"
-                value={downPaymentData.percentage}
-                onChange={(e) => handleDownPaymentChange('percentage', parseFloat(e.target.value) || 0)}
+                type="text"
+                value={formatNumberWithSpaces(downPaymentData.percentage)}
+                onChange={(e) => handleDownPaymentChange('percentage', parseFormattedNumber(e.target.value))}
                 className={`input-field ${errors.downPaymentPercentage ? 'border-red-500' : ''}`}
                 placeholder="0"
               />
@@ -645,9 +770,9 @@ const EditQuote: React.FC = () => {
                 Montant d'acompte (Ar)
               </label>
               <input
-                type="number"
-                value={downPaymentData.amount}
-                onChange={(e) => handleDownPaymentChange('amount', parseFloat(e.target.value) || 0)}
+                type="text"
+                value={formatNumberWithSpaces(downPaymentData.amount)}
+                onChange={(e) => handleDownPaymentChange('amount', parseFormattedNumber(e.target.value))}
                 className="input-field"
                 placeholder="0"
               />
@@ -726,13 +851,13 @@ const EditQuote: React.FC = () => {
                       {item.description || `Article ${index + 1}`}
                     </td>
                     <td className="px-4 py-4 text-sm text-gray-900">
-                      {item.quantity}
+                      {formatNumberWithSpaces(item.quantity)}
                     </td>
                     <td className="px-4 py-4 text-sm text-gray-900">
-                      {item.unitPrice.toLocaleString('fr-FR')} Ar
+                      {formatNumberWithSpaces(Math.round(item.unitPrice))} Ar
                     </td>
                     <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                      {(item.quantity * item.unitPrice).toLocaleString('fr-FR')} Ar
+                      {formatNumberWithSpaces(Math.round(item.sellingPrice))} Ar
                     </td>
                   </tr>
                 ))}
@@ -745,7 +870,7 @@ const EditQuote: React.FC = () => {
               <div className="flex justify-between py-2">
                 <span className="text-sm text-gray-600">Sous-total:</span>
                 <span className="text-sm font-medium text-gray-900">
-                  {calculateTotal().toLocaleString('fr-FR')} Ar
+                  {formatNumberWithSpaces(Math.round(calculateTotal()))} Ar
                 </span>
               </div>
               
@@ -753,16 +878,16 @@ const EditQuote: React.FC = () => {
                 <>
                   <div className="flex justify-between py-2">
                     <span className="text-sm text-gray-600">
-                      Acompte ({downPaymentData.percentage}%):
+                      Acompte ({formatNumberWithSpaces(downPaymentData.percentage)}%):
                     </span>
                     <span className="text-sm font-medium text-orange-600">
-                      -{downPaymentData.amount.toLocaleString('fr-FR')} Ar
+                      -{formatNumberWithSpaces(downPaymentData.amount)} Ar
                     </span>
                   </div>
                   <div className="flex justify-between py-2 border-t border-gray-200">
                     <span className="text-sm text-gray-600">Solde restant:</span>
                     <span className="text-sm font-medium text-gray-900">
-                      {(calculateTotal() - downPaymentData.amount).toLocaleString('fr-FR')} Ar
+                      {formatNumberWithSpaces(Math.round(calculateTotal() - downPaymentData.amount))} Ar
                     </span>
                   </div>
                 </>
@@ -771,7 +896,7 @@ const EditQuote: React.FC = () => {
               <div className="flex justify-between py-2 border-t border-gray-200">
                 <span className="text-base font-semibold text-gray-900">Total:</span>
                 <span className="text-base font-bold text-gray-900">
-                  {calculateTotal().toLocaleString('fr-FR')} Ar
+                  {formatNumberWithSpaces(Math.round(calculateTotal()))} Ar
                 </span>
               </div>
             </div>
