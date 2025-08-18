@@ -304,13 +304,9 @@ const NewQuote: React.FC = () => {
   };
 
   const countries = [
-    'Chine', 'États-Unis', 'Allemagne', 'France', 'Italie', 'Japon', 
-    'Corée du Sud', 'Royaume-Uni', 'Espagne', 'Pays-Bas', 'Belgique', 'Autre'
+    'Chine', 'France', 'USA'
   ];
 
-  const ports = [
-    'Toamasina', 'Mahajanga', 'Antsiranana', 'Toliara', 'Sambava', 'Antalaha'
-  ];
 
   return (
     <div className="space-y-6 px-4 sm:px-0">
@@ -398,7 +394,7 @@ const NewQuote: React.FC = () => {
         {/* Informations Expédition */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Informations Expédition</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Pays d'origine *
@@ -408,27 +404,13 @@ const NewQuote: React.FC = () => {
                 onChange={(e) => handleInputChange('originCountry', e.target.value)}
                 className={`input-field ${errors.originCountry ? 'border-red-500' : ''}`}
               >
-                {countries.map(country => (
-                  <option key={country} value={country}>{country}</option>
-                ))}
+                <option value="Chine">Chine</option>
+                <option value="France">France</option>
+                <option value="USA">USA</option>
               </select>
               {errors.originCountry && <p className="text-red-500 text-xs mt-1">{errors.originCountry}</p>}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Port de destination
-              </label>
-              <select
-                value={formData.destinationPort}
-                onChange={(e) => handleInputChange('destinationPort', e.target.value)}
-                className="input-field"
-              >
-                {ports.map(port => (
-                  <option key={port} value={port}>{port}</option>
-                ))}
-              </select>
-            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
