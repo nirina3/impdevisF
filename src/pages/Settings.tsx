@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useUserSettings } from '../hooks/useUserSettings';
+import { dataFormattingService } from '../services/dataFormatting';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import ErrorMessage from '../components/ui/ErrorMessage';
+import Modal from '../components/ui/Modal';
 import { 
   User, 
   Building, 
@@ -13,12 +15,17 @@ import {
   Save,
   Bell,
   Shield,
-  Palette
+  Palette,
+  Database,
+  AlertTriangle,
+  RefreshCw
 } from 'lucide-react';
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const { settings, loading, error, updateSettings } = useUserSettings();
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   
   const [profileData, setProfileData] = useState(
     settings?.profile || {
@@ -77,6 +84,7 @@ const Settings: React.FC = () => {
   const tabs = [
     { id: 'profile', label: 'Profil', icon: User },
     { id: 'business', label: 'Entreprise', icon: Building },
+    { id: 'data', label: 'Données', icon: Database },
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'security', label: 'Sécurité', icon: Shield },
     { id: 'appearance', label: 'Apparence', icon: Palette }
@@ -109,11 +117,30 @@ const Settings: React.FC = () => {
     }
   };
 
+  const handleDataReset = async () => {
+    try {
+      setIsResetting(true);
+      await dataFormattingService.formatAllData();
+      setShowResetModal(false);
+      alert('Données réinitialisées avec succès ! La page va se recharger.');
+      window.location.reload();
+    } catch (error) {
+      console.error('Erreur lors de la réinitialisation:', error);
+      alert('Erreur lors de la réinitialisation des données');
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6 px-4 sm:px-0">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Paramètres</h1>
-        <button onClick={handleSave} className="btn-primary flex items-center space-x-2">
+        <button 
+          onClick={handleSave} 
+          className="btn-primary flex items-center space-x-2"
+          disabled={activeTab === 'data'}
+        >
           <Save className="w-4 h-4" />
           <span>Sauvegarder</span>
         </button>
@@ -332,6 +359,81 @@ const Settings: React.FC = () => {
             </div>
           )}
 
+          {activeTab === 'data' && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-6">Gestion des Données</h2>
+              
+              <div className="space-y-6">
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <div className="flex items-center space-x-3">
+                    <AlertTriangle className="w-5 h-5 text-amber-600" />
+                    <div>
+                      <h3 className="text-sm font-medium text-amber-900">Zone de Danger</h3>
+                      <p className="text-sm text-amber-700 mt-1">
+                        Les actions ci-dessous affecteront définitivement vos données.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-md font-medium text-gray-900 mb-3">Réinitialisation des Données</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Cette action supprimera toutes vos données existantes (devis, clients, calculs) et les remplacera par des données de démonstration cohérentes.
+                    </p>
+                    
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                      <div className="flex items-start space-x-3">
+                        <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
+                        <div>
+                          <h4 className="text-sm font-medium text-red-900">Attention !</h4>
+                          <ul className="text-sm text-red-700 mt-1 space-y-1">
+                            <li>• Tous vos devis existants seront supprimés</li>
+                            <li>• Tous vos clients seront supprimés</li>
+                            <li>• Tout l'historique des calculs sera supprimé</li>
+                            <li>• Cette action est irréversible</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setShowResetModal(true)}
+                      className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+                      disabled={isResetting}
+                    >
+                      {isResetting ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <span>Réinitialisation en cours...</span>
+                        </>
+                      ) : (
+                        <>
+                          <RefreshCw className="w-4 h-4" />
+                          <span>Réinitialiser toutes les données</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="border-t border-gray-200 pt-6">
+                    <h3 className="text-md font-medium text-gray-900 mb-3">Données de Démonstration</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Après la réinitialisation, l'application sera peuplée avec :
+                    </p>
+                    <ul className="text-sm text-gray-700 space-y-1">
+                      <li>• 3 clients de démonstration avec des informations complètes</li>
+                      <li>• 3 devis avec des calculs de coûts réalistes</li>
+                      <li>• Des données cohérentes pour tester les analyses financières</li>
+                      <li>• Des exemples de différents statuts de devis et de paiement</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'notifications' && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-6">Préférences de Notification</h2>
@@ -538,6 +640,60 @@ const Settings: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Modal de confirmation de réinitialisation */}
+      <Modal
+        isOpen={showResetModal}
+        onClose={() => setShowResetModal(false)}
+        title="Confirmer la réinitialisation des données"
+        size="md"
+      >
+        <div className="space-y-4">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center space-x-3">
+              <AlertTriangle className="w-5 h-5 text-red-600" />
+              <div>
+                <h3 className="text-sm font-medium text-red-900">Action irréversible</h3>
+                <p className="text-sm text-red-700 mt-1">
+                  Cette action supprimera définitivement toutes vos données existantes.
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <p className="text-sm text-gray-600">
+            Êtes-vous absolument certain de vouloir réinitialiser toutes les données de l'application ?
+            Cette action ne peut pas être annulée.
+          </p>
+          
+          <div className="flex justify-end space-x-3">
+            <button
+              onClick={() => setShowResetModal(false)}
+              className="btn-secondary"
+              disabled={isResetting}
+            >
+              Annuler
+            </button>
+            <button
+              onClick={handleDataReset}
+              className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+              disabled={isResetting}
+            >
+              {isResetting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Réinitialisation...</span>
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Confirmer la réinitialisation</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
