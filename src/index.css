@@ -243,6 +243,94 @@
   .stat-icon {
     padding: 8px;
   }
+  
+  /* Additional mobile improvements */
+  .mobile-stack {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  
+  .mobile-full-width {
+    width: 100% !important;
+  }
+  
+  .mobile-text-center {
+    text-align: center !important;
+  }
+  
+  .mobile-hidden {
+    display: none !important;
+  }
+  
+  .mobile-block {
+    display: block !important;
+  }
+  
+  /* Improved button spacing on mobile */
+  .mobile-button-stack > * {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .mobile-button-stack > *:last-child {
+    margin-bottom: 0;
+  }
+  
+  /* Better form layouts on mobile */
+  .mobile-form-stack .grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  
+  /* Improved table scrolling */
+  .mobile-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 0.5rem;
+  }
+  
+  .mobile-table-container table {
+    min-width: 600px;
+  }
+  
+  /* Better modal sizing */
+  .modal-content {
+    width: calc(100vw - 2rem) !important;
+    max-width: calc(100vw - 2rem) !important;
+    margin: 1rem !important;
+    max-height: calc(100vh - 2rem) !important;
+  }
+  
+  /* Improved card layouts */
+  .mobile-card-stack {
+    padding: 1rem !important;
+  }
+  
+  .mobile-card-stack .grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
+  
+  /* Better navigation */
+  .mobile-nav-item {
+    padding: 1rem !important;
+    font-size: 1rem !important;
+  }
+  
+  /* Improved spacing */
+  .mobile-spacing {
+    padding: 1rem !important;
+    margin: 0.5rem 0 !important;
+  }
+  
+  /* Better text sizing */
+  .mobile-text-sm {
+    font-size: 0.875rem !important;
+  }
+  
+  .mobile-text-xs {
+    font-size: 0.75rem !important;
+  }
 }
 
 /* Tablet-specific improvements */
@@ -281,6 +369,56 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.5rem;
   }
+  
+  /* Enhanced tablet improvements */
+  .tablet-optimized {
+    padding: 1.5rem !important;
+  }
+  
+  .tablet-grid-auto {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+  }
+  
+  .tablet-text-base {
+    font-size: 1rem !important;
+  }
+  
+  .tablet-spacing {
+    gap: 1.5rem !important;
+  }
+  
+  /* Better sidebar on tablets */
+  .tablet-sidebar {
+    width: 16rem !important;
+  }
+  
+  /* Improved header on tablets */
+  .tablet-header {
+    padding: 1rem 1.5rem !important;
+  }
+  
+  /* Better modal sizing on tablets */
+  .modal-content {
+    width: calc(100vw - 4rem) !important;
+    max-width: 42rem !important;
+    margin: 2rem !important;
+  }
+  
+  /* Enhanced form layouts */
+  .tablet-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 1.5rem !important;
+  }
+  
+  /* Better table layouts */
+  .tablet-table {
+    font-size: 0.875rem !important;
+  }
+  
+  .tablet-table th,
+  .tablet-table td {
+    padding: 0.75rem 1rem !important;
+  }
 }
 
 /* Large screen optimizations */
@@ -291,6 +429,24 @@
   
   .xl-grid-5 {
     grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  
+  /* Enhanced large screen layouts */
+  .xl-container {
+    max-width: 80rem !important;
+    margin: 0 auto !important;
+  }
+  
+  .xl-grid-6 {
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+  }
+  
+  .xl-spacing {
+    gap: 2rem !important;
+  }
+  
+  .xl-padding {
+    padding: 2rem !important;
   }
 }
 
@@ -312,6 +468,28 @@
   .table-cell {
     padding: 12px 16px;
   }
+  
+  /* Enhanced touch targets */
+  .touch-target {
+    min-height: 48px !important;
+    min-width: 48px !important;
+  }
+  
+  .touch-friendly {
+    padding: 12px 16px !important;
+  }
+  
+  /* Better touch interactions */
+  .touch-button {
+    min-height: 48px !important;
+    min-width: 48px !important;
+    padding: 12px !important;
+  }
+  
+  .touch-input {
+    min-height: 48px !important;
+    font-size: 16px !important; /* Prevent zoom on iOS */
+  }
 }
 
 /* Print optimizations */
@@ -326,6 +504,19 @@
   
   .print-break-before {
     break-before: page;
+  }
+  
+  /* Enhanced print styles */
+  .print-full-width {
+    width: 100% !important;
+  }
+  
+  .print-hide {
+    display: none !important;
+  }
+  
+  .print-show {
+    display: block !important;
   }
 }
 

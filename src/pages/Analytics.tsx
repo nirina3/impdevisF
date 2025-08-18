@@ -174,7 +174,7 @@ const Analytics: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6 px-4 sm:px-0">
+    <div className="space-y-4 sm:space-y-6 px-3 sm:px-4 lg:px-0 xl-container">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
@@ -182,8 +182,8 @@ const Analytics: React.FC = () => {
             <BarChart3 className="w-6 h-6 text-blue-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Analyses Financières</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Analyses Financières</h1>
+            <p className="text-xs sm:text-sm text-gray-500">
               Analyse des bénéfices et performance commerciale
             </p>
           </div>
@@ -191,13 +191,13 @@ const Analytics: React.FC = () => {
       </div>
 
       {/* Filtres de période */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mx-0 sm:mx-0">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mx-0 tablet-optimized mobile-card-stack">
         <div className="flex items-center space-x-3 mb-4">
           <Calendar className="w-5 h-5 text-gray-600" />
-          <h2 className="text-lg font-semibold text-gray-900">Période d'analyse</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900">Période d'analyse</h2>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mobile-form-stack tablet-form-grid">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Année
@@ -212,7 +212,7 @@ const Analytics: React.FC = () => {
                   setSelectedYear(new Date().getFullYear());
                 }
               }}
-              className="input-field"
+              className="input-field touch-input"
             >
               {availableYears.map(year => (
                 <option key={year} value={year}>{year}</option>
@@ -237,7 +237,7 @@ const Analytics: React.FC = () => {
                   }
                 }
               }}
-              className="input-field"
+              className="input-field touch-input"
             >
               {months.map(month => (
                 <option key={month.value} value={month.value}>{month.label}</option>
@@ -246,7 +246,7 @@ const Analytics: React.FC = () => {
           </div>
         </div>
         
-        <div className="mt-4 text-sm text-gray-600">
+        <div className="mt-4 text-xs sm:text-sm text-gray-600">
           <p>
             Période sélectionnée: {selectedMonth === 'all' ? `Année ${selectedYear}` : `${months.find(m => m.value === selectedMonth)?.label} ${selectedYear}`}
             • {formatNumberWithSpaces(filteredQuotes.length)} devis analysés
@@ -255,7 +255,7 @@ const Analytics: React.FC = () => {
       </div>
 
       {/* Métriques principales */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 tablet-grid-2 xl-spacing">
         <StatCard
           icon={DollarSign}
           title="Chiffre d'Affaires"
@@ -296,12 +296,12 @@ const Analytics: React.FC = () => {
       </div>
 
       {/* Analyse détaillée */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mobile-form-stack">
         {/* Graphique de répartition */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mx-0 tablet-optimized mobile-card-stack">
           <div className="flex items-center space-x-3 mb-6">
             <PieChart className="w-5 h-5 text-gray-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Répartition Coûts/Bénéfices</h2>
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">Répartition Coûts/Bénéfices</h2>
           </div>
           
           <ProfitAnalysisChart 
@@ -311,35 +311,35 @@ const Analytics: React.FC = () => {
         </div>
 
         {/* Métriques de performance */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mx-0 tablet-optimized mobile-card-stack">
           <div className="flex items-center space-x-3 mb-6">
             <Target className="w-5 h-5 text-gray-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Indicateurs de Performance</h2>
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">Indicateurs de Performance</h2>
           </div>
           
           <div className="space-y-4">
-            <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+            <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg touch-friendly">
               <span className="text-sm font-medium text-gray-700">Valeur moyenne par devis</span>
               <span className="font-bold text-blue-600">
                 {formatAriary(performanceMetrics.averageQuoteValue)}
               </span>
             </div>
             
-            <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
+            <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg touch-friendly">
               <span className="text-sm font-medium text-gray-700">Coût moyen par devis</span>
               <span className="font-bold text-orange-600">
                 {formatAriary(performanceMetrics.averageCostPerQuote)}
               </span>
             </div>
             
-            <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+            <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg touch-friendly">
               <span className="text-sm font-medium text-gray-700">Bénéfice moyen par devis</span>
               <span className="font-bold text-green-600">
                 {formatAriary(performanceMetrics.averageProfitPerQuote)}
               </span>
             </div>
             
-            <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+            <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg touch-friendly">
               <span className="text-sm font-medium text-gray-700">Retour sur investissement</span>
               <span className="font-bold text-purple-600">
                 {Math.round(performanceMetrics.returnOnInvestment)}%
@@ -350,13 +350,13 @@ const Analytics: React.FC = () => {
       </div>
 
       {/* Analyse par statut */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mx-0 tablet-optimized mobile-card-stack">
         <div className="flex items-center space-x-3 mb-6">
           <FileText className="w-5 h-5 text-gray-600" />
-          <h2 className="text-lg font-semibold text-gray-900">Analyse par Statut de Devis</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900">Analyse par Statut de Devis</h2>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mobile-form-stack tablet-grid-2">
           {[
             { status: 'pending', label: 'En Attente', color: 'amber' },
             { status: 'confirmed', label: 'Confirmés', color: 'emerald' },
@@ -368,13 +368,13 @@ const Analytics: React.FC = () => {
             const statusCount = statusQuotes.length;
             
             return (
-              <div key={status} className={`p-4 bg-${color}-50 rounded-lg border border-${color}-200`}>
+              <div key={status} className={`p-3 sm:p-4 bg-${color}-50 rounded-lg border border-${color}-200 mobile-card-stack`}>
                 <div className="text-center">
                   <p className={`text-sm font-medium text-${color}-700`}>{label}</p>
-                  <p className="text-xl font-bold text-gray-900 mt-1">
+                  <p className="text-lg sm:text-xl font-bold text-gray-900 mt-1">
                     {formatNumberWithSpaces(statusCount)}
                   </p>
-                  <p className={`text-xs text-${color}-600 mt-1`}>
+                  <p className={`text-xs text-${color}-600 mt-1 mobile-text-xs`}>
                     {formatAriary(statusValue)}
                   </p>
                 </div>
@@ -385,13 +385,13 @@ const Analytics: React.FC = () => {
       </div>
 
       {/* Analyse par mode de paiement */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mx-0 tablet-optimized mobile-card-stack">
         <div className="flex items-center space-x-3 mb-6">
           <Users className="w-5 h-5 text-gray-600" />
-          <h2 className="text-lg font-semibold text-gray-900">Analyse des Paiements</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900">Analyse des Paiements</h2>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mobile-form-stack tablet-grid-3">
           {[
             { status: 'unpaid', label: 'Non Payés', color: 'red' },
             { status: 'partial', label: 'Acomptes Versés', color: 'orange' },
@@ -403,17 +403,17 @@ const Analytics: React.FC = () => {
             const remainingAmount = paymentQuotes.reduce((sum, q) => sum + q.remainingAmount, 0);
             
             return (
-              <div key={status} className={`p-4 bg-${color}-50 rounded-lg border border-${color}-200`}>
+              <div key={status} className={`p-3 sm:p-4 bg-${color}-50 rounded-lg border border-${color}-200 mobile-card-stack`}>
                 <div className="text-center">
                   <p className={`text-sm font-medium text-${color}-700`}>{label}</p>
-                  <p className="text-xl font-bold text-gray-900 mt-1">
+                  <p className="text-lg sm:text-xl font-bold text-gray-900 mt-1">
                     {formatNumberWithSpaces(paymentCount)}
                   </p>
-                  <p className={`text-xs text-${color}-600 mt-1`}>
+                  <p className={`text-xs text-${color}-600 mt-1 mobile-text-xs`}>
                     Valeur: {formatAriary(paymentValue)}
                   </p>
                   {status !== 'paid' && remainingAmount > 0 && (
-                    <p className={`text-xs text-${color}-700 mt-1 font-medium`}>
+                    <p className={`text-xs text-${color}-700 mt-1 font-medium mobile-text-xs`}>
                       Reste: {formatAriary(remainingAmount)}
                     </p>
                   )}
@@ -425,16 +425,16 @@ const Analytics: React.FC = () => {
       </div>
 
       {/* Résumé de la formule de calcul */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-6 mx-0 sm:mx-0">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-4 sm:p-6 mx-0 tablet-optimized mobile-card-stack">
         <div className="flex items-center space-x-3 mb-4">
           <Calculator className="w-5 h-5 text-blue-600" />
-          <h2 className="text-lg font-semibold text-gray-900">Méthode de Calcul</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900">Méthode de Calcul</h2>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mobile-form-stack">
           <div>
-            <h3 className="text-md font-medium text-gray-900 mb-3">Formule du Bénéfice Net</h3>
-            <div className="font-mono text-sm text-gray-700 space-y-2 bg-white p-4 rounded-lg border border-blue-200">
+            <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-3">Formule du Bénéfice Net</h3>
+            <div className="font-mono text-xs sm:text-sm text-gray-700 space-y-2 bg-white p-3 sm:p-4 rounded-lg border border-blue-200 mobile-text-xs">
               <div>Chiffre d'Affaires = Σ(Prix de vente total par devis)</div>
               <div>Coût Total = Σ(Prix d'achat + Transport + Frais divers + Douane)</div>
               <div className="border-t border-gray-200 pt-2 font-bold text-blue-600">
@@ -445,8 +445,8 @@ const Analytics: React.FC = () => {
           </div>
           
           <div>
-            <h3 className="text-md font-medium text-gray-900 mb-3">Détail des Calculs</h3>
-            <div className="text-sm text-gray-700 space-y-2 bg-white p-4 rounded-lg border border-blue-200">
+            <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-3">Détail des Calculs</h3>
+            <div className="text-xs sm:text-sm text-gray-700 space-y-2 bg-white p-3 sm:p-4 rounded-lg border border-blue-200 mobile-text-xs">
               <div className="flex justify-between">
                 <span>Articles analysés:</span>
                 <span className="font-medium">
@@ -476,10 +476,10 @@ const Analytics: React.FC = () => {
 
       {/* Message si pas de données */}
       {filteredQuotes.length === 0 && (
-        <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200 mx-0 sm:mx-0">
+        <div className="text-center py-8 sm:py-12 bg-white rounded-lg shadow-sm border border-gray-200 mx-0 mobile-spacing">
           <BarChart3 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune donnée pour cette période</h3>
-          <p className="text-gray-500">
+          <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">Aucune donnée pour cette période</h3>
+          <p className="text-sm text-gray-500">
             Sélectionnez une autre période ou créez des devis pour voir les analyses.
           </p>
         </div>

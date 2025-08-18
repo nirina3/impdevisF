@@ -137,23 +137,24 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 px-4 sm:px-0">
+    <div className="space-y-4 sm:space-y-6 px-3 sm:px-4 lg:px-0 xl-container">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Paramètres</h1>
+        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Paramètres</h1>
         <button 
           onClick={handleSave} 
-          className="btn-primary flex items-center space-x-2"
+          className="btn-primary flex items-center space-x-2 text-sm lg:text-base touch-target"
           disabled={activeTab === 'data'}
         >
           <Save className="w-4 h-4" />
-          <span>Sauvegarder</span>
+          <span className="hidden sm:inline">Sauvegarder</span>
+          <span className="sm:hidden">Save</span>
         </button>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
         {/* Navigation des onglets */}
-        <div className="lg:w-64 mx-0 sm:mx-0">
-          <nav className="space-y-1">
+        <div className="lg:w-64 xl:w-72 mx-0 tablet-sidebar">
+          <nav className="space-y-1 mobile-nav-item">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -164,10 +165,10 @@ const Settings: React.FC = () => {
                     activeTab === tab.id
                       ? 'bg-primary-50 text-primary-700 border-r-2 border-primary-700'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
+                  } touch-friendly mobile-nav-item`}
                 >
-                  <Icon className="w-5 h-5 mr-3" />
-                  {tab.label}
+                  <Icon className="w-5 h-5 mr-3 flex-shrink-0" />
+                  <span className="truncate">{tab.label}</span>
                 </button>
               );
             })}
@@ -175,11 +176,11 @@ const Settings: React.FC = () => {
         </div>
 
         {/* Contenu des onglets */}
-        <div className="flex-1 mx-0 sm:mx-0">
+        <div className="flex-1 mx-0">
           {activeTab === 'profile' && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Informations Personnelles</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 tablet-optimized mobile-card-stack">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">Informations Personnelles</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mobile-form-stack tablet-form-grid">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     <User className="w-4 h-4 inline mr-1" />
@@ -189,7 +190,7 @@ const Settings: React.FC = () => {
                     type="text"
                     value={profileData.name}
                     onChange={(e) => handleProfileChange('name', e.target.value)}
-                    className="input-field"
+                    className="input-field touch-input"
                   />
                 </div>
 
@@ -202,7 +203,7 @@ const Settings: React.FC = () => {
                     type="email"
                     value={profileData.email}
                     onChange={(e) => handleProfileChange('email', e.target.value)}
-                    className="input-field"
+                    className="input-field touch-input"
                   />
                 </div>
 
@@ -215,7 +216,7 @@ const Settings: React.FC = () => {
                     type="tel"
                     value={profileData.phone}
                     onChange={(e) => handleProfileChange('phone', e.target.value)}
-                    className="input-field"
+                    className="input-field touch-input"
                   />
                 </div>
 
@@ -228,7 +229,7 @@ const Settings: React.FC = () => {
                     type="text"
                     value={profileData.company}
                     onChange={(e) => handleProfileChange('company', e.target.value)}
-                    className="input-field"
+                    className="input-field touch-input"
                   />
                 </div>
 
@@ -241,7 +242,7 @@ const Settings: React.FC = () => {
                     value={profileData.address}
                     onChange={(e) => handleProfileChange('address', e.target.value)}
                     rows={3}
-                    className="input-field"
+                    className="input-field touch-input"
                   />
                 </div>
 
@@ -254,7 +255,7 @@ const Settings: React.FC = () => {
                     type="url"
                     value={profileData.website}
                     onChange={(e) => handleProfileChange('website', e.target.value)}
-                    className="input-field"
+                    className="input-field touch-input"
                   />
                 </div>
               </div>
@@ -262,9 +263,9 @@ const Settings: React.FC = () => {
           )}
 
           {activeTab === 'business' && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Paramètres Entreprise</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 tablet-optimized mobile-card-stack">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">Paramètres Entreprise</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mobile-form-stack tablet-form-grid">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Nom de l'entreprise *
@@ -273,7 +274,7 @@ const Settings: React.FC = () => {
                     type="text"
                     value={businessData.companyName}
                     onChange={(e) => handleBusinessChange('companyName', e.target.value)}
-                    className="input-field"
+                    className="input-field touch-input"
                   />
                 </div>
 
@@ -285,7 +286,7 @@ const Settings: React.FC = () => {
                     type="text"
                     value={businessData.taxId}
                     onChange={(e) => handleBusinessChange('taxId', e.target.value)}
-                    className="input-field"
+                    className="input-field touch-input"
                   />
                 </div>
 
@@ -297,7 +298,7 @@ const Settings: React.FC = () => {
                   <select
                     value={businessData.currency}
                     onChange={(e) => handleBusinessChange('currency', e.target.value)}
-                    className="input-field bg-gray-50"
+                    className="input-field bg-gray-50 touch-input"
                     disabled
                   >
                     <option value="MGA">MGA (Ariary)</option>
@@ -311,7 +312,7 @@ const Settings: React.FC = () => {
                   <select
                     value={businessData.language}
                     onChange={(e) => handleBusinessChange('language', e.target.value)}
-                    className="input-field"
+                    className="input-field touch-input"
                   >
                     <option value="fr">Français</option>
                     <option value="mg">Malagasy</option>
@@ -326,7 +327,7 @@ const Settings: React.FC = () => {
                   <select
                     value={businessData.timezone}
                     onChange={(e) => handleBusinessChange('timezone', e.target.value)}
-                    className="input-field"
+                    className="input-field touch-input"
                   >
                     <option value="Indian/Antananarivo">Indian/Antananarivo</option>
                     <option value="Indian/Mauritius">Indian/Mauritius</option>
@@ -344,7 +345,7 @@ const Settings: React.FC = () => {
                     max="365"
                     value={businessData.quoteValidityDays}
                     onChange={(e) => handleBusinessChange('quoteValidityDays', parseInt(e.target.value))}
-                    className="input-field"
+                    className="input-field touch-input"
                   />
                 </div>
 
@@ -356,7 +357,7 @@ const Settings: React.FC = () => {
                     type="text"
                     value={businessData.quotePrefix}
                     onChange={(e) => handleBusinessChange('quotePrefix', e.target.value)}
-                    className="input-field"
+                    className="input-field touch-input"
                   />
                 </div>
               </div>
@@ -364,8 +365,8 @@ const Settings: React.FC = () => {
           )}
 
           {activeTab === 'backup' && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Sauvegarde et Restauration</h2>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 tablet-optimized mobile-card-stack">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">Sauvegarde et Restauration</h2>
               
               <div className="mb-6">
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -373,7 +374,7 @@ const Settings: React.FC = () => {
                     <HardDrive className="w-5 h-5 text-blue-600" />
                     <div>
                       <h3 className="text-sm font-medium text-blue-900">Protection de vos données</h3>
-                      <p className="text-sm text-blue-700 mt-1">
+                      <p className="text-xs sm:text-sm text-blue-700 mt-1">
                         Créez des sauvegardes régulières pour protéger vos devis, clients et calculs contre toute perte de données.
                       </p>
                     </div>
@@ -408,8 +409,8 @@ const Settings: React.FC = () => {
           )}
 
           {activeTab === 'data' && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Gestion des Données</h2>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 tablet-optimized mobile-card-stack">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">Gestion des Données</h2>
               
               <div className="space-y-6">
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
@@ -417,7 +418,7 @@ const Settings: React.FC = () => {
                     <AlertTriangle className="w-5 h-5 text-amber-600" />
                     <div>
                       <h3 className="text-sm font-medium text-amber-900">Zone de Danger</h3>
-                      <p className="text-sm text-amber-700 mt-1">
+                      <p className="text-xs sm:text-sm text-amber-700 mt-1">
                         Les actions ci-dessous affecteront définitivement vos données.
                       </p>
                     </div>
@@ -426,8 +427,8 @@ const Settings: React.FC = () => {
 
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-md font-medium text-gray-900 mb-3">Réinitialisation des Données</h3>
-                    <p className="text-sm text-gray-600 mb-4">
+                    <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-3">Réinitialisation des Données</h3>
+                    <p className="text-xs sm:text-sm text-gray-600 mb-4">
                       Cette action supprimera toutes vos données existantes (devis, clients, calculs) et les remplacera par des données de démonstration cohérentes.
                     </p>
                     
@@ -436,7 +437,7 @@ const Settings: React.FC = () => {
                         <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
                         <div>
                           <h4 className="text-sm font-medium text-red-900">Attention !</h4>
-                          <ul className="text-sm text-red-700 mt-1 space-y-1">
+                          <ul className="text-xs sm:text-sm text-red-700 mt-1 space-y-1">
                             <li>• Tous vos devis existants seront supprimés</li>
                             <li>• Tous vos clients seront supprimés</li>
                             <li>• Tout l'historique des calculs sera supprimé</li>
@@ -448,29 +449,31 @@ const Settings: React.FC = () => {
 
                     <button
                       onClick={() => setShowResetModal(true)}
-                      className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+                      className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center space-x-2 touch-target"
                       disabled={isResetting}
                     >
                       {isResetting ? (
                         <>
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                          <span>Réinitialisation en cours...</span>
+                          <span className="hidden sm:inline">Réinitialisation en cours...</span>
+                          <span className="sm:hidden">En cours...</span>
                         </>
                       ) : (
                         <>
                           <RefreshCw className="w-4 h-4" />
-                          <span>Réinitialiser toutes les données</span>
+                          <span className="hidden sm:inline">Réinitialiser toutes les données</span>
+                          <span className="sm:hidden">Réinitialiser</span>
                         </>
                       )}
                     </button>
                   </div>
 
                   <div className="border-t border-gray-200 pt-6">
-                    <h3 className="text-md font-medium text-gray-900 mb-3">Données de Démonstration</h3>
-                    <p className="text-sm text-gray-600 mb-4">
+                    <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-3">Données de Démonstration</h3>
+                    <p className="text-xs sm:text-sm text-gray-600 mb-4">
                       Après la réinitialisation, l'application sera peuplée avec :
                     </p>
-                    <ul className="text-sm text-gray-700 space-y-1">
+                    <ul className="text-xs sm:text-sm text-gray-700 space-y-1">
                       <li>• 3 clients de démonstration avec des informations complètes</li>
                       <li>• 3 devis avec des calculs de coûts réalistes</li>
                       <li>• Des données cohérentes pour tester les analyses financières</li>
@@ -483,18 +486,18 @@ const Settings: React.FC = () => {
           )}
 
           {activeTab === 'notifications' && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Préférences de Notification</h2>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 tablet-optimized mobile-card-stack">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">Préférences de Notification</h2>
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-md font-medium text-gray-900 mb-3">Notifications Email</h3>
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-3">Notifications Email</h3>
                   <div className="space-y-3">
                     {[
                       { key: 'emailQuoteCreated', label: 'Nouveau devis créé' },
                       { key: 'emailQuoteConfirmed', label: 'Devis confirmé' },
                       { key: 'emailQuoteDelivered', label: 'Devis livré' }
                     ].map(({ key, label }) => (
-                      <div key={key} className="flex items-center justify-between">
+                      <div key={key} className="flex items-center justify-between py-2 touch-friendly">
                         <span className="text-sm text-gray-700">{label}</span>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
@@ -511,14 +514,14 @@ const Settings: React.FC = () => {
                 </div>
 
                 <div>
-                  <h3 className="text-md font-medium text-gray-900 mb-3">Autres Notifications</h3>
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-3">Autres Notifications</h3>
                   <div className="space-y-3">
                     {[
                       { key: 'pushNotifications', label: 'Notifications push' },
                       { key: 'weeklyReports', label: 'Rapports hebdomadaires' },
                       { key: 'monthlyReports', label: 'Rapports mensuels' }
                     ].map(({ key, label }) => (
-                      <div key={key} className="flex items-center justify-between">
+                      <div key={key} className="flex items-center justify-between py-2 touch-friendly">
                         <span className="text-sm text-gray-700">{label}</span>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
@@ -538,11 +541,11 @@ const Settings: React.FC = () => {
           )}
 
           {activeTab === 'security' && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Sécurité</h2>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 tablet-optimized mobile-card-stack">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">Sécurité</h2>
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-md font-medium text-gray-900 mb-3">Changer le mot de passe</h3>
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-3">Changer le mot de passe</h3>
                   <div className="space-y-4 max-w-md">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -550,7 +553,7 @@ const Settings: React.FC = () => {
                       </label>
                       <input
                         type="password"
-                        className="input-field"
+                        className="input-field touch-input"
                         placeholder="••••••••"
                       />
                     </div>
@@ -560,7 +563,7 @@ const Settings: React.FC = () => {
                       </label>
                       <input
                         type="password"
-                        className="input-field"
+                        className="input-field touch-input"
                         placeholder="••••••••"
                       />
                     </div>
@@ -570,36 +573,36 @@ const Settings: React.FC = () => {
                       </label>
                       <input
                         type="password"
-                        className="input-field"
+                        className="input-field touch-input"
                         placeholder="••••••••"
                       />
                     </div>
-                    <button className="btn-primary">
+                    <button className="btn-primary touch-target">
                       Mettre à jour le mot de passe
                     </button>
                   </div>
                 </div>
 
                 <div className="border-t border-gray-200 pt-6">
-                  <h3 className="text-md font-medium text-gray-900 mb-3">Authentification à deux facteurs</h3>
-                  <p className="text-sm text-gray-600 mb-4">
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-3">Authentification à deux facteurs</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-4">
                     Ajoutez une couche de sécurité supplémentaire à votre compte.
                   </p>
-                  <button className="btn-secondary">
+                  <button className="btn-secondary touch-target">
                     Activer l'authentification à deux facteurs
                   </button>
                 </div>
 
                 <div className="border-t border-gray-200 pt-6">
-                  <h3 className="text-md font-medium text-gray-900 mb-3">Sessions actives</h3>
-                  <p className="text-sm text-gray-600 mb-4">
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-3">Sessions actives</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 mb-4">
                     Gérez vos sessions actives sur différents appareils.
                   </p>
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg touch-friendly">
                       <div>
                         <p className="text-sm font-medium text-gray-900">Session actuelle</p>
-                        <p className="text-xs text-gray-500">Chrome sur Windows • Casablanca, Maroc</p>
+                        <p className="text-xs text-gray-500 mobile-text-xs">Chrome sur Windows • Casablanca, Maroc</p>
                       </div>
                       <span className="text-xs text-green-600 font-medium">Actif</span>
                     </div>
@@ -610,12 +613,12 @@ const Settings: React.FC = () => {
           )}
 
           {activeTab === 'appearance' && (
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">Apparence</h2>
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 tablet-optimized mobile-card-stack">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">Apparence</h2>
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-md font-medium text-gray-900 mb-3">Thème</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-3">Thème</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mobile-form-stack">
                     {[
                       { id: 'light', name: 'Clair', description: 'Thème clair par défaut' },
                       { id: 'dark', name: 'Sombre', description: 'Thème sombre pour les yeux' },
@@ -631,10 +634,10 @@ const Settings: React.FC = () => {
                         />
                         <label
                           htmlFor={theme.id}
-                          className="flex flex-col p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary-300 peer-checked:border-primary-600 peer-checked:bg-primary-50"
+                          className="flex flex-col p-3 sm:p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-primary-300 peer-checked:border-primary-600 peer-checked:bg-primary-50 touch-friendly"
                         >
                           <span className="font-medium text-gray-900">{theme.name}</span>
-                          <span className="text-sm text-gray-500">{theme.description}</span>
+                          <span className="text-xs sm:text-sm text-gray-500">{theme.description}</span>
                         </label>
                       </div>
                     ))}
@@ -642,7 +645,7 @@ const Settings: React.FC = () => {
                 </div>
 
                 <div>
-                  <h3 className="text-md font-medium text-gray-900 mb-3">Couleur d'accent</h3>
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-3">Couleur d'accent</h3>
                   <div className="flex space-x-3">
                     {[
                       { color: 'bg-blue-600', name: 'Bleu' },
@@ -653,7 +656,7 @@ const Settings: React.FC = () => {
                     ].map((colorOption) => (
                       <button
                         key={colorOption.name}
-                        className={`w-8 h-8 rounded-full ${colorOption.color} ring-2 ring-offset-2 ring-transparent hover:ring-gray-300 focus:ring-gray-400`}
+                        className={`w-10 h-10 sm:w-8 sm:h-8 rounded-full ${colorOption.color} ring-2 ring-offset-2 ring-transparent hover:ring-gray-300 focus:ring-gray-400 touch-target`}
                         title={colorOption.name}
                       />
                     ))}
@@ -661,23 +664,23 @@ const Settings: React.FC = () => {
                 </div>
 
                 <div>
-                  <h3 className="text-md font-medium text-gray-900 mb-3">Densité d'affichage</h3>
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-3">Densité d'affichage</h3>
                   <div className="space-y-2">
                     {[
                       { id: 'comfortable', name: 'Confortable', description: 'Plus d\'espace entre les éléments' },
                       { id: 'compact', name: 'Compact', description: 'Moins d\'espace, plus de contenu visible' }
                     ].map((density) => (
-                      <div key={density.id} className="flex items-center">
+                      <div key={density.id} className="flex items-center py-2 touch-friendly">
                         <input
                           type="radio"
                           id={density.id}
                           name="density"
                           defaultChecked={density.id === 'comfortable'}
-                          className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500"
+                          className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500 touch-target"
                         />
                         <label htmlFor={density.id} className="ml-3">
                           <span className="text-sm font-medium text-gray-900">{density.name}</span>
-                          <p className="text-xs text-gray-500">{density.description}</p>
+                          <p className="text-xs text-gray-500 mobile-text-xs">{density.description}</p>
                         </label>
                       </div>
                     ))}
@@ -702,40 +705,42 @@ const Settings: React.FC = () => {
               <AlertTriangle className="w-5 h-5 text-red-600" />
               <div>
                 <h3 className="text-sm font-medium text-red-900">Action irréversible</h3>
-                <p className="text-sm text-red-700 mt-1">
+                <p className="text-xs sm:text-sm text-red-700 mt-1">
                   Cette action supprimera définitivement toutes vos données existantes.
                 </p>
               </div>
             </div>
           </div>
           
-          <p className="text-sm text-gray-600">
+          <p className="text-xs sm:text-sm text-gray-600">
             Êtes-vous absolument certain de vouloir réinitialiser toutes les données de l'application ?
             Cette action ne peut pas être annulée.
           </p>
           
-          <div className="flex justify-end space-x-3">
+          <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 mobile-button-stack">
             <button
               onClick={() => setShowResetModal(false)}
-              className="btn-secondary"
+              className="btn-secondary touch-target"
               disabled={isResetting}
             >
               Annuler
             </button>
             <button
               onClick={handleDataReset}
-              className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+              className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 touch-target"
               disabled={isResetting}
             >
               {isResetting ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Réinitialisation...</span>
+                  <span className="hidden sm:inline">Réinitialisation...</span>
+                  <span className="sm:hidden">En cours...</span>
                 </>
               ) : (
                 <>
                   <RefreshCw className="w-4 h-4" />
-                  <span>Confirmer la réinitialisation</span>
+                  <span className="hidden sm:inline">Confirmer la réinitialisation</span>
+                  <span className="sm:hidden">Confirmer</span>
                 </>
               )}
             </button>

@@ -250,27 +250,27 @@ const CostCalculation: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 px-3 sm:px-4 lg:px-0">
+    <div className="space-y-4 sm:space-y-6 px-3 sm:px-4 lg:px-0 xl-container">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-blue-100 rounded-lg">
             <Calculator className="w-6 h-6 text-blue-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">
               {isEditing ? 'Modifier le Calcul' : 'Calcul des Coûts'}
             </h1>
             {isEditing && (
-              <p className="text-sm text-gray-500">
+              <p className="text-xs sm:text-sm text-gray-500">
                 Modification du calcul • Les modifications seront sauvegardées comme un nouveau calcul
               </p>
             )}
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 lg:space-x-3 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 lg:space-x-3 w-full sm:w-auto mobile-button-stack">
           <button
             onClick={addItem}
-            className="btn-secondary flex items-center justify-center space-x-2 w-full sm:w-auto text-xs sm:text-sm min-h-[44px]"
+            className="btn-secondary flex items-center justify-center space-x-2 w-full sm:w-auto text-xs sm:text-sm min-h-[44px] touch-target"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Ajouter un article</span>
@@ -278,7 +278,7 @@ const CostCalculation: React.FC = () => {
           </button>
           <button
             onClick={handleSaveCalculation}
-            className="btn-secondary flex items-center justify-center space-x-2 w-full sm:w-auto text-xs sm:text-sm min-h-[44px]"
+            className="btn-secondary flex items-center justify-center space-x-2 w-full sm:w-auto text-xs sm:text-sm min-h-[44px] touch-target"
           >
             <Save className="w-4 h-4" />
             <span className="hidden sm:inline">{isEditing ? 'Sauvegarder comme nouveau' : 'Sauvegarder'}</span>
@@ -286,7 +286,7 @@ const CostCalculation: React.FC = () => {
           </button>
           <button
             onClick={handleSaveAndCreateQuote}
-            className="btn-primary flex items-center justify-center space-x-2 w-full sm:w-auto text-xs sm:text-sm min-h-[44px]"
+            className="btn-primary flex items-center justify-center space-x-2 w-full sm:w-auto text-xs sm:text-sm min-h-[44px] touch-target"
             disabled={items.length === 0 || items.some(item => !item.description.trim())}
           >
             <FileText className="w-4 h-4" />
@@ -299,21 +299,21 @@ const CostCalculation: React.FC = () => {
 
       {/* Notification si on est en mode édition */}
       {isEditing ? (
-        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mx-0 sm:mx-0">
+        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mx-0 tablet-optimized mobile-card-stack">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-orange-100 rounded-lg">
               <Edit className="w-5 h-5 text-orange-600" />
             </div>
             <div className="flex-1">
               <h3 className="text-sm font-medium text-orange-900">Mode édition</h3>
-              <p className="text-sm text-orange-700">
+              <p className="text-xs sm:text-sm text-orange-700">
                 Vous modifiez un calcul existant. Les modifications seront sauvegardées comme un nouveau calcul dans votre historique.
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto mobile-button-stack">
               <button
                 onClick={() => navigate('/cost-history')}
-                className="btn-secondary text-sm flex items-center justify-center space-x-2 w-full sm:w-auto"
+                className="btn-secondary text-sm flex items-center justify-center space-x-2 w-full sm:w-auto touch-target"
               >
                 <History className="w-4 h-4" />
                 <span className="hidden sm:inline">Retour à l'historique</span>
@@ -325,7 +325,7 @@ const CostCalculation: React.FC = () => {
       ) : (
         /* Notification si des données sont déjà sauvegardées */
         (hasCalculation() && calculationData) || calculations.length > 0 ? (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mx-0 sm:mx-0">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mx-0 tablet-optimized mobile-card-stack">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-blue-100 rounded-lg">
               <Calculator className="w-5 h-5 text-blue-600" />
@@ -335,21 +335,21 @@ const CostCalculation: React.FC = () => {
                 {hasCalculation() && calculationData ? 'Calcul précédent disponible' : 'Historique des calculs'}
               </h3>
               {hasCalculation() && calculationData ? (
-                <p className="text-sm text-blue-700">
+                <p className="text-xs sm:text-sm text-blue-700">
                   Dernière sauvegarde : {calculationData.calculatedAt.toLocaleString('fr-FR')} 
                   • {calculationData.items.length} article(s) 
                   • Total : {formatNumberWithSpaces(Math.round(calculationData.totalSellingPrice))} Ar
                 </p>
               ) : (
-                <p className="text-sm text-blue-700">
+                <p className="text-xs sm:text-sm text-blue-700">
                   {calculations.length} calcul{calculations.length > 1 ? 's' : ''} sauvegardé{calculations.length > 1 ? 's' : ''}
                 </p>
               )}
             </div>
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto mobile-button-stack">
               <button
                 onClick={() => navigate('/cost-history')}
-                className="btn-secondary text-sm flex items-center justify-center space-x-2 w-full sm:w-auto"
+                className="btn-secondary text-sm flex items-center justify-center space-x-2 w-full sm:w-auto touch-target"
               >
                 <History className="w-4 h-4" />
                 <span className="hidden sm:inline">Voir l'historique</span>
@@ -358,7 +358,7 @@ const CostCalculation: React.FC = () => {
               {hasCalculation() && calculationData && (
                 <button
                   onClick={() => navigate('/quotes/new?from=cost-calculation')}
-                  className="btn-primary text-sm flex items-center justify-center space-x-2 w-full sm:w-auto"
+                  className="btn-primary text-sm flex items-center justify-center space-x-2 w-full sm:w-auto touch-target"
                 >
                   <FileText className="w-4 h-4" />
                   <span className="hidden sm:inline">Utiliser pour un devis</span>
@@ -372,15 +372,15 @@ const CostCalculation: React.FC = () => {
       )}
 
       {/* Section des taux de change */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6 mx-0 sm:mx-0">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6 mx-0 tablet-optimized mobile-card-stack">
         <div className="flex items-center space-x-3 mb-4">
           <div className="p-2 bg-green-100 rounded-lg">
             <TrendingUp className="w-5 h-5 text-green-600" />
           </div>
-          <h2 className="text-lg font-semibold text-gray-900">Cours du Jour</h2>
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900">Cours du Jour</h2>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mobile-form-stack tablet-grid-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               USD → MGA
@@ -391,7 +391,7 @@ const CostCalculation: React.FC = () => {
                 type="text"
                 value={formatNumberWithSpaces(exchangeRates.USD)}
                 onChange={(e) => handleExchangeRateChange('USD', e.target.value)}
-                className="pl-10 input-field min-h-[44px]"
+                className="pl-10 input-field min-h-[44px] touch-input"
                 placeholder="4 500"
               />
             </div>
@@ -407,7 +407,7 @@ const CostCalculation: React.FC = () => {
                 type="text"
                 value={formatNumberWithSpaces(exchangeRates.EUR)}
                 onChange={(e) => handleExchangeRateChange('EUR', e.target.value)}
-                className="pl-10 input-field min-h-[44px]"
+                className="pl-10 input-field min-h-[44px] touch-input"
                 placeholder="4 900"
               />
             </div>
@@ -423,7 +423,7 @@ const CostCalculation: React.FC = () => {
                 type="text"
                 value={formatNumberWithSpaces(exchangeRates.CNY)}
                 onChange={(e) => handleExchangeRateChange('CNY', e.target.value)}
-                className="pl-10 input-field min-h-[44px]"
+                className="pl-10 input-field min-h-[44px] touch-input"
                 placeholder="620"
               />
             </div>
@@ -432,15 +432,15 @@ const CostCalculation: React.FC = () => {
       </div>
 
       {/* Articles */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {items.map((item, index) => (
-          <div key={item.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6 mx-0 sm:mx-0">
+          <div key={item.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6 mx-0 tablet-optimized mobile-card-stack">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Article {index + 1}</h2>
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900">Article {index + 1}</h2>
               {items.length > 1 && (
                 <button
                   onClick={() => removeItem(index)}
-                  className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center touch-target"
                   title="Supprimer cet article"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -448,11 +448,11 @@ const CostCalculation: React.FC = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mobile-form-stack">
               {/* Section de saisie */}
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-md font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200 flex items-center">
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200 flex items-center">
                     <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-medium mr-2">📝</span>
                     Informations de base
                   </h3>
@@ -466,7 +466,7 @@ const CostCalculation: React.FC = () => {
                         type="text"
                         value={item.description}
                         onChange={(e) => handleItemChange(index, 'description', e.target.value)}
-                       className="input-field min-h-[44px]"
+                       className="input-field min-h-[44px] touch-input"
                         placeholder="Description de l'article..."
                       />
                     </div>
@@ -478,7 +478,7 @@ const CostCalculation: React.FC = () => {
                       <select
                         value={item.originCountry}
                         onChange={(e) => handleItemChange(index, 'originCountry', e.target.value)}
-                       className="input-field min-h-[44px]"
+                       className="input-field min-h-[44px] touch-input"
                       >
                         {countries.map(country => (
                           <option key={country} value={country}>{country}</option>
@@ -489,12 +489,12 @@ const CostCalculation: React.FC = () => {
                 </div>
 
                 <div>
-                  <h3 className="text-md font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200 flex items-center">
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200 flex items-center">
                     <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-medium mr-2">💰</span>
                     Prix et quantité
                   </h3>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mobile-form-stack">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Quantité
@@ -503,7 +503,7 @@ const CostCalculation: React.FC = () => {
                         type="text"
                         value={formatNumberWithSpaces(item.quantity)}
                         onChange={(e) => handleItemChange(index, 'quantity', parseFormattedNumber(e.target.value))}
-                       className="input-field min-h-[44px]"
+                       className="input-field min-h-[44px] touch-input"
                         placeholder="1"
                       />
                     </div>
@@ -515,7 +515,7 @@ const CostCalculation: React.FC = () => {
                       <select
                         value={item.mainCurrency}
                         onChange={(e) => handleItemChange(index, 'mainCurrency', e.target.value)}
-                       className="input-field min-h-[44px]"
+                       className="input-field min-h-[44px] touch-input"
                       >
                         <option value="USD">USD ($)</option>
                         <option value="EUR">EUR (€)</option>
@@ -535,7 +535,7 @@ const CostCalculation: React.FC = () => {
                           type="text"
                           value={formatNumberWithSpaces(item.purchasePrice)}
                           onChange={(e) => handleItemChange(index, 'purchasePrice', parseFormattedNumber(e.target.value))}
-                         className="pl-10 input-field min-h-[44px]"
+                          className="pl-10 input-field min-h-[44px] touch-input"
                           placeholder="0"
                         />
                       </div>
@@ -547,7 +547,7 @@ const CostCalculation: React.FC = () => {
                 </div>
 
                 <div>
-                  <h3 className="text-md font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200 flex items-center">
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200 flex items-center">
                     <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-sm font-medium mr-2">🚚</span>
                     Frais de transport
                   </h3>
@@ -566,12 +566,12 @@ const CostCalculation: React.FC = () => {
                           handleItemChange(index, 'transportFees', value);
                           handleItemChange(index, 'transportCurrency', 'MGA');
                         }}
-                        className="input-field"
+                        className="input-field touch-input"
                         placeholder="0"
                       />
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mobile-form-stack">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Devise transport
@@ -579,7 +579,7 @@ const CostCalculation: React.FC = () => {
                         <select
                           value={item.transportCurrency}
                           onChange={(e) => handleItemChange(index, 'transportCurrency', e.target.value)}
-                          className="input-field"
+                          className="input-field touch-input"
                         >
                           <option value="USD">USD ($)</option>
                           <option value="EUR">EUR (€)</option>
@@ -599,7 +599,7 @@ const CostCalculation: React.FC = () => {
                             type="text"
                             value={formatNumberWithSpaces(item.transportFeesOriginal)}
                             onChange={(e) => handleItemChange(index, 'transportFeesOriginal', parseFormattedNumber(e.target.value))}
-                            className="pl-10 input-field"
+                            className="pl-10 input-field touch-input"
                             placeholder="0"
                           />
                         </div>
@@ -612,12 +612,12 @@ const CostCalculation: React.FC = () => {
                 </div>
 
                 <div>
-                  <h3 className="text-md font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200 flex items-center">
+                  <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200 flex items-center">
                     <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-sm font-medium mr-2">📋</span>
                     Autres frais et marge
                   </h3>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mobile-form-stack">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Frais divers (Ar)
@@ -626,7 +626,7 @@ const CostCalculation: React.FC = () => {
                         type="text"
                         value={formatNumberWithSpaces(item.miscFees)}
                         onChange={(e) => handleItemChange(index, 'miscFees', parseFormattedNumber(e.target.value))}
-                        className="input-field"
+                        className="input-field touch-input"
                         placeholder="0"
                       />
                     </div>
@@ -639,7 +639,7 @@ const CostCalculation: React.FC = () => {
                         type="text"
                         value={formatNumberWithSpaces(item.customsFees)}
                         onChange={(e) => handleItemChange(index, 'customsFees', parseFormattedNumber(e.target.value))}
-                        className="input-field"
+                        className="input-field touch-input"
                         placeholder="0"
                       />
                     </div>
@@ -652,7 +652,7 @@ const CostCalculation: React.FC = () => {
                         type="text"
                         value={formatNumberWithSpaces(item.margin)}
                         onChange={(e) => handleItemChange(index, 'margin', parseFormattedNumber(e.target.value))}
-                        className="input-field"
+                        className="input-field touch-input"
                         placeholder="20"
                       />
                     </div>
@@ -661,8 +661,8 @@ const CostCalculation: React.FC = () => {
               </div>
 
               {/* Section de résultats */}
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-blue-200">
-                <h3 className="text-md font-medium text-gray-900 mb-4 pb-2 border-b border-blue-200 flex items-center">
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 sm:p-6 rounded-xl border-2 border-blue-200 mobile-card-stack">
+                <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-4 pb-2 border-b border-blue-200 flex items-center">
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-medium mr-2">💰</span>
                   Résultats du calcul
                 </h3>
@@ -713,16 +713,16 @@ const CostCalculation: React.FC = () => {
                   <div className="border-t border-blue-200 pt-3">
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-semibold text-gray-900">Prix de vente total :</span>
-                      <span className="text-2xl font-bold text-green-600">
+                      <span className="text-xl sm:text-2xl font-bold text-green-600">
                         {formatNumberWithSpaces(Math.round(item.sellingPrice))} Ar
                       </span>
                     </div>
                   </div>
 
                   {/* Détail du calcul */}
-                  <div className="mt-4 p-4 bg-white rounded-lg border border-blue-200">
+                  <div className="mt-4 p-3 sm:p-4 bg-white rounded-lg border border-blue-200 mobile-card-stack">
                     <p className="text-xs text-gray-500 mb-3 font-medium">Détail du calcul :</p>
-                    <div className="font-mono text-xs text-gray-700 space-y-1.5">
+                    <div className="font-mono text-xs text-gray-700 space-y-1.5 mobile-text-xs">
                       <div className="flex justify-between">
                         <span>Prix unitaire ({item.mainCurrency}):</span>
                         <span>{formatNumberWithSpaces(item.purchasePrice)} {item.mainCurrency}</span>
@@ -774,46 +774,46 @@ const CostCalculation: React.FC = () => {
 
       {/* Résumé global */}
       {items.length > 1 && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mx-0 sm:mx-0">
-          <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mx-0 tablet-optimized mobile-card-stack">
+          <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-6 flex items-center">
             <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full text-sm font-medium mr-3">📊</span>
             Résumé Global
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mobile-form-stack tablet-grid-2">
             <div className="text-center p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl">
               <p className="text-sm text-gray-500 mb-1">Articles</p>
-              <p className="text-2xl font-bold text-gray-900">
+              <p className="text-xl sm:text-2xl font-bold text-gray-900">
                 {formatNumberWithSpaces(items.length)}
               </p>
             </div>
             
             <div className="text-center p-4 bg-gradient-to-br from-red-50 to-pink-100 rounded-xl">
               <p className="text-sm text-gray-500 mb-1">Coût total</p>
-              <p className="text-2xl font-bold text-red-600">
+              <p className="text-xl sm:text-2xl font-bold text-red-600">
                 {formatNumberWithSpaces(Math.round(items.reduce((sum, item) => sum + getTotalCostMGA(item), 0)))} Ar
               </p>
             </div>
             
             <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-cyan-100 rounded-xl">
               <p className="text-sm text-gray-500 mb-1">Marge totale</p>
-              <p className="text-2xl font-bold text-blue-600">
+              <p className="text-xl sm:text-2xl font-bold text-blue-600">
                 {formatNumberWithSpaces(Math.round(items.reduce((sum, item) => sum + getMarginAmount(item), 0)))} Ar
               </p>
             </div>
             
             <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-100 rounded-xl">
               <p className="text-sm text-gray-500 mb-1">Prix de vente total</p>
-              <p className="text-2xl font-bold text-green-600">
+              <p className="text-xl sm:text-2xl font-bold text-green-600">
                 {formatNumberWithSpaces(Math.round(items.reduce((sum, item) => sum + item.sellingPrice, 0)))} Ar
               </p>
             </div>
           </div>
 
           {/* Détail par devise */}
-          <div className="mt-6 p-4 bg-gradient-to-r from-neutral-50 to-gray-50 rounded-xl">
+          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gradient-to-r from-neutral-50 to-gray-50 rounded-xl mobile-card-stack">
             <h4 className="text-sm font-medium text-gray-900 mb-3">Répartition par devise :</h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-sm mobile-form-stack">
               {(['USD', 'EUR', 'CNY'] as const).map(currency => {
                 const currencyItems = items.filter(item => item.mainCurrency === currency);
                 const totalInCurrency = currencyItems.reduce((sum, item) => sum + (item.purchasePrice * item.quantity), 0);

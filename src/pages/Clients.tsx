@@ -123,24 +123,25 @@ const Clients: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 px-4 sm:px-0">
+    <div className="space-y-4 sm:space-y-6 px-3 sm:px-4 lg:px-0 xl-container">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Clients</h1>
+        <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Clients</h1>
         <button
           onClick={() => {
             resetForm();
             setSelectedClient(null);
             setShowAddModal(true);
           }}
-          className="btn-primary flex items-center space-x-2"
+          className="btn-primary flex items-center space-x-2 text-sm lg:text-base touch-target"
         >
           <Plus className="w-4 h-4" />
-          <span>Nouveau Client</span>
+          <span className="hidden sm:inline">Nouveau Client</span>
+          <span className="sm:hidden">Nouveau</span>
         </button>
       </div>
 
       {/* Recherche */}
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mx-0 sm:mx-0">
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mx-0 tablet-optimized mobile-card-stack">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
@@ -148,29 +149,29 @@ const Clients: React.FC = () => {
             placeholder="Rechercher un client..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-full"
+            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-full touch-input"
           />
         </div>
       </div>
 
       {/* Liste des clients */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mobile-form-stack tablet-grid-2 xl-grid-4">
         {filteredClients.map((client) => (
-          <div key={client.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mx-0 sm:mx-0">
+          <div key={client.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mx-0 mobile-card-stack">
             <div className="flex items-start justify-between mb-4">
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-900">{client.name}</h3>
+              <div className="flex-1 min-w-0 pr-2">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{client.name}</h3>
                 {client.company && (
                   <div className="flex items-center text-sm text-gray-600 mt-1">
                     <Building className="w-4 h-4 mr-1" />
-                    {client.company}
+                    <span className="truncate">{client.company}</span>
                   </div>
                 )}
               </div>
-              <div className="flex space-x-1">
+              <div className="flex space-x-1 flex-shrink-0">
                 <button
                   onClick={() => handleEdit(client)}
-                  className="text-blue-600 hover:text-blue-800 p-1"
+                  className="text-blue-600 hover:text-blue-800 p-2 hover:bg-blue-50 rounded-lg transition-all duration-200 touch-target"
                   title="Modifier"
                 >
                   <Edit className="w-4 h-4" />
@@ -180,7 +181,7 @@ const Clients: React.FC = () => {
                     setClientToDelete(client.id);
                     setShowDeleteModal(true);
                   }}
-                  className="text-red-600 hover:text-red-800 p-1"
+                  className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-all duration-200 touch-target"
                   title="Supprimer"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -191,7 +192,7 @@ const Clients: React.FC = () => {
             <div className="space-y-2">
               <div className="flex items-center text-sm text-gray-600">
                 <Mail className="w-4 h-4 mr-2" />
-                <a href={`mailto:${client.email}`} className="hover:text-primary-600">
+                <a href={`mailto:${client.email}`} className="hover:text-primary-600 truncate">
                   {client.email}
                 </a>
               </div>
@@ -203,25 +204,25 @@ const Clients: React.FC = () => {
               </div>
               <div className="flex items-start text-sm text-gray-600">
                 <MapPin className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
-                <span>{client.address}</span>
+                <span className="break-words">{client.address}</span>
               </div>
             </div>
 
             <div className="mt-4 pt-4 border-t border-gray-200">
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 text-sm">
                 <div>
                   <p className="text-gray-500">Devis</p>
                   <p className="font-semibold text-gray-900">{formatNumberWithSpaces(client.totalQuotes)}</p>
                 </div>
                 <div>
                   <p className="text-gray-500">Valeur totale</p>
-                  <p className="font-semibold text-gray-900">
+                  <p className="font-semibold text-gray-900 truncate">
                     {formatAriary(client.totalValue)}
                   </p>
                 </div>
               </div>
               <div className="mt-2">
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-gray-500 mobile-text-xs">
                   Client depuis le {safeFormatDate(client.createdAt, 'dd/MM/yyyy')}
                 </p>
               </div>
@@ -231,7 +232,7 @@ const Clients: React.FC = () => {
       </div>
 
       {filteredClients.length === 0 && (
-        <div className="text-center py-12">
+        <div className="text-center py-8 sm:py-12 mobile-spacing">
           <p className="text-gray-500">Aucun client trouvé</p>
         </div>
       )}
@@ -247,7 +248,7 @@ const Clients: React.FC = () => {
         title={selectedClient ? 'Modifier le client' : 'Nouveau client'}
         size="md"
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 mobile-form-stack">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Nom complet *
@@ -256,7 +257,7 @@ const Clients: React.FC = () => {
               type="text"
               value={formData.name}
               onChange={(e) => handleInputChange('name', e.target.value)}
-              className={`input-field ${errors.name ? 'border-red-500' : ''}`}
+              className={`input-field touch-input ${errors.name ? 'border-red-500' : ''}`}
               placeholder="Nom complet du client"
             />
             {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
@@ -270,7 +271,7 @@ const Clients: React.FC = () => {
               type="email"
               value={formData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
-              className={`input-field ${errors.email ? 'border-red-500' : ''}`}
+              className={`input-field touch-input ${errors.email ? 'border-red-500' : ''}`}
               placeholder="email@exemple.com"
             />
             {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
@@ -284,7 +285,7 @@ const Clients: React.FC = () => {
               type="tel"
               value={formData.phone}
               onChange={(e) => handleInputChange('phone', e.target.value)}
-              className={`input-field ${errors.phone ? 'border-red-500' : ''}`}
+              className={`input-field touch-input ${errors.phone ? 'border-red-500' : ''}`}
               placeholder="+212 6 12 34 56 78"
             />
             {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
@@ -298,7 +299,7 @@ const Clients: React.FC = () => {
               type="text"
               value={formData.company}
               onChange={(e) => handleInputChange('company', e.target.value)}
-              className="input-field"
+              className="input-field touch-input"
               placeholder="Nom de l'entreprise (optionnel)"
             />
           </div>
@@ -311,13 +312,13 @@ const Clients: React.FC = () => {
               value={formData.address}
               onChange={(e) => handleInputChange('address', e.target.value)}
               rows={3}
-              className={`input-field ${errors.address ? 'border-red-500' : ''}`}
+              className={`input-field touch-input ${errors.address ? 'border-red-500' : ''}`}
               placeholder="Adresse complète"
             />
             {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
           </div>
 
-          <div className="flex justify-end space-x-3 pt-4">
+          <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-4 mobile-button-stack">
             <button
               type="button"
               onClick={() => {
@@ -325,11 +326,11 @@ const Clients: React.FC = () => {
                 setSelectedClient(null);
                 resetForm();
               }}
-              className="btn-secondary"
+              className="btn-secondary touch-target"
             >
               Annuler
             </button>
-            <button type="submit" className="btn-primary">
+            <button type="submit" className="btn-primary touch-target">
               {selectedClient ? 'Modifier' : 'Créer'}
             </button>
           </div>
@@ -344,19 +345,19 @@ const Clients: React.FC = () => {
         size="sm"
       >
         <div className="space-y-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-xs sm:text-sm text-gray-600">
             Êtes-vous sûr de vouloir supprimer ce client ? Cette action est irréversible.
           </p>
-          <div className="flex justify-end space-x-3">
+          <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 mobile-button-stack">
             <button
               onClick={() => setShowDeleteModal(false)}
-              className="btn-secondary"
+              className="btn-secondary touch-target"
             >
               Annuler
             </button>
             <button
               onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
+              className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 touch-target"
             >
               Supprimer
             </button>

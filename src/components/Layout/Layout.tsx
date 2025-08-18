@@ -11,28 +11,33 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 overflow-hidden">
+    <div className="flex h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 overflow-hidden relative">
       {/* Sidebar */}
-      <div className="hidden lg:flex lg:w-72 lg:flex-shrink-0 lg:relative">
+      <div className="hidden lg:flex lg:w-72 xl:w-80 lg:flex-shrink-0 lg:relative">
         <Sidebar />
       </div>
 
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-          <div className="fixed inset-y-0 left-0 flex w-full max-w-xs sm:max-w-sm">
-            <div className="relative flex w-full flex-col bg-white">
-              <div className="absolute top-0 right-0 -mr-12 pt-2">
+        <div className="fixed inset-0 z-50 lg:hidden" style={{ zIndex: 9999 }}>
+          <div 
+            className="fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity duration-300" 
+            onClick={() => setSidebarOpen(false)} 
+          />
+          <div className="fixed inset-y-0 left-0 flex w-full max-w-xs sm:max-w-sm md:max-w-md">
+            <div className="relative flex w-full flex-col bg-white shadow-xl">
+              <div className="absolute top-0 right-0 -mr-12 pt-4 sm:pt-2">
                 <button
                   type="button"
-                  className="ml-1 flex h-12 w-12 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white bg-gray-600 hover:bg-gray-700 transition-colors"
+                  className="ml-1 flex h-12 w-12 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white bg-gray-600 hover:bg-gray-700 transition-colors touch-target"
                   onClick={() => setSidebarOpen(false)}
                 >
                   <X className="h-6 w-6 text-white" />
                 </button>
               </div>
-              <Sidebar onClose={() => setSidebarOpen(false)} />
+              <div className="flex-1 overflow-y-auto">
+                <Sidebar onClose={() => setSidebarOpen(false)} />
+              </div>
             </div>
           </div>
         </div>
@@ -42,7 +47,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header onMenuClick={() => setSidebarOpen(true)} />
         
-        <main className="flex-1 overflow-y-auto p-0 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 page-container">
+        <main className="flex-1 overflow-y-auto p-0 sm:p-4 lg:p-6 xl:p-8 space-y-4 sm:space-y-6 page-container">
           <div className="animate-fade-in">
             {children}
           </div>
