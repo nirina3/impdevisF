@@ -72,12 +72,11 @@ export const quotesService = {
       const userId = getCurrentUserId();
       const q = query(
         collection(db, QUOTES_COLLECTION), 
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
+        where('userId', '==', userId)
       );
       const querySnapshot = await getDocs(q);
       
-      return querySnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
+      const quotes = querySnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
         const data = doc.data();
         return {
           id: doc.id,
@@ -92,6 +91,9 @@ export const quotesService = {
           } : undefined
         } as Quote;
       });
+      
+      // Sort in memory instead of using orderBy
+      return quotes.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     } catch (error) {
       console.error('Error fetching quotes:', error);
       throw error;
@@ -232,12 +234,11 @@ export const quotesService = {
       const q = query(
         collection(db, QUOTES_COLLECTION), 
         where('userId', '==', userId),
-        where('status', '==', status),
-        orderBy('createdAt', 'desc')
+        where('status', '==', status)
       );
       const querySnapshot = await getDocs(q);
       
-      return querySnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
+      const quotes = querySnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
         const data = doc.data();
         return {
           id: doc.id,
@@ -252,6 +253,9 @@ export const quotesService = {
           } : undefined
         } as Quote;
       });
+      
+      // Sort in memory instead of using orderBy
+      return quotes.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     } catch (error) {
       console.error('Error fetching quotes by status:', error);
       throw error;
@@ -267,12 +271,11 @@ export const clientsService = {
       const userId = getCurrentUserId();
       const q = query(
         collection(db, CLIENTS_COLLECTION), 
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
+        where('userId', '==', userId)
       );
       const querySnapshot = await getDocs(q);
       
-      return querySnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
+      const clients = querySnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
         const data = doc.data();
         return {
           id: doc.id,
@@ -280,6 +283,9 @@ export const clientsService = {
           createdAt: convertTimestamp(data.createdAt)
         } as Client;
       });
+      
+      // Sort in memory instead of using orderBy
+      return clients.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     } catch (error) {
       console.error('Error fetching clients:', error);
       throw error;
@@ -412,12 +418,11 @@ export const costCalculationsService = {
       const userId = getCurrentUserId();
       const q = query(
         collection(db, COST_CALCULATIONS_COLLECTION), 
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
+        where('userId', '==', userId)
       );
       const querySnapshot = await getDocs(q);
       
-      return querySnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
+      const calculations = querySnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
         const data = doc.data();
         return {
           id: doc.id,
@@ -427,6 +432,9 @@ export const costCalculationsService = {
           calculatedAt: convertTimestamp(data.calculatedAt)
         };
       });
+      
+      // Sort in memory instead of using orderBy
+      return calculations.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     } catch (error) {
       console.error('Error fetching cost calculations:', error);
       throw error;
