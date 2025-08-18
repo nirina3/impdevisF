@@ -289,7 +289,494 @@ const EditQuote: React.FC = () => {
         </div>
 
         {/* Le reste du formulaire est identique à NewQuote mais avec les données pré-remplies */}
-        {/* ... (même structure que NewQuote) ... */}
+
+        {/* Informations Client */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Informations Client</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Nom du client *
+              </label>
+              <input
+                type="text"
+                value={formData.clientName}
+                onChange={(e) => handleInputChange('clientName', e.target.value)}
+                className={`input-field ${errors.clientName ? 'border-red-500' : ''}`}
+                placeholder="Nom complet du client"
+              />
+              {errors.clientName && <p className="text-red-500 text-xs mt-1">{errors.clientName}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email *
+              </label>
+              <input
+                type="email"
+                value={formData.clientEmail}
+                onChange={(e) => handleInputChange('clientEmail', e.target.value)}
+                className={`input-field ${errors.clientEmail ? 'border-red-500' : ''}`}
+                placeholder="email@exemple.com"
+              />
+              {errors.clientEmail && <p className="text-red-500 text-xs mt-1">{errors.clientEmail}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Téléphone *
+              </label>
+              <input
+                type="tel"
+                value={formData.clientPhone}
+                onChange={(e) => handleInputChange('clientPhone', e.target.value)}
+                className={`input-field ${errors.clientPhone ? 'border-red-500' : ''}`}
+                placeholder="+261 34 12 345 67"
+              />
+              {errors.clientPhone && <p className="text-red-500 text-xs mt-1">{errors.clientPhone}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Adresse *
+              </label>
+              <input
+                type="text"
+                value={formData.clientAddress}
+                onChange={(e) => handleInputChange('clientAddress', e.target.value)}
+                className={`input-field ${errors.clientAddress ? 'border-red-500' : ''}`}
+                placeholder="Adresse complète"
+              />
+              {errors.clientAddress && <p className="text-red-500 text-xs mt-1">{errors.clientAddress}</p>}
+            </div>
+          </div>
+        </div>
+
+        {/* Informations Expédition */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Informations Expédition</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Pays d'origine *
+              </label>
+              <select
+                value={formData.originCountry}
+                onChange={(e) => handleInputChange('originCountry', e.target.value)}
+                className={`input-field ${errors.originCountry ? 'border-red-500' : ''}`}
+              >
+                <option value="Chine">Chine</option>
+                <option value="France">France</option>
+                <option value="USA">USA</option>
+              </select>
+              {errors.originCountry && <p className="text-red-500 text-xs mt-1">{errors.originCountry}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Mode d'expédition
+              </label>
+              <select
+                value={formData.shippingMethod}
+                onChange={(e) => handleInputChange('shippingMethod', e.target.value)}
+                className="input-field"
+              >
+                <option value="sea">Maritime</option>
+                <option value="air">Aérien</option>
+                <option value="land">Terrestre</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Articles */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">Articles</h2>
+            <button
+              type="button"
+              onClick={addItem}
+              className="btn-secondary flex items-center space-x-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Ajouter un article</span>
+            </button>
+          </div>
+
+          <div className="space-y-6">
+            {items.map((item, index) => (
+              <div key={index} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-md font-medium text-gray-900">Article {index + 1}</h3>
+                  {items.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeItem(index)}
+                      className="text-red-600 hover:text-red-800 p-1"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="lg:col-span-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Description *
+                    </label>
+                    <input
+                      type="text"
+                      value={item.description}
+                      onChange={(e) => handleItemChange(index, 'description', e.target.value)}
+                      className={`input-field ${errors[`item_${index}_description`] ? 'border-red-500' : ''}`}
+                      placeholder="Description de l'article"
+                    />
+                    {errors[`item_${index}_description`] && (
+                      <p className="text-red-500 text-xs mt-1">{errors[`item_${index}_description`]}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Quantité *
+                    </label>
+                    <input
+                      type="number"
+                      value={item.quantity}
+                      onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value) || 0)}
+                      className={`input-field ${errors[`item_${index}_quantity`] ? 'border-red-500' : ''}`}
+                      placeholder="1"
+                    />
+                    {errors[`item_${index}_quantity`] && (
+                      <p className="text-red-500 text-xs mt-1">{errors[`item_${index}_quantity`]}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Prix unitaire (Ar)
+                    </label>
+                    <input
+                      type="number"
+                      value={item.unitPrice}
+                      onChange={(e) => handleItemChange(index, 'unitPrice', parseFloat(e.target.value) || 0)}
+                      className="input-field"
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Prix d'achat (Ar)
+                    </label>
+                    <input
+                      type="number"
+                      value={item.purchasePrice}
+                      onChange={(e) => handleItemChange(index, 'purchasePrice', parseFloat(e.target.value) || 0)}
+                      className="input-field"
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Frais divers (Ar)
+                    </label>
+                    <input
+                      type="number"
+                      value={item.miscFees}
+                      onChange={(e) => handleItemChange(index, 'miscFees', parseFloat(e.target.value) || 0)}
+                      className="input-field"
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Frais de douane (Ar)
+                    </label>
+                    <input
+                      type="number"
+                      value={item.customsFees}
+                      onChange={(e) => handleItemChange(index, 'customsFees', parseFloat(e.target.value) || 0)}
+                      className="input-field"
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Poids (kg)
+                    </label>
+                    <input
+                      type="number"
+                      value={item.weight}
+                      onChange={(e) => handleItemChange(index, 'weight', parseFloat(e.target.value) || 0)}
+                      className="input-field"
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Catégorie
+                    </label>
+                    <input
+                      type="text"
+                      value={item.category}
+                      onChange={(e) => handleItemChange(index, 'category', e.target.value)}
+                      className="input-field"
+                      placeholder="Électronique, Textile, etc."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Code HS
+                    </label>
+                    <input
+                      type="text"
+                      value={item.hsCode}
+                      onChange={(e) => handleItemChange(index, 'hsCode', e.target.value)}
+                      className="input-field"
+                      placeholder="Code douanier"
+                    />
+                  </div>
+
+                  <div className="lg:col-span-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Dimensions (L × l × H en cm)
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <input
+                        type="number"
+                        value={item.dimensions.length}
+                        onChange={(e) => handleDimensionChange(index, 'length', parseFloat(e.target.value) || 0)}
+                        className="input-field"
+                        placeholder="Longueur"
+                      />
+                      <input
+                        type="number"
+                        value={item.dimensions.width}
+                        onChange={(e) => handleDimensionChange(index, 'width', parseFloat(e.target.value) || 0)}
+                        className="input-field"
+                        placeholder="Largeur"
+                      />
+                      <input
+                        type="number"
+                        value={item.dimensions.height}
+                        onChange={(e) => handleDimensionChange(index, 'height', parseFloat(e.target.value) || 0)}
+                        className="input-field"
+                        placeholder="Hauteur"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Lien produit (optionnel)
+                    </label>
+                    <input
+                      type="url"
+                      value={item.productLink}
+                      onChange={(e) => handleItemChange(index, 'productLink', e.target.value)}
+                      className="input-field"
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Dates et Validité */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Dates et Validité</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Valide jusqu'au *
+              </label>
+              <input
+                type="date"
+                value={formData.validUntil}
+                onChange={(e) => handleInputChange('validUntil', e.target.value)}
+                className={`input-field ${errors.validUntil ? 'border-red-500' : ''}`}
+              />
+              {errors.validUntil && <p className="text-red-500 text-xs mt-1">{errors.validUntil}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Livraison estimée *
+              </label>
+              <input
+                type="date"
+                value={formData.estimatedDelivery}
+                onChange={(e) => handleInputChange('estimatedDelivery', e.target.value)}
+                className={`input-field ${errors.estimatedDelivery ? 'border-red-500' : ''}`}
+              />
+              {errors.estimatedDelivery && <p className="text-red-500 text-xs mt-1">{errors.estimatedDelivery}</p>}
+            </div>
+          </div>
+        </div>
+
+        {/* Acompte */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Acompte (optionnel)</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Pourcentage d'acompte (%)
+              </label>
+              <input
+                type="number"
+                value={downPaymentData.percentage}
+                onChange={(e) => handleDownPaymentChange('percentage', parseFloat(e.target.value) || 0)}
+                className={`input-field ${errors.downPaymentPercentage ? 'border-red-500' : ''}`}
+                placeholder="0"
+              />
+              {errors.downPaymentPercentage && <p className="text-red-500 text-xs mt-1">{errors.downPaymentPercentage}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Montant d'acompte (Ar)
+              </label>
+              <input
+                type="number"
+                value={downPaymentData.amount}
+                onChange={(e) => handleDownPaymentChange('amount', parseFloat(e.target.value) || 0)}
+                className="input-field"
+                placeholder="0"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Mode de paiement
+              </label>
+              <select
+                value={downPaymentData.paymentMethod}
+                onChange={(e) => handleDownPaymentChange('paymentMethod', e.target.value)}
+                className="input-field"
+              >
+                <option value="">Sélectionner...</option>
+                <option value="cash">Espèces</option>
+                <option value="bank_transfer">Virement bancaire</option>
+                <option value="mobile_money">Mobile Money</option>
+                <option value="check">Chèque</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Notes sur l'acompte
+              </label>
+              <input
+                type="text"
+                value={downPaymentData.notes}
+                onChange={(e) => handleDownPaymentChange('notes', e.target.value)}
+                className="input-field"
+                placeholder="Notes optionnelles"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Notes */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Notes additionnelles</h2>
+          <textarea
+            value={formData.notes}
+            onChange={(e) => handleInputChange('notes', e.target.value)}
+            rows={4}
+            className="input-field"
+            placeholder="Notes, conditions particulières, etc."
+          />
+        </div>
+
+        {/* Aperçu du devis */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Aperçu du devis</h2>
+          
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Article
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Quantité
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Prix unitaire
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Total
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {items.map((item, index) => (
+                  <tr key={index}>
+                    <td className="px-4 py-4 text-sm text-gray-900">
+                      {item.description || `Article ${index + 1}`}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-900">
+                      {item.quantity}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-900">
+                      {item.unitPrice.toLocaleString('fr-FR')} Ar
+                    </td>
+                    <td className="px-4 py-4 text-sm font-medium text-gray-900">
+                      {(item.quantity * item.unitPrice).toLocaleString('fr-FR')} Ar
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-6 flex justify-end">
+            <div className="w-64">
+              <div className="flex justify-between py-2">
+                <span className="text-sm text-gray-600">Sous-total:</span>
+                <span className="text-sm font-medium text-gray-900">
+                  {calculateTotal().toLocaleString('fr-FR')} Ar
+                </span>
+              </div>
+              
+              {downPaymentData.amount > 0 && (
+                <>
+                  <div className="flex justify-between py-2">
+                    <span className="text-sm text-gray-600">
+                      Acompte ({downPaymentData.percentage}%):
+                    </span>
+                    <span className="text-sm font-medium text-orange-600">
+                      -{downPaymentData.amount.toLocaleString('fr-FR')} Ar
+                    </span>
+                  </div>
+                  <div className="flex justify-between py-2 border-t border-gray-200">
+                    <span className="text-sm text-gray-600">Solde restant:</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {(calculateTotal() - downPaymentData.amount).toLocaleString('fr-FR')} Ar
+                    </span>
+                  </div>
+                </>
+              )}
+              
+              <div className="flex justify-between py-2 border-t border-gray-200">
+                <span className="text-base font-semibold text-gray-900">Total:</span>
+                <span className="text-base font-bold text-gray-900">
+                  {calculateTotal().toLocaleString('fr-FR')} Ar
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Actions */}
         <div className="flex justify-end space-x-4">
