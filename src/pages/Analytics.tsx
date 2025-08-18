@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useEffect } from 'react';
 import { useQuotes } from '../hooks/useQuotes';
 import { 
   TrendingUp, 
@@ -30,6 +31,35 @@ const Analytics: React.FC = () => {
     return isNaN(currentYear) ? 2025 : currentYear;
   });
   const [selectedMonth, setSelectedMonth] = useState<number | 'all'>('all');
+
+  // Calculer les années disponibles avec protection contre NaN
+  const availableYears = useMemo(() => {
+    const years = quotes
+      .map(quote => {
+        const date = new Date(quote.createdAt);
+        const year = date.getFullYear();
+        return isNaN(year) ? new Date().getFullYear() : year;
+      })
+      .filter(year => !isNaN(year) && year > 1900 && year < 3000); // Filtrer les années valides
+    
+    const uniqueYears = [...new Set(years)];
+    
+    // S'assurer qu'on a au moins l'année courante
+    const currentYear = new Date().getFullYear();
+    if (!uniqueYears.includes(currentYear)) {
+      uniqueYears.push(currentYear);
+    }
+    
+    return uniqueYears.sort((a, b) => b - a);
+  }, [quotes]);
+
+  // S'assurer que selectedYear est toujours valide
+  useEffect(() => {
+    if (isNaN(selectedYear) || !availableYears.includes(selectedYear)) {
+      const fallbackYear = availableYears.length > 0 ? availableYears[0] : new Date().getFullYear();
+      setSelectedYear(fallbackYear);
+    }
+  }, [selectedYear, availableYears]);
 
   // Filtrer les devis selon la période sélectionnée
   const filteredQuotes = useMemo(() => {
@@ -94,35 +124,6 @@ const Analytics: React.FC = () => {
       <ErrorMessage message={error} onRetry={refreshQuotes} />
     );
   }
-
-  // Calculer les années disponibles avec protection contre NaN
-  const availableYears = useMemo(() => {
-    const years = quotes
-      .map(quote => {
-        const date = new Date(quote.createdAt);
-        const year = date.getFullYear();
-        return isNaN(year) ? new Date().getFullYear() : year;
-      })
-      .filter(year => !isNaN(year) && year > 1900 && year < 3000); // Filtrer les années valides
-    
-    const uniqueYears = [...new Set(years)];
-    
-    // S'assurer qu'on a au moins l'année courante
-    const currentYear = new Date().getFullYear();
-    if (!uniqueYears.includes(currentYear)) {
-      uniqueYears.push(currentYear);
-    }
-    
-    return uniqueYears.sort((a, b) => b - a);
-  }, [quotes]);
-
-  // S'assurer que selectedYear est toujours valide
-  useEffect(() => {
-    if (isNaN(selectedYear) || !availableYears.includes(selectedYear)) {
-      const fallbackYear = availableYears.length > 0 ? availableYears[0] : new Date().getFullYear();
-      setSelectedYear(fallbackYear);
-    }
-  }, [selectedYear, availableYears]);
 
   const months = [
     { value: 'all', label: 'Toute l\'année' },

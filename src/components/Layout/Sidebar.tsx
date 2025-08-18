@@ -1,4 +1,5 @@
 import React from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -10,7 +11,9 @@ import {
   TrendingUp,
   Calculator,
   History,
-  Briefcase
+  Briefcase,
+  ChevronDown,
+  ChevronRight
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -19,17 +22,32 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const location = useLocation();
+  const [quotesMenuOpen, setQuotesMenuOpen] = useState(true);
 
-  const menuItems = [
+  // Vérifier si on est dans une page liée aux devis
+  const isQuotesSection = location.pathname.startsWith('/quotes') || 
+                         location.pathname === '/quote-management';
+
+  // Ouvrir automatiquement le menu devis si on est dans une section devis
+  React.useEffect(() => {
+    if (isQuotesSection) {
+      setQuotesMenuOpen(true);
+    }
+  }, [isQuotesSection]);
+
+  const mainMenuItems = [
     { path: '/', icon: LayoutDashboard, label: 'Dashboard', color: 'text-blue-500' },
-    { path: '/quotes', icon: FileText, label: 'Devis', color: 'text-emerald-500' },
-    { path: '/quote-management', icon: Settings, label: 'Gestion des devis', color: 'text-indigo-500' },
-    { path: '/quotes/new', icon: Plus, label: 'Nouveau Devis', color: 'text-violet-500' },
     { path: '/cost-calculation', icon: Calculator, label: 'Calcul des coûts', color: 'text-amber-500' },
     { path: '/cost-history', icon: History, label: 'Historique Calculs', color: 'text-purple-500' },
     { path: '/analytics', icon: TrendingUp, label: 'Analyses', color: 'text-rose-500' },
     { path: '/clients', icon: Users, label: 'Clients', color: 'text-cyan-500' },
     { path: '/settings', icon: SettingsIcon, label: 'Paramètres', color: 'text-neutral-500' },
+  ];
+
+  const quotesMenuItems = [
+    { path: '/quotes', icon: FileText, label: 'Liste des Devis', color: 'text-emerald-500' },
+    { path: '/quote-management', icon: Settings, label: 'Gestion des Devis', color: 'text-indigo-500' },
+    { path: '/quotes/new', icon: Plus, label: 'Nouveau Devis', color: 'text-violet-500' },
   ];
 
   const handleLinkClick = () => {
@@ -56,7 +74,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
       {/* Navigation */}
       <nav className="mt-4 sm:mt-6 pb-6 px-2 sm:px-0">
         <div className="space-y-1">
-          {menuItems.map((item) => {
+          {/* Menu principal */}
+          {mainMenuItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
             
@@ -79,6 +98,61 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
               </Link>
             );
           })}
+
+          {/* Menu accordéon pour les devis */}
+          <div className="mx-3">
+            <button
+              onClick={() => setQuotesMenuOpen(!quotesMenuOpen)}
+              className={`w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                isQuotesSection
+                  ? 'bg-primary-50 text-primary-700'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              } group`}
+            >
+              <div className="flex items-center">
+                <div className={`stat-icon ${isQuotesSection ? 'bg-primary-100' : 'bg-neutral-100'} mr-3`}>
+                  <FileText className={`w-5 h-5 ${isQuotesSection ? 'text-primary-600' : 'text-emerald-500'}`} />
+                </div>
+                <span className="font-medium text-sm sm:text-base">Devis</span>
+              </div>
+              {quotesMenuOpen ? (
+                <ChevronDown className="w-4 h-4" />
+              ) : (
+                <ChevronRight className="w-4 h-4" />
+              )}
+            </button>
+
+            {/* Sous-menu des devis */}
+            {quotesMenuOpen && (
+              <div className="mt-1 ml-6 space-y-1">
+                {quotesMenuItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = location.pathname === item.path;
+                  
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      onClick={handleLinkClick}
+                      className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                        isActive 
+                          ? 'bg-primary-100 text-primary-700 border-l-2 border-primary-600' 
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      } group`}
+                    >
+                      <div className={`p-2 rounded-lg mr-3 ${isActive ? 'bg-primary-200' : 'bg-neutral-100'}`}>
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-primary-700' : item.color}`} />
+                      </div>
+                      <span className="font-medium">{item.label}</span>
+                      {isActive && (
+                        <div className="ml-auto w-1.5 h-1.5 bg-primary-600 rounded-full"></div>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </nav>
 
