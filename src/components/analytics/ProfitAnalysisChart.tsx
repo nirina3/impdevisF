@@ -8,6 +8,19 @@ interface ProfitAnalysisChartProps {
 
 const ProfitAnalysisChart: React.FC<ProfitAnalysisChartProps> = ({ totalCost, netProfit }) => {
   const total = totalCost + netProfit;
+  
+  // Gérer le cas où il n'y a pas de données
+  if (total === 0) {
+    return (
+      <div className="flex items-center justify-center h-64 text-gray-500">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-gray-200 rounded-full mx-auto mb-3"></div>
+          <p className="text-sm">Aucune donnée à afficher</p>
+        </div>
+      </div>
+    );
+  }
+  
   const costPercentage = (totalCost / total) * 100;
   const profitPercentage = (netProfit / total) * 100;
   
@@ -93,7 +106,7 @@ const ProfitAnalysisChart: React.FC<ProfitAnalysisChartProps> = ({ totalCost, ne
               {formatAriary(total)}
             </p>
             <p className="text-xs text-gray-600 mt-1">
-              Marge: {Math.round(profitPercentage)}%
+              Marge: {total > 0 ? Math.round(profitPercentage) : 0}%
             </p>
           </div>
         </div>
@@ -108,7 +121,7 @@ const ProfitAnalysisChart: React.FC<ProfitAnalysisChartProps> = ({ totalCost, ne
           </div>
           <div className="text-right">
             <p className="text-sm font-bold text-gray-900">{formatAriary(totalCost)}</p>
-            <p className="text-xs text-gray-500">{Math.round(costPercentage)}%</p>
+            <p className="text-xs text-gray-500">{total > 0 ? Math.round(costPercentage) : 0}%</p>
           </div>
         </div>
         
@@ -119,7 +132,7 @@ const ProfitAnalysisChart: React.FC<ProfitAnalysisChartProps> = ({ totalCost, ne
           </div>
           <div className="text-right">
             <p className="text-sm font-bold text-gray-900">{formatAriary(netProfit)}</p>
-            <p className="text-xs text-gray-500">{Math.round(profitPercentage)}%</p>
+            <p className="text-xs text-gray-500">{total > 0 ? Math.round(profitPercentage) : 0}%</p>
           </div>
         </div>
       </div>
