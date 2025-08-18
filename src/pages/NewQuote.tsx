@@ -115,6 +115,14 @@ const NewQuote: React.FC = () => {
 
   // Fonction de calcul du prix de vente (identique au calcul des coûts)
   const calculateSellingPrice = (item: Omit<QuoteItem, 'id'>): number => {
+    // Si on vient du calcul des coûts, préserver le prix de vente calculé
+    if (fromCostCalculation && hasCalculation() && calculationData) {
+      const originalItem = calculationData.items.find(calcItem => calcItem.description === item.description);
+      if (originalItem) {
+        return originalItem.sellingPrice;
+      }
+    }
+    
     // Convertir le prix d'achat en MGA
     const purchasePriceMGA = convertToMGA(item.purchasePrice, item.mainCurrency as 'USD' | 'EUR' | 'CNY');
     
@@ -156,6 +164,22 @@ const NewQuote: React.FC = () => {
     setItems(prev => prev.map((item, i) => {
       if (i === index) {
         const updatedItem = { ...item, [field]: value };
+        
+        // Si on vient du calcul des coûts et qu'on modifie la marge, recalculer uniquement le prix de vente
+        if (fromCostCalculation && field === 'margin') {
+          const purchasePriceMGA = convertToMGA(updatedItem.purchasePrice, updatedItem.mainCurrency as 'USD' | 'EUR' | 'CNY');
+          const transportFeesMGA = convertToMGA(updatedItem.transportFeesOriginal || 0, updatedItem.transportCurrency as 'USD' | 'EUR' | 'CNY' | 'MGA');
+          const totalCostMGA = (purchasePriceMGA * updatedItem.quantity) + transportFeesMGA + (updatedItem.miscFees || 0) + (updatedItem.customsFees || 0);
+          updatedItem.sellingPrice = totalCostMGA + (totalCostMGA * value / 100);
+          updatedItem.unitPrice = updatedItem.sellingPrice / updatedItem.quantity;
+          return updatedItem;
+        }
+        
+        // Si on vient du calcul des coûts, ne pas recalculer automatiquement sauf si c'est un champ qui affecte le coût
+        const fieldsAffectingCost = ['purchasePrice', 'quantity', 'transportFeesOriginal', 'transportCurrency', 'miscFees', 'customsFees', 'originCountry'];
+        if (fromCostCalculation && !fieldsAffectingCost.includes(field)) {
+          return updatedItem;
+        }
         
         // Logique spéciale pour les frais de transport selon l'origine
         if (field === 'originCountry') {
