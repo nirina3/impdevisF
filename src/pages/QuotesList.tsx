@@ -20,10 +20,12 @@ import PaymentStatusBadge from '../components/ui/PaymentStatusBadge';
 import { Quote } from '../types';
 import { formatAriary, formatNumberWithSpaces } from '../utils/formatters';
 import { generateQuotePDF } from '../utils/pdf';
+import { useUserSettings } from '../hooks/useUserSettings';
 
 const QuotesList: React.FC = () => {
   const navigate = useNavigate();
   const { quotes, loading, error, deleteQuote, refreshQuotes } = useQuotes();
+  const { settings: userSettings } = useUserSettings();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
@@ -60,7 +62,7 @@ const QuotesList: React.FC = () => {
   };
 
   const exportQuote = (quote: Quote) => {
-    generateQuotePDF(quote);
+    generateQuotePDF(quote, userSettings || undefined);
   };
 
   return (

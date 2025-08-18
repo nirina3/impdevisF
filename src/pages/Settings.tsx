@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { useUserSettings } from '../hooks/useUserSettings';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
+import ErrorMessage from '../components/ui/ErrorMessage';
 import { 
   User, 
   Building, 
@@ -15,25 +18,52 @@ import {
 
 const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState('profile');
+  const { settings, loading, error, updateSettings } = useUserSettings();
   
-  const [profileData, setProfileData] = useState({
-    name: 'Admin User',
-    email: 'admin@example.com',
-    phone: '+212 6 12 34 56 78',
-    company: 'Import Export Solutions',
-    address: '123 Rue Hassan II, Casablanca, Maroc',
-    website: 'www.example.com'
-  });
+  const [profileData, setProfileData] = useState(
+    settings?.profile || {
+      name: 'Admin User',
+      email: 'admin@example.com',
+      phone: '+261 34 12 345 67',
+      company: 'Import Export Solutions',
+      address: '123 Avenue de l\'Indépendance, Antananarivo, Madagascar',
+      website: 'www.importexport.mg'
+    }
+  );
 
-  const [businessData, setBusinessData] = useState({
-    companyName: 'Import Export Solutions',
-    taxId: 'IF123456789',
-    currency: 'MGA',
-    language: 'fr',
-    timezone: 'Africa/Casablanca',
-    quoteValidityDays: 30,
-    quotePrefix: 'QT'
-  });
+  const [businessData, setBusinessData] = useState(
+    settings?.business || {
+      companyName: 'Import Export Solutions',
+      taxId: 'NIF123456789',
+      currency: 'MGA',
+      language: 'fr',
+      timezone: 'Indian/Antananarivo',
+      quoteValidityDays: 30,
+      quotePrefix: 'QT'
+    }
+  );
+
+  // Mettre à jour les données locales quand les paramètres sont chargés
+  React.useEffect(() => {
+    if (settings) {
+      setProfileData(settings.profile);
+      setBusinessData(settings.business);
+    }
+  }, [settings]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <ErrorMessage message={error} />
+    );
+  }
 
   const [notifications, setNotifications] = useState({
     emailQuoteCreated: true,
@@ -64,9 +94,19 @@ const Settings: React.FC = () => {
     setNotifications(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = () => {
-    // Simuler la sauvegarde
-    console.log('Paramètres sauvegardés');
+  const handleSave = async () => {
+    try {
+      await updateSettings({
+        profile: profileData,
+        business: businessData
+      });
+      
+      // Afficher une notification de succès
+      alert('Paramètres sauvegardés avec succès !');
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde:', error);
+      alert('Erreur lors de la sauvegarde des paramètres');
+    }
   };
 
   return (
@@ -112,7 +152,7 @@ const Settings: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     <User className="w-4 h-4 inline mr-1" />
-                    Nom complet
+                    Nom complet *
                   </label>
                   <input
                     type="text"
@@ -125,7 +165,7 @@ const Settings: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     <Mail className="w-4 h-4 inline mr-1" />
-                    Email
+                    Email *
                   </label>
                   <input
                     type="email"
@@ -138,7 +178,7 @@ const Settings: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     <Phone className="w-4 h-4 inline mr-1" />
-                    Téléphone
+                    Téléphone *
                   </label>
                   <input
                     type="tel"
@@ -151,7 +191,7 @@ const Settings: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     <Building className="w-4 h-4 inline mr-1" />
-                    Entreprise
+                    Entreprise *
                   </label>
                   <input
                     type="text"
@@ -164,7 +204,7 @@ const Settings: React.FC = () => {
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     <MapPin className="w-4 h-4 inline mr-1" />
-                    Adresse
+                    Adresse complète *
                   </label>
                   <textarea
                     value={profileData.address}
@@ -196,7 +236,7 @@ const Settings: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nom de l'entreprise
+                    Nom de l'entreprise *
                   </label>
                   <input
                     type="text"
@@ -208,7 +248,7 @@ const Settings: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Identifiant fiscal
+                    Identifiant fiscal (NIF) *
                   </label>
                   <input
                     type="text"
@@ -243,8 +283,8 @@ const Settings: React.FC = () => {
                     className="input-field"
                   >
                     <option value="fr">Français</option>
+                    <option value="mg">Malagasy</option>
                     <option value="en">English</option>
-                    <option value="ar">العربية</option>
                   </select>
                 </div>
 
@@ -257,8 +297,8 @@ const Settings: React.FC = () => {
                     onChange={(e) => handleBusinessChange('timezone', e.target.value)}
                     className="input-field"
                   >
-                    <option value="Africa/Casablanca">Africa/Casablanca</option>
-                    <option value="Europe/Paris">Europe/Paris</option>
+                    <option value="Indian/Antananarivo">Indian/Antananarivo</option>
+                    <option value="Indian/Mauritius">Indian/Mauritius</option>
                     <option value="UTC">UTC</option>
                   </select>
                 </div>
