@@ -1,26 +1,36 @@
 import { collection, getDocs, deleteDoc, doc, addDoc, Timestamp } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db, auth } from '../config/firebase';
 import { Quote, Client, QuoteItem } from '../types';
+
+// Helper function to get current user ID
+const getCurrentUserId = (): string => {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error('Utilisateur non connecté');
+  }
+  return user.uid;
+};
 
 // Service pour formater/réinitialiser les données de l'application
 export const dataFormattingService = {
   // Supprimer toutes les données existantes
   async clearAllData(): Promise<void> {
     try {
+      const userId = getCurrentUserId();
       console.log('Suppression de toutes les données...');
       
       // Supprimer tous les devis
-      const quotesSnapshot = await getDocs(collection(db, 'quotes'));
+      const quotesSnapshot = await getDocs(query(collection(db, 'quotes'), where('userId', '==', userId)));
       const quoteDeletePromises = quotesSnapshot.docs.map(doc => deleteDoc(doc.ref));
       await Promise.all(quoteDeletePromises);
       
       // Supprimer tous les clients
-      const clientsSnapshot = await getDocs(collection(db, 'clients'));
+      const clientsSnapshot = await getDocs(query(collection(db, 'clients'), where('userId', '==', userId)));
       const clientDeletePromises = clientsSnapshot.docs.map(doc => deleteDoc(doc.ref));
       await Promise.all(clientDeletePromises);
       
       // Supprimer tous les calculs de coûts
-      const calculationsSnapshot = await getDocs(collection(db, 'costCalculations'));
+      const calculationsSnapshot = await getDocs(query(collection(db, 'costCalculations'), where('userId', '==', userId)));
       const calculationDeletePromises = calculationsSnapshot.docs.map(doc => deleteDoc(doc.ref));
       await Promise.all(calculationDeletePromises);
       
@@ -34,12 +44,14 @@ export const dataFormattingService = {
   // Créer des données de démonstration cohérentes
   async createDemoData(): Promise<void> {
     try {
+      const userId = getCurrentUserId();
       console.log('Création des données de démonstration...');
       
       // Créer des clients de démonstration
       const demoClients = [
         {
           name: 'Jean Rakoto',
+          userId,
           email: 'jean.rakoto@email.mg',
           phone: '+261 34 12 345 67',
           address: '123 Avenue de l\'Indépendance, Antananarivo',
@@ -50,6 +62,7 @@ export const dataFormattingService = {
         },
         {
           name: 'Marie Rasoamalala',
+          userId,
           email: 'marie.rasoamalala@business.mg',
           phone: '+261 33 98 765 43',
           address: '456 Rue de la Liberté, Fianarantsoa',
@@ -60,6 +73,7 @@ export const dataFormattingService = {
         },
         {
           name: 'Paul Andriamampianina',
+          userId,
           email: 'paul.andria@commerce.mg',
           phone: '+261 32 55 123 89',
           address: '789 Boulevard Ratsimilaho, Toamasina',
@@ -80,6 +94,7 @@ export const dataFormattingService = {
       const demoQuotes = [
         {
           quoteNumber: 'QT202501150830',
+          userId,
           clientName: 'Jean Rakoto',
           clientEmail: 'jean.rakoto@email.mg',
           clientPhone: '+261 34 12 345 67',
@@ -131,6 +146,7 @@ export const dataFormattingService = {
         },
         {
           quoteNumber: 'QT202501201045',
+          userId,
           clientName: 'Marie Rasoamalala',
           clientEmail: 'marie.rasoamalala@business.mg',
           clientPhone: '+261 33 98 765 43',
@@ -182,6 +198,7 @@ export const dataFormattingService = {
         },
         {
           quoteNumber: 'QT202501251230',
+          userId,
           clientName: 'Paul Andriamampianina',
           clientEmail: 'paul.andria@commerce.mg',
           clientPhone: '+261 32 55 123 89',

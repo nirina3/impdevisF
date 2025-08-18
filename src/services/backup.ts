@@ -1,5 +1,5 @@
 import { collection, getDocs, doc, setDoc, deleteDoc, Timestamp } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db, auth } from '../config/firebase';
 import { Quote, Client } from '../types';
 
 export interface BackupData {
@@ -21,6 +21,15 @@ export interface BackupMetadata {
   calculationsCount: number;
 }
 
+// Helper function to get current user ID
+const getCurrentUserId = (): string => {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error('Utilisateur non connecté');
+  }
+  return user.uid;
+};
+
 // Helper function to convert Firestore timestamp to Date
 const convertTimestamp = (timestamp: any): Date => {
   if (timestamp && timestamp.toDate) {
@@ -38,13 +47,14 @@ export const backupService = {
   // Créer une sauvegarde complète
   async createBackup(name?: string): Promise<BackupMetadata> {
     try {
+      const userId = getCurrentUserId();
       console.log('Création de la sauvegarde...');
       
       // Récupérer toutes les données
       const [quotesSnapshot, clientsSnapshot, calculationsSnapshot] = await Promise.all([
-        getDocs(collection(db, 'quotes')),
-        getDocs(collection(db, 'clients')),
-        getDocs(collection(db, 'costCalculations'))
+        getDocs(query(collection(db, 'quotes'), where('userId', '==', userId))),
+        getDocs(query(collection(db, 'clients'), where('userId', '==', userId))),
+        getDocs(query(collection(db, 'costCalculations'), where('userId', '==', userId)))
       ]);
 
       // Convertir les données
@@ -81,6 +91,7 @@ export const backupService = {
       const backupId = `backup_${Date.now()}`;
       const backupDoc = {
         name: backupName,
+        userId,
         createdAt: convertToTimestamp(new Date()),
         data: backupData,
         size: dataSize,
@@ -111,7 +122,9 @@ export const backupService = {
   // Lister toutes les sauvegardes
   async listBackups(): Promise<BackupMetadata[]> {
     try {
-      const backupsSnapshot = await getDocs(collection(db, 'backups'));
+      const userId = getCurrentUserId();
+      const q = query(collection(db, 'backups'), where('userId', '==', userId));
+      const backupsSnapshot = await getDocs(q);
       
       return backupsSnapshot.docs.map(doc => {
         const data = doc.data();
@@ -134,17 +147,24 @@ export const backupService = {
   // Restaurer une sauvegarde
   async restoreBackup(backupId: string): Promise<void> {
     try {
+      const userId = getCurrentUserId();
       console.log('Restauration de la sauvegarde:', backupId);
       
       // Récupérer la sauvegarde
-      const backupDoc = await getDocs(collection(db, 'backups'));
-      const backup = backupDoc.docs.find(doc => doc.id === backupId);
+      const q = query(collection(db, 'backups'), where('userId', '==', userId));
+      const backupSnapshot = await getDocs(q);
+      const backup = backupSnapshot.docs.find(doc => doc.id === backupId);
       
       if (!backup) {
         throw new Error('Sauvegarde non trouvée');
       }
 
-      const backupData = backup.data().data as BackupData;
+      const backupDocData = backup.data();
+      if (backupDocData.userId !== userId) {
+        throw new Error('Accès non autorisé à cette sauvegarde');
+      }
+
+      const backupData = backupDocData.data as BackupData;
 
       // Supprimer toutes les données existantes
       await this.clearAllCollections();
@@ -164,7 +184,22 @@ export const backupService = {
   // Supprimer une sauvegarde
   async deleteBackup(backupId: string): Promise<void> {
     try {
-      await deleteDoc(doc(db, 'backups', backupId));
+      const userId = getCurrentUserId();
+      
+      // Vérifier que la sauvegarde appartient à l'utilisateur
+      const docRef = doc(db, 'backups', backupId);
+      const docSnap = await getDoc(docRef);
+      
+      if (!docSnap.exists()) {
+        throw new Error('Sauvegarde non trouvée');
+      }
+      
+      const backupData = docSnap.data();
+      if (backupData.userId !== userId) {
+        throw new Error('Accès non autorisé à cette sauvegarde');
+      }
+
+      await deleteDoc(docRef);
       console.log('Sauvegarde supprimée:', backupId);
     } catch (error) {
       console.error('Erreur lors de la suppression de la sauvegarde:', error);
@@ -175,14 +210,21 @@ export const backupService = {
   // Exporter une sauvegarde vers un fichier JSON
   async exportBackup(backupId: string): Promise<void> {
     try {
-      const backupsSnapshot = await getDocs(collection(db, 'backups'));
+      const userId = getCurrentUserId();
+      const q = query(collection(db, 'backups'), where('userId', '==', userId));
+      const backupsSnapshot = await getDocs(q);
       const backup = backupsSnapshot.docs.find(doc => doc.id === backupId);
       
       if (!backup) {
         throw new Error('Sauvegarde non trouvée');
       }
 
-      const backupData = backup.data();
+      const backupDocData = backup.data();
+      if (backupDocData.userId !== userId) {
+        throw new Error('Accès non autorisé à cette sauvegarde');
+      }
+
+      const backupData = backupDocData;
       const exportData = {
         metadata: {
           name: backupData.name,
@@ -260,10 +302,12 @@ export const backupService = {
   // Supprimer toutes les collections
   async clearAllCollections(): Promise<void> {
     try {
+      const userId = getCurrentUserId();
       const collections = ['quotes', 'clients', 'costCalculations'];
       
       for (const collectionName of collections) {
-        const snapshot = await getDocs(collection(db, collectionName));
+        const q = query(collection(db, collectionName), where('userId', '==', userId));
+        const snapshot = await getDocs(q);
         const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
         await Promise.all(deletePromises);
       }
@@ -276,9 +320,10 @@ export const backupService = {
   // Restaurer une collection
   async restoreCollection(collectionName: string, data: any[]): Promise<void> {
     try {
+      const userId = getCurrentUserId();
       for (const item of data) {
         const { id, ...itemData } = item;
-        await setDoc(doc(db, collectionName, id), itemData);
+        await setDoc(doc(db, collectionName, id), { ...itemData, userId });
       }
     } catch (error) {
       console.error(`Erreur lors de la restauration de la collection ${collectionName}:`, error);

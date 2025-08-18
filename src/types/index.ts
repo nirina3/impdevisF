@@ -1,5 +1,6 @@
 export interface Quote {
   id: string;
+  userId: string;
   quoteNumber: string;
   clientName: string;
   clientEmail: string;
@@ -69,6 +70,7 @@ export interface QuoteItem {
 
 export interface Client {
   id: string;
+  userId: string;
   name: string;
   email: string;
   phone: string;

@@ -144,8 +144,8 @@
     box-sizing: border-box;
   }
   
-  /* Calcul des coûts specific fixes */
-  .calcul-couts-container {
+  /* Page containers responsive fixes */
+  .page-container {
     padding: 0 16px;
     max-width: 100%;
     box-sizing: border-box;
@@ -174,6 +174,7 @@
   
   .input-field {
     font-size: 16px; /* Prevent zoom on iOS */
+    min-height: 44px;
   }
   
   /* Space responsive fixes */
@@ -199,12 +200,132 @@
     padding-left: 0;
     padding-right: 0;
   }
+  
+  /* Modal responsive fixes */
+  .modal-content {
+    margin: 1rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+  
+  /* Table responsive fixes */
+  .table-responsive {
+    font-size: 14px;
+  }
+  
+  .table-responsive th,
+  .table-responsive td {
+    padding: 8px 12px;
+  }
+  
+  /* Form responsive fixes */
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  /* Sidebar responsive fixes */
+  .sidebar-item {
+    padding: 12px 16px;
+    min-height: 48px;
+  }
+  
+  /* Header responsive fixes */
+  .header-search {
+    display: none;
+  }
+  
+  /* Stats cards responsive */
+  .stat-card {
+    padding: 1rem;
+  }
+  
+  .stat-icon {
+    padding: 8px;
+  }
 }
 
 /* Tablet-specific improvements */
 @media (min-width: 768px) and (max-width: 1024px) {
   .sidebar-item {
     padding: 0.75rem 1rem;
+  }
+  
+  /* Grid adjustments for tablets */
+  .tablet-grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  
+  .tablet-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  
+  /* Button adjustments for tablets */
+  .btn-primary, .btn-secondary {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+  
+  /* Table adjustments for tablets */
+  .table-responsive {
+    font-size: 13px;
+  }
+  
+  /* Modal adjustments for tablets */
+  .modal-content {
+    margin: 2rem;
+  }
+  
+  /* Form adjustments for tablets */
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+}
+
+/* Large screen optimizations */
+@media (min-width: 1280px) {
+  .xl-grid-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  
+  .xl-grid-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+/* Touch-friendly improvements */
+@media (pointer: coarse) {
+  .btn-primary, .btn-secondary, .btn-accent {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  .sidebar-item {
+    min-height: 48px;
+  }
+  
+  .input-field {
+    min-height: 48px;
+  }
+  
+  .table-cell {
+    padding: 12px 16px;
+  }
+}
+
+/* Print optimizations */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-break-inside-avoid {
+    break-inside: avoid;
+  }
+  
+  .print-break-before {
+    break-before: page;
   }
 }
 

@@ -13,8 +13,17 @@ import {
   DocumentData,
   QueryDocumentSnapshot
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db, auth } from '../config/firebase';
 import { Quote, Client } from '../types';
+
+// Helper function to get current user ID
+const getCurrentUserId = (): string => {
+  const user = auth.currentUser;
+  if (!user) {
+    throw new Error('Utilisateur non connecté');
+  }
+  return user.uid;
+};
 
 // Helper function to clean undefined values from objects
 const cleanUndefinedFields = (obj: any): any => {
@@ -60,7 +69,12 @@ export const quotesService = {
   // Get all quotes
   async getAll(): Promise<Quote[]> {
     try {
-      const q = query(collection(db, QUOTES_COLLECTION), orderBy('createdAt', 'desc'));
+      const userId = getCurrentUserId();
+      const q = query(
+        collection(db, QUOTES_COLLECTION), 
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc')
+      );
       const querySnapshot = await getDocs(q);
       
       return querySnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
@@ -115,9 +129,11 @@ export const quotesService = {
   // Add new quote
   async add(quote: Omit<Quote, 'id' | 'createdAt' | 'updatedAt'>): Promise<Quote> {
     try {
+      const userId = getCurrentUserId();
       const now = new Date();
       const quoteData = {
         ...quote,
+        userId,
         createdAt: convertToTimestamp(now),
         updatedAt: convertToTimestamp(now),
         validUntil: convertToTimestamp(quote.validUntil),
@@ -148,7 +164,21 @@ export const quotesService = {
   // Update quote
   async update(id: string, updates: Partial<Quote>): Promise<void> {
     try {
+      const userId = getCurrentUserId();
+      
+      // Vérifier que le devis appartient à l'utilisateur
       const docRef = doc(db, QUOTES_COLLECTION, id);
+      const docSnap = await getDoc(docRef);
+      
+      if (!docSnap.exists()) {
+        throw new Error('Devis non trouvé');
+      }
+      
+      const quoteData = docSnap.data();
+      if (quoteData.userId !== userId) {
+        throw new Error('Accès non autorisé à ce devis');
+      }
+
       const updateData = {
         ...updates,
         updatedAt: convertToTimestamp(new Date()),
@@ -173,7 +203,21 @@ export const quotesService = {
   // Delete quote
   async delete(id: string): Promise<void> {
     try {
+      const userId = getCurrentUserId();
+      
+      // Vérifier que le devis appartient à l'utilisateur
       const docRef = doc(db, QUOTES_COLLECTION, id);
+      const docSnap = await getDoc(docRef);
+      
+      if (!docSnap.exists()) {
+        throw new Error('Devis non trouvé');
+      }
+      
+      const quoteData = docSnap.data();
+      if (quoteData.userId !== userId) {
+        throw new Error('Accès non autorisé à ce devis');
+      }
+
       await deleteDoc(docRef);
     } catch (error) {
       console.error('Error deleting quote:', error);
@@ -184,8 +228,10 @@ export const quotesService = {
   // Get quotes by status
   async getByStatus(status: Quote['status']): Promise<Quote[]> {
     try {
+      const userId = getCurrentUserId();
       const q = query(
         collection(db, QUOTES_COLLECTION), 
+        where('userId', '==', userId),
         where('status', '==', status),
         orderBy('createdAt', 'desc')
       );
@@ -218,7 +264,12 @@ export const clientsService = {
   // Get all clients
   async getAll(): Promise<Client[]> {
     try {
-      const q = query(collection(db, CLIENTS_COLLECTION), orderBy('createdAt', 'desc'));
+      const userId = getCurrentUserId();
+      const q = query(
+        collection(db, CLIENTS_COLLECTION), 
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc')
+      );
       const querySnapshot = await getDocs(q);
       
       return querySnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
@@ -259,9 +310,11 @@ export const clientsService = {
   // Add new client
   async add(client: Omit<Client, 'id' | 'createdAt' | 'totalQuotes' | 'totalValue'>): Promise<Client> {
     try {
+      const userId = getCurrentUserId();
       const now = new Date();
       const clientData = {
         ...client,
+        userId,
         createdAt: convertToTimestamp(now),
         totalQuotes: 0,
         totalValue: 0
@@ -286,7 +339,21 @@ export const clientsService = {
   // Update client
   async update(id: string, updates: Partial<Client>): Promise<void> {
     try {
+      const userId = getCurrentUserId();
+      
+      // Vérifier que le client appartient à l'utilisateur
       const docRef = doc(db, CLIENTS_COLLECTION, id);
+      const docSnap = await getDoc(docRef);
+      
+      if (!docSnap.exists()) {
+        throw new Error('Client non trouvé');
+      }
+      
+      const clientData = docSnap.data();
+      if (clientData.userId !== userId) {
+        throw new Error('Accès non autorisé à ce client');
+      }
+
       const cleanedData = cleanUndefinedFields(updates);
       await updateDoc(docRef, cleanedData);
     } catch (error) {
@@ -298,7 +365,21 @@ export const clientsService = {
   // Delete client
   async delete(id: string): Promise<void> {
     try {
+      const userId = getCurrentUserId();
+      
+      // Vérifier que le client appartient à l'utilisateur
       const docRef = doc(db, CLIENTS_COLLECTION, id);
+      const docSnap = await getDoc(docRef);
+      
+      if (!docSnap.exists()) {
+        throw new Error('Client non trouvé');
+      }
+      
+      const clientData = docSnap.data();
+      if (clientData.userId !== userId) {
+        throw new Error('Accès non autorisé à ce client');
+      }
+
       await deleteDoc(docRef);
     } catch (error) {
       console.error('Error deleting client:', error);
@@ -328,7 +409,12 @@ export const costCalculationsService = {
   // Get all cost calculations
   async getAll(): Promise<any[]> {
     try {
-      const q = query(collection(db, COST_CALCULATIONS_COLLECTION), orderBy('createdAt', 'desc'));
+      const userId = getCurrentUserId();
+      const q = query(
+        collection(db, COST_CALCULATIONS_COLLECTION), 
+        where('userId', '==', userId),
+        orderBy('createdAt', 'desc')
+      );
       const querySnapshot = await getDocs(q);
       
       return querySnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
@@ -373,10 +459,12 @@ export const costCalculationsService = {
   // Add new cost calculation
   async add(calculationData: any, name: string): Promise<any> {
     try {
+      const userId = getCurrentUserId();
       const now = new Date();
       const dataToSave = {
         ...calculationData,
         name,
+        userId,
         createdAt: convertToTimestamp(now),
         updatedAt: convertToTimestamp(now),
         calculatedAt: convertToTimestamp(calculationData.calculatedAt || now)
@@ -402,7 +490,21 @@ export const costCalculationsService = {
   // Update cost calculation
   async update(id: string, updates: any): Promise<void> {
     try {
+      const userId = getCurrentUserId();
+      
+      // Vérifier que le calcul appartient à l'utilisateur
       const docRef = doc(db, COST_CALCULATIONS_COLLECTION, id);
+      const docSnap = await getDoc(docRef);
+      
+      if (!docSnap.exists()) {
+        throw new Error('Calcul non trouvé');
+      }
+      
+      const calculationData = docSnap.data();
+      if (calculationData.userId !== userId) {
+        throw new Error('Accès non autorisé à ce calcul');
+      }
+
       const updateData = {
         ...updates,
         updatedAt: convertToTimestamp(new Date())
@@ -419,7 +521,21 @@ export const costCalculationsService = {
   // Delete cost calculation
   async delete(id: string): Promise<void> {
     try {
+      const userId = getCurrentUserId();
+      
+      // Vérifier que le calcul appartient à l'utilisateur
       const docRef = doc(db, COST_CALCULATIONS_COLLECTION, id);
+      const docSnap = await getDoc(docRef);
+      
+      if (!docSnap.exists()) {
+        throw new Error('Calcul non trouvé');
+      }
+      
+      const calculationData = docSnap.data();
+      if (calculationData.userId !== userId) {
+        throw new Error('Accès non autorisé à ce calcul');
+      }
+
       await deleteDoc(docRef);
     } catch (error) {
       console.error('Error deleting cost calculation:', error);

@@ -250,7 +250,7 @@ const CostCalculation: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 px-4 sm:px-0">
+    <div className="space-y-4 sm:space-y-6 px-3 sm:px-4 lg:px-0">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className="p-2 bg-blue-100 rounded-lg">
@@ -267,10 +267,10 @@ const CostCalculation: React.FC = () => {
             )}
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 lg:space-x-3 w-full sm:w-auto">
           <button
             onClick={addItem}
-            className="btn-secondary flex items-center justify-center space-x-2 w-full sm:w-auto text-sm"
+            className="btn-secondary flex items-center justify-center space-x-2 w-full sm:w-auto text-xs sm:text-sm min-h-[44px]"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Ajouter un article</span>
@@ -278,7 +278,7 @@ const CostCalculation: React.FC = () => {
           </button>
           <button
             onClick={handleSaveCalculation}
-            className="btn-secondary flex items-center justify-center space-x-2 w-full sm:w-auto text-sm"
+            className="btn-secondary flex items-center justify-center space-x-2 w-full sm:w-auto text-xs sm:text-sm min-h-[44px]"
           >
             <Save className="w-4 h-4" />
             <span className="hidden sm:inline">{isEditing ? 'Sauvegarder comme nouveau' : 'Sauvegarder'}</span>
@@ -286,7 +286,7 @@ const CostCalculation: React.FC = () => {
           </button>
           <button
             onClick={handleSaveAndCreateQuote}
-            className="btn-primary flex items-center justify-center space-x-2 w-full sm:w-auto text-sm"
+            className="btn-primary flex items-center justify-center space-x-2 w-full sm:w-auto text-xs sm:text-sm min-h-[44px]"
             disabled={items.length === 0 || items.some(item => !item.description.trim())}
           >
             <FileText className="w-4 h-4" />
@@ -372,7 +372,7 @@ const CostCalculation: React.FC = () => {
       )}
 
       {/* Section des taux de change */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mx-0 sm:mx-0">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6 mx-0 sm:mx-0">
         <div className="flex items-center space-x-3 mb-4">
           <div className="p-2 bg-green-100 rounded-lg">
             <TrendingUp className="w-5 h-5 text-green-600" />
@@ -380,7 +380,7 @@ const CostCalculation: React.FC = () => {
           <h2 className="text-lg font-semibold text-gray-900">Cours du Jour</h2>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               USD → MGA
@@ -391,7 +391,7 @@ const CostCalculation: React.FC = () => {
                 type="text"
                 value={formatNumberWithSpaces(exchangeRates.USD)}
                 onChange={(e) => handleExchangeRateChange('USD', e.target.value)}
-                className="pl-10 input-field"
+                className="pl-10 input-field min-h-[44px]"
                 placeholder="4 500"
               />
             </div>
@@ -407,7 +407,7 @@ const CostCalculation: React.FC = () => {
                 type="text"
                 value={formatNumberWithSpaces(exchangeRates.EUR)}
                 onChange={(e) => handleExchangeRateChange('EUR', e.target.value)}
-                className="pl-10 input-field"
+                className="pl-10 input-field min-h-[44px]"
                 placeholder="4 900"
               />
             </div>
@@ -423,7 +423,7 @@ const CostCalculation: React.FC = () => {
                 type="text"
                 value={formatNumberWithSpaces(exchangeRates.CNY)}
                 onChange={(e) => handleExchangeRateChange('CNY', e.target.value)}
-                className="pl-10 input-field"
+                className="pl-10 input-field min-h-[44px]"
                 placeholder="620"
               />
             </div>
@@ -434,13 +434,13 @@ const CostCalculation: React.FC = () => {
       {/* Articles */}
       <div className="space-y-6">
         {items.map((item, index) => (
-          <div key={item.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mx-0 sm:mx-0">
+          <div key={item.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6 mx-0 sm:mx-0">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-gray-900">Article {index + 1}</h2>
               {items.length > 1 && (
                 <button
                   onClick={() => removeItem(index)}
-                  className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-all duration-200"
+                  className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
                   title="Supprimer cet article"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -448,7 +448,7 @@ const CostCalculation: React.FC = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
               {/* Section de saisie */}
               <div className="space-y-6">
                 <div>
@@ -466,7 +466,7 @@ const CostCalculation: React.FC = () => {
                         type="text"
                         value={item.description}
                         onChange={(e) => handleItemChange(index, 'description', e.target.value)}
-                        className="input-field"
+                       className="input-field min-h-[44px]"
                         placeholder="Description de l'article..."
                       />
                     </div>
@@ -478,7 +478,7 @@ const CostCalculation: React.FC = () => {
                       <select
                         value={item.originCountry}
                         onChange={(e) => handleItemChange(index, 'originCountry', e.target.value)}
-                        className="input-field"
+                       className="input-field min-h-[44px]"
                       >
                         {countries.map(country => (
                           <option key={country} value={country}>{country}</option>
@@ -503,7 +503,7 @@ const CostCalculation: React.FC = () => {
                         type="text"
                         value={formatNumberWithSpaces(item.quantity)}
                         onChange={(e) => handleItemChange(index, 'quantity', parseFormattedNumber(e.target.value))}
-                        className="input-field"
+                       className="input-field min-h-[44px]"
                         placeholder="1"
                       />
                     </div>
@@ -515,7 +515,7 @@ const CostCalculation: React.FC = () => {
                       <select
                         value={item.mainCurrency}
                         onChange={(e) => handleItemChange(index, 'mainCurrency', e.target.value)}
-                        className="input-field"
+                       className="input-field min-h-[44px]"
                       >
                         <option value="USD">USD ($)</option>
                         <option value="EUR">EUR (€)</option>
@@ -535,7 +535,7 @@ const CostCalculation: React.FC = () => {
                           type="text"
                           value={formatNumberWithSpaces(item.purchasePrice)}
                           onChange={(e) => handleItemChange(index, 'purchasePrice', parseFormattedNumber(e.target.value))}
-                          className="pl-10 input-field"
+                         className="pl-10 input-field min-h-[44px]"
                           placeholder="0"
                         />
                       </div>

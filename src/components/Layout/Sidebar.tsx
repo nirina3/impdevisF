@@ -37,10 +37,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
 
   const mainMenuItems = [
     { path: '/', icon: LayoutDashboard, label: 'Dashboard', color: 'text-blue-500' },
+    { path: '/clients', icon: Users, label: 'Clients', color: 'text-cyan-500' },
     { path: '/cost-calculation', icon: Calculator, label: 'Calcul des coûts', color: 'text-amber-500' },
     { path: '/cost-history', icon: History, label: 'Historique Calculs', color: 'text-purple-500' },
     { path: '/analytics', icon: TrendingUp, label: 'Analyses', color: 'text-rose-500' },
-    { path: '/clients', icon: Users, label: 'Clients', color: 'text-cyan-500' },
     { path: '/settings', icon: SettingsIcon, label: 'Paramètres', color: 'text-neutral-500' },
   ];
 

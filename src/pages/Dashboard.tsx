@@ -95,7 +95,7 @@ const Dashboard: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6 sm:space-y-8 px-4 sm:px-0">
+    <div className="space-y-4 sm:space-y-6 lg:space-y-8 px-4 sm:px-0">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -116,7 +116,7 @@ const Dashboard: React.FC = () => {
         <div className="sm:hidden">
           <Link
             to="/quotes/new"
-            className="btn-primary p-3 rounded-xl"
+            className="btn-primary p-3 rounded-xl min-h-[48px] min-w-[48px] flex items-center justify-center"
           >
             <Plus className="w-5 h-5" />
           </Link>
@@ -124,7 +124,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Statistiques principales */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
         <StatCard
           icon={FileText}
           title="Total Devis"
@@ -163,7 +163,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Statistiques financières */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
         <div className="card-elevated p-6 bg-gradient-to-br from-success-50 to-emerald-50 border-success-200">
           <div className="flex items-center space-x-4">
             <div className="stat-icon bg-success-100">
@@ -216,12 +216,12 @@ const Dashboard: React.FC = () => {
 
       {/* Devis récents */}
       <div className="card-elevated mx-0 sm:mx-0">
-        <div className="px-4 sm:px-6 py-4 border-b border-neutral-200/50 bg-gradient-to-r from-neutral-50 to-neutral-100/50">
+        <div className="px-3 sm:px-4 lg:px-6 py-3 sm:py-4 border-b border-neutral-200/50 bg-gradient-to-r from-neutral-50 to-neutral-100/50">
           <div className="flex items-center justify-between">
             <h2 className="text-lg sm:text-xl font-bold text-neutral-900">Devis Récents</h2>
             <Link
               to="/quotes"
-              className="text-primary-600 hover:text-primary-700 text-xs sm:text-sm font-medium flex items-center space-x-1 transition-colors duration-200"
+              className="text-primary-600 hover:text-primary-700 text-xs sm:text-sm font-medium flex items-center space-x-1 transition-colors duration-200 min-h-[44px] px-2 rounded-lg hover:bg-primary-50"
             >
               <span>Voir tout</span>
               <ArrowUpRight className="w-4 h-4" />
@@ -230,37 +230,37 @@ const Dashboard: React.FC = () => {
         </div>
         
         <div className="overflow-x-auto">
-          <table className="min-w-full hidden sm:table">
+          <table className="min-w-full hidden sm:table table-responsive">
             <thead className="bg-neutral-50/50">
               <tr>
-                <th className="table-header">Numéro</th>
-                <th className="table-header">Client</th>
-                <th className="table-header">Statut</th>
-                <th className="table-header">Paiement</th>
-                <th className="table-header">Montant</th>
-                <th className="table-header">Date</th>
-                <th className="table-header text-right">Actions</th>
+                <th className="table-header text-xs sm:text-sm">Numéro</th>
+                <th className="table-header text-xs sm:text-sm">Client</th>
+                <th className="table-header text-xs sm:text-sm">Statut</th>
+                <th className="table-header text-xs sm:text-sm">Paiement</th>
+                <th className="table-header text-xs sm:text-sm">Montant</th>
+                <th className="table-header text-xs sm:text-sm">Date</th>
+                <th className="table-header text-right text-xs sm:text-sm">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200/50">
               {recentQuotes.map((quote, index) => (
                 <tr key={quote.id} className="hover:bg-neutral-50/50 transition-colors duration-200 group" style={{ animationDelay: `${index * 100}ms` }}>
-                  <td className="table-cell">
+                  <td className="table-cell text-xs sm:text-sm">
                     <span className="font-semibold text-primary-600">{quote.quoteNumber}</span>
                   </td>
-                  <td className="table-cell">
+                  <td className="table-cell text-xs sm:text-sm">
                     <div>
                       <div className="font-medium text-neutral-900">{quote.clientName}</div>
-                      <div className="text-xs text-neutral-500">{quote.clientEmail}</div>
+                      <div className="text-xs text-neutral-500 hidden lg:block">{quote.clientEmail}</div>
                     </div>
                   </td>
-                  <td className="table-cell">
+                  <td className="table-cell text-xs sm:text-sm">
                     <StatusBadge status={quote.status} />
                   </td>
-                  <td className="table-cell">
+                  <td className="table-cell text-xs sm:text-sm">
                     <PaymentStatusBadge status={quote.paymentStatus} />
                   </td>
-                  <td className="table-cell">
+                  <td className="table-cell text-xs sm:text-sm">
                     <div className="font-semibold text-neutral-900">
                       {quote.totalAmount >= 1000000 
                         ? `${formatNumberWithSpaces(Math.round(quote.totalAmount / 1000000))} M Ar`
@@ -268,7 +268,7 @@ const Dashboard: React.FC = () => {
                       }
                     </div>
                     {quote.remainingAmount > 0 && (
-                      <div className="text-xs text-amber-600">
+                      <div className="text-xs text-amber-600 hidden sm:block">
                         Reste: {quote.remainingAmount >= 1000000 
                           ? `${formatNumberWithSpaces(Math.round(quote.remainingAmount / 1000000))} M Ar`
                           : formatAriary(quote.remainingAmount)
@@ -276,11 +276,11 @@ const Dashboard: React.FC = () => {
                       </div>
                     )}
                   </td>
-                  <td className="table-cell text-neutral-500">
+                  <td className="table-cell text-neutral-500 text-xs sm:text-sm">
                     {safeFormatDate(quote.createdAt, 'dd/MM/yyyy')}
                   </td>
-                  <td className="table-cell text-right">
-                    <button className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-2 text-neutral-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg">
+                  <td className="table-cell text-right text-xs sm:text-sm">
+                    <button className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-2 text-neutral-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center">
                       <Eye className="w-4 h-4" />
                     </button>
                   </td>
@@ -292,14 +292,14 @@ const Dashboard: React.FC = () => {
           {/* Mobile card view */}
           <div className="sm:hidden divide-y divide-neutral-200/50">
             {recentQuotes.map((quote, index) => (
-              <div key={quote.id} className="p-4 hover:bg-neutral-50/50 transition-colors duration-200">
+              <div key={quote.id} className="p-3 sm:p-4 hover:bg-neutral-50/50 transition-colors duration-200">
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <span className="font-semibold text-primary-600 text-sm">{quote.quoteNumber}</span>
                     <p className="text-sm font-medium text-neutral-900 mt-1">{quote.clientName}</p>
                     <p className="text-xs text-neutral-500">{quote.clientEmail}</p>
                   </div>
-                  <button className="p-2 text-neutral-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg">
+                  <button className="p-2 text-neutral-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center">
                     <Eye className="w-4 h-4" />
                   </button>
                 </div>
