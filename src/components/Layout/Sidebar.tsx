@@ -5,6 +5,7 @@ import {
   FileText, 
   Plus, 
   Settings, 
+  Settings as SettingsIcon,
   Users,
   TrendingUp,
   Calculator,
@@ -22,12 +23,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const menuItems = [
     { path: '/', icon: LayoutDashboard, label: 'Dashboard', color: 'text-blue-500' },
     { path: '/quotes', icon: FileText, label: 'Devis', color: 'text-emerald-500' },
+    { path: '/quote-management', icon: Settings, label: 'Gestion des devis', color: 'text-indigo-500' },
     { path: '/quotes/new', icon: Plus, label: 'Nouveau Devis', color: 'text-violet-500' },
     { path: '/cost-calculation', icon: Calculator, label: 'Calcul des coûts', color: 'text-amber-500' },
     { path: '/cost-history', icon: History, label: 'Historique Calculs', color: 'text-purple-500' },
     { path: '/analytics', icon: TrendingUp, label: 'Analyses', color: 'text-rose-500' },
     { path: '/clients', icon: Users, label: 'Clients', color: 'text-cyan-500' },
-    { path: '/settings', icon: Settings, label: 'Paramètres', color: 'text-neutral-500' },
+    { path: '/settings', icon: SettingsIcon, label: 'Paramètres', color: 'text-neutral-500' },
   ];
 
   const handleLinkClick = () => {

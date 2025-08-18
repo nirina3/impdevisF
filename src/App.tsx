@@ -5,6 +5,7 @@ import Layout from './components/Layout/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import QuotesList from './pages/QuotesList';
+import QuoteManagement from './pages/QuoteManagement';
 import NewQuote from './pages/NewQuote';
 import EditQuote from './pages/EditQuote';
 import CostHistory from './pages/CostHistory';
@@ -50,6 +51,7 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/quotes" element={<QuotesList />} />
+                  <Route path="/quote-management" element={<QuoteManagement />} />
                   <Route path="/quotes/new" element={<NewQuote />} />
                   <Route path="/quotes/edit/:id" element={<EditQuote />} />
                   <Route path="/cost-calculation" element={<CostCalculation />} />

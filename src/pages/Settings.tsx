@@ -43,6 +43,15 @@ const Settings: React.FC = () => {
     }
   );
 
+  const [notifications, setNotifications] = useState({
+    emailQuoteCreated: true,
+    emailQuoteConfirmed: true,
+    emailQuoteDelivered: true,
+    pushNotifications: true,
+    weeklyReports: true,
+    monthlyReports: false
+  });
+
   // Mettre à jour les données locales quand les paramètres sont chargés
   React.useEffect(() => {
     if (settings) {
@@ -64,15 +73,6 @@ const Settings: React.FC = () => {
       <ErrorMessage message={error} />
     );
   }
-
-  const [notifications, setNotifications] = useState({
-    emailQuoteCreated: true,
-    emailQuoteConfirmed: true,
-    emailQuoteDelivered: true,
-    pushNotifications: true,
-    weeklyReports: true,
-    monthlyReports: false
-  });
 
   const tabs = [
     { id: 'profile', label: 'Profil', icon: User },
