@@ -20,24 +20,22 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto mobile-scroll-fix touch-scroll-container" style={{ zIndex: 9999 }}>
-      <div className="flex items-center justify-center min-h-screen px-2 sm:px-4 lg:px-6 pt-4 pb-20 text-center sm:block sm:p-0 mobile-scroll-fix">
-        <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 backdrop-blur-sm" onClick={onClose}></div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
+      <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 backdrop-blur-sm" onClick={onClose}></div>
+      
+      <div className={`relative w-full ${sizeClasses[size]} bg-white shadow-xl rounded-lg sm:rounded-xl max-h-[90vh] overflow-y-auto`}>
+        <div className="flex items-start justify-between p-4 sm:p-6 border-b border-gray-200">
+          <h3 className="text-base sm:text-lg lg:text-xl font-medium text-gray-900 pr-4 leading-tight">{title}</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors p-1.5 sm:p-1 hover:bg-gray-100 rounded-lg flex-shrink-0 touch-target"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
         
-        <div className={`modal-content inline-block w-full ${sizeClasses[size]} p-4 sm:p-6 lg:p-8 my-4 sm:my-8 overflow-y-auto text-left align-middle transition-all transform bg-white shadow-xl rounded-lg sm:rounded-xl mobile-scroll-fix touch-modal`}>
-          <div className="flex items-start justify-between mb-4 sm:mb-6">
-            <h3 className="text-base sm:text-lg lg:text-xl font-medium text-gray-900 pr-4 leading-tight">{title}</h3>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors p-1.5 sm:p-1 hover:bg-gray-100 rounded-lg flex-shrink-0 touch-target"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-          
-          <div className="overflow-y-auto max-h-[calc(100vh-8rem)] sm:max-h-[calc(100vh-12rem)] lg:max-h-[calc(100vh-6rem)] mobile-scroll-fix touch-scroll-container">
-            {children}
-          </div>
+        <div className="p-4 sm:p-6">
+          {children}
         </div>
       </div>
     </div>

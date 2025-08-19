@@ -374,8 +374,7 @@ const Dashboard: React.FC = () => {
                   <div className="text-right">
                     <p className={`text-sm font-bold ${payment.color}`}>
                       {formatAriary(payment.value)}
-                      </p>
-                    </div>
+                    </p>
                   </div>
                 </div>
               ))}
