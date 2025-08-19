@@ -137,7 +137,7 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 px-3 sm:px-4 lg:px-0 xl-container">
+    <div className="space-y-4 sm:space-y-6 px-3 sm:px-4 lg:px-0 xl-container mobile-scroll-fix touch-page-container page-content-mobile">
       <div className="flex items-center justify-between">
         <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Paramètres</h1>
         <button 
@@ -153,7 +153,7 @@ const Settings: React.FC = () => {
 
       <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
         {/* Navigation des onglets */}
-        <div className="lg:w-64 xl:w-72 mx-0 tablet-sidebar">
+        <div className="lg:w-64 xl:w-72 mx-0 tablet-sidebar mobile-scroll-fix">
           <nav className="space-y-1 mobile-nav-item">
             {tabs.map((tab) => {
               const Icon = tab.icon;

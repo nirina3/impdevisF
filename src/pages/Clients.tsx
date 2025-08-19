@@ -123,7 +123,7 @@ const Clients: React.FC = () => {
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 px-3 sm:px-4 lg:px-0 xl-container">
+    <div className="space-y-4 sm:space-y-6 px-3 sm:px-4 lg:px-0 xl-container mobile-scroll-fix touch-page-container page-content-mobile">
       <div className="flex items-center justify-between">
         <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">Clients</h1>
         <button

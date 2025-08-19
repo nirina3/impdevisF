@@ -333,7 +333,7 @@ const NewQuote: React.FC = () => {
 
 
   return (
-    <div className="space-y-4 sm:space-y-6 px-3 sm:px-4 lg:px-0 xl-container">
+    <div className="space-y-4 sm:space-y-6 px-3 sm:px-4 lg:px-0 xl-container mobile-scroll-fix touch-page-container page-content-mobile">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <button
@@ -353,7 +353,7 @@ const NewQuote: React.FC = () => {
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 mobile-form-container touch-form">
         {/* Informations Client */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mx-0 tablet-optimized mobile-card-stack">
           <h2 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Informations Client</h2>

@@ -11,7 +11,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 relative">
+    <div className="flex min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 relative app-container mobile-scroll-fix">
       {/* Sidebar */}
       <div className="hidden lg:flex lg:w-72 xl:w-80 lg:flex-shrink-0 lg:relative">
         <Sidebar />
@@ -25,7 +25,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             onClick={() => setSidebarOpen(false)} 
           />
           <div className="fixed inset-y-0 left-0 flex w-full max-w-xs sm:max-w-sm md:max-w-md">
-            <div className="relative flex w-full flex-col bg-white shadow-xl">
+            <div className="relative flex w-full flex-col bg-white shadow-xl mobile-scroll-fix">
               <div className="absolute top-0 right-0 -mr-12 pt-4 sm:pt-2">
                 <button
                   type="button"
@@ -35,7 +35,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <X className="h-6 w-6 text-white" />
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto mobile-scroll-fix touch-scroll-container">
                 <Sidebar onClose={() => setSidebarOpen(false)} />
               </div>
             </div>
@@ -44,11 +44,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       )}
       
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen mobile-flex-fix layout-main">
         <Header onMenuClick={() => setSidebarOpen(true)} />
         
-        <main className="flex-1 p-0 sm:p-4 lg:p-6 xl:p-8 space-y-4 sm:space-y-6 page-container">
-          <div className="animate-fade-in">
+        <main className="flex-1 p-0 sm:p-4 lg:p-6 xl:p-8 space-y-4 sm:space-y-6 page-container mobile-scroll-fix touch-page-container page-wrapper">
+          <div className="animate-fade-in content-container page-content-mobile">
             {children}
           </div>
         </main>
