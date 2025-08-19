@@ -186,6 +186,7 @@ export const generateQuoteHTML = (quote: any, userSettings?: UserSettings) => {
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.3px;
+            vertical-align: middle;
         }
         
         .items-table td {
@@ -205,10 +206,13 @@ export const generateQuoteHTML = (quote: any, userSettings?: UserSettings) => {
         .item-description {
             font-weight: 500;
             color: #1e293b;
+            text-align: left;
+            padding-left: 8px;
         }
         
         .text-right {
             text-align: right;
+            padding-right: 8px;
         }
         
         .text-center {
@@ -425,19 +429,19 @@ export const generateQuoteHTML = (quote: any, userSettings?: UserSettings) => {
             <table class="items-table">
                 <thead>
                     <tr>
-                        <th style="width: 45%;">Description</th>
-                        <th style="width: 15%;" class="text-center">Qté</th>
-                        <th style="width: 20%;" class="text-right">P.U. (Ar)</th>
-                        <th style="width: 20%;" class="text-right">Total (Ar)</th>
+                        <th style="width: 45%; text-align: left; padding-left: 8px;">Description</th>
+                        <th style="width: 15%; text-align: center;">Qté</th>
+                        <th style="width: 20%; text-align: right; padding-right: 8px;">P.U. (Ar)</th>
+                        <th style="width: 20%; text-align: right; padding-right: 8px;">Total (Ar)</th>
                     </tr>
                 </thead>
                 <tbody>
                     ${quote.items.map((item: any) => `
                         <tr>
-                            <td class="item-description">${item.description}</td>
+                            <td class="item-description" style="text-align: left; padding-left: 8px;">${item.description}</td>
                             <td class="text-center">${formatNumberWithSpaces(item.quantity)}</td>
-                            <td class="text-right">${formatNumberWithSpaces(Math.round(item.unitPrice))}</td>
-                            <td class="text-right">${formatNumberWithSpaces(Math.round(item.quantity * item.unitPrice))}</td>
+                            <td class="text-right" style="text-align: right; padding-right: 8px;">${formatNumberWithSpaces(Math.round(item.unitPrice))}</td>
+                            <td class="text-right" style="text-align: right; padding-right: 8px;">${formatNumberWithSpaces(Math.round(item.quantity * item.unitPrice))}</td>
                         </tr>
                     `).join('')}
                 </tbody>
