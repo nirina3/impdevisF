@@ -119,6 +119,7 @@
   /* Prevent horizontal overflow */
   body {
     overflow-x: hidden;
+    min-height: 100vh;
   }
   
   /* Container fixes */
@@ -126,6 +127,12 @@
     padding: 0 16px;
     max-width: 100%;
     box-sizing: border-box;
+  }
+  
+  /* Page container fixes */
+  .page-container {
+    min-height: calc(100vh - 80px); /* Hauteur minimale moins la hauteur du header */
+    padding-bottom: 2rem; /* Espace en bas pour éviter que le contenu soit coupé */
   }
   
   /* Button responsive fixes */
@@ -149,6 +156,7 @@
     padding: 0 16px;
     max-width: 100%;
     box-sizing: border-box;
+    overflow-y: visible;
   }
   
   /* Grid responsive fixes */
@@ -193,12 +201,15 @@
   /* Overflow fixes */
   .overflow-x-auto {
     -webkit-overflow-scrolling: touch;
+    overflow-y: visible;
   }
   
   /* Padding fixes for main containers */
   main {
     padding-left: 0;
     padding-right: 0;
+    overflow-y: visible;
+    min-height: auto;
   }
   
   /* Modal responsive fixes */
@@ -248,6 +259,7 @@
   .mobile-stack {
     flex-direction: column !important;
     align-items: stretch !important;
+    min-height: auto !important;
   }
   
   .mobile-full-width {
@@ -304,6 +316,8 @@
   /* Improved card layouts */
   .mobile-card-stack {
     padding: 1rem !important;
+    min-height: auto !important;
+    overflow: visible !important;
   }
   
   .mobile-card-stack .grid {
@@ -321,6 +335,7 @@
   .mobile-spacing {
     padding: 1rem !important;
     margin: 0.5rem 0 !important;
+    min-height: auto !important;
   }
   
   /* Better text sizing */
@@ -335,6 +350,18 @@
 
 /* Tablet-specific improvements */
 @media (min-width: 768px) and (max-width: 1024px) {
+  /* Ensure proper scrolling on tablets */
+  body {
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+  
+  .page-container {
+    min-height: calc(100vh - 100px);
+    padding-bottom: 2rem;
+    overflow-y: visible;
+  }
+  
   .sidebar-item {
     padding: 0.75rem 1rem;
   }
@@ -373,6 +400,8 @@
   /* Enhanced tablet improvements */
   .tablet-optimized {
     padding: 1.5rem !important;
+    min-height: auto !important;
+    overflow: visible !important;
   }
   
   .tablet-grid-auto {
@@ -423,6 +452,18 @@
 
 /* Large screen optimizations */
 @media (min-width: 1280px) {
+  /* Ensure proper scrolling on large screens */
+  body {
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+  
+  .page-container {
+    min-height: calc(100vh - 120px);
+    padding-bottom: 3rem;
+    overflow-y: visible;
+  }
+  
   .xl-grid-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
@@ -447,6 +488,7 @@
   
   .xl-padding {
     padding: 2rem !important;
+    min-height: auto !important;
   }
 }
 
@@ -489,6 +531,7 @@
   .touch-input {
     min-height: 48px !important;
     font-size: 16px !important; /* Prevent zoom on iOS */
+    overflow: visible !important;
   }
 }
 
@@ -523,6 +566,7 @@
 /* Scrollbar personnalisé */
 ::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -535,6 +579,43 @@
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-neutral-400;
+}
+
+/* Correction globale du scroll */
+html, body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: 100vh;
+  scroll-behavior: smooth;
+}
+
+/* Assurer que tous les conteneurs principaux permettent le scroll */
+#root {
+  min-height: 100vh;
+  overflow-y: visible;
+}
+
+/* Correction spécifique pour les pages avec beaucoup de contenu */
+.page-content {
+  min-height: auto;
+  overflow-y: visible;
+  padding-bottom: 2rem;
+}
+
+/* Assurer que les modales ne bloquent pas le scroll de la page */
+.modal-open {
+  overflow: hidden;
+}
+
+.modal-open body {
+  overflow: hidden;
+}
+
+/* Correction pour les conteneurs flex qui pourraient limiter la hauteur */
+.flex-container-scroll {
+  min-height: auto !important;
+  height: auto !important;
+  overflow-y: visible !important;
 }
 
 /* Animations d'entrée */

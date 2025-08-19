@@ -11,7 +11,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 overflow-hidden relative">
+    <div className="flex min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 relative">
       {/* Sidebar */}
       <div className="hidden lg:flex lg:w-72 xl:w-80 lg:flex-shrink-0 lg:relative">
         <Sidebar />
@@ -44,10 +44,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       )}
       
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-screen">
         <Header onMenuClick={() => setSidebarOpen(true)} />
         
-        <main className="flex-1 overflow-y-auto p-0 sm:p-4 lg:p-6 xl:p-8 space-y-4 sm:space-y-6 page-container">
+        <main className="flex-1 p-0 sm:p-4 lg:p-6 xl:p-8 space-y-4 sm:space-y-6 page-container">
           <div className="animate-fade-in">
             {children}
           </div>
