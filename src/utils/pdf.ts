@@ -508,8 +508,6 @@ export const generateQuoteHTML = (quote: any, userSettings?: UserSettings) => {
 };
 
 export const printQuote = (quote: any) => {
-  const printQuote = (quote: any, userSettings?: UserSettings) => {
-  }
   const htmlContent = generateQuoteHTML(quote, userSettings);
   
   const printWindow = window.open('', '_blank');

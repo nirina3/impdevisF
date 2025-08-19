@@ -65,7 +65,6 @@ const AutoBackup: React.FC = () => {
   const createAutoBackup = async () => {
     try {
       const now = new Date();
-      const backupName = `Sauvegarde automatique - ${format(now, 'dd/MM/yyyy HH:mm', { locale: fr })}`;
       const backupName = `Sauvegarde automatique - ${safeFormatDate(now, 'dd/MM/yyyy HH:mm')}`;
       
       await createBackup(backupName);

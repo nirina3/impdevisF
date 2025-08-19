@@ -556,20 +556,30 @@ const EditQuote: React.FC = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Frais de transport (MGA)
+                      Frais de transport ({item.transportCurrency})
                     </label>
-                    <input
-                      type="text"
-                      value={formatNumberWithSpaces(item.transportFeesOriginal || 0)}
-                      onChange={(e) => {
-                        const value = parseFormattedNumber(e.target.value);
-                        handleItemChange(index, 'transportFeesOriginal', value);
-                        handleItemChange(index, 'transportFees', value);
-                        handleItemChange(index, 'transportCurrency', 'MGA');
-                      }}
-                      className="input-field"
-                      placeholder="0"
-                    />
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
+                        {item.transportCurrency === 'USD' ? '$' : 
+                         item.transportCurrency === 'EUR' ? '€' : 
+                         item.transportCurrency === 'CNY' ? '¥' : 'Ar'}
+                      </span>
+                      <input
+                        type="text"
+                        value={formatNumberWithSpaces(item.transportFeesOriginal || 0)}
+                        onChange={(e) => {
+                          const value = parseFormattedNumber(e.target.value);
+                          handleItemChange(index, 'transportFeesOriginal', value);
+                        }}
+                        className="pl-10 input-field"
+                        placeholder="0"
+                      />
+                    </div>
+                    {item.transportCurrency !== 'MGA' && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Équivalent: {formatNumberWithSpaces(Math.round(convertToMGA(item.transportFeesOriginal || 0, item.transportCurrency as 'USD' | 'EUR' | 'CNY')))} Ar
+                      </p>
+                    )}
                   </div>
 
                   <div>
