@@ -66,6 +66,7 @@ export interface QuoteItem {
   transportFeesOriginal?: number;
   transportCurrency?: string;
   margin?: number;
+  reference?: string;
 }
 
 export interface Client {

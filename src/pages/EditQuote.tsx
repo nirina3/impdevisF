@@ -95,7 +95,8 @@ const EditQuote: React.FC = () => {
           transportFees: item.transportFees || 0,
           transportFeesOriginal: item.transportFeesOriginal || 0,
           transportCurrency: item.transportCurrency || 'MGA',
-          margin: item.margin || 20
+          margin: item.margin || 20,
+          reference: item.reference || ''
         })));
       }
       setLoading(false);
@@ -209,7 +210,8 @@ const EditQuote: React.FC = () => {
       transportFees: 0,
       transportFeesOriginal: 0,
       transportCurrency: 'MGA',
-      margin: 20
+      margin: 20,
+      reference: ''
     }]);
   };
 

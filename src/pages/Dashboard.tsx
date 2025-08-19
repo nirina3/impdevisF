@@ -369,11 +369,10 @@ const Dashboard: React.FC = () => {
                 <div key={payment.status} className={`flex items-center justify-between p-3 ${payment.bgColor} rounded-lg touch-friendly`}>
                   <div>
                     <p className={`text-sm font-medium ${payment.color}`}>{payment.label}</p>
-                    <p className="text-xs text-gray-500">{formatNumberWithSpaces(payment.count)} devis</p>
                   </div>
                   <div className="text-right">
                     <p className={`text-sm font-bold ${payment.color}`}>
-                      {formatAriary(payment.value)}
+                      {formatAriary(Math.round(payment.value))}
                     </p>
                   </div>
                 </div>
@@ -463,7 +462,7 @@ const Dashboard: React.FC = () => {
             <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
               <DollarSign className="w-8 h-8 text-blue-600 mx-auto mb-2" />
               <p className="text-lg sm:text-xl font-bold text-gray-900">
-                {formatAriary(totalValue)}
+                {formatAriary(Math.round(totalValue))}
               </p>
               <p className="text-sm text-blue-600 font-medium">Chiffre d'Affaires Total</p>
               <p className="text-xs text-gray-500 mt-1">{formatNumberWithSpaces(totalQuotes)} devis</p>
@@ -472,7 +471,7 @@ const Dashboard: React.FC = () => {
             <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border border-green-200">
               <CheckCircle className="w-8 h-8 text-green-600 mx-auto mb-2" />
               <p className="text-lg sm:text-xl font-bold text-gray-900">
-                {formatAriary(confirmedValue)}
+                {formatAriary(Math.round(confirmedValue))}
               </p>
               <p className="text-sm text-green-600 font-medium">Valeur Confirmée</p>
               <p className="text-xs text-gray-500 mt-1">{formatNumberWithSpaces(confirmedQuotes + deliveredQuotes)} devis</p>
@@ -481,7 +480,7 @@ const Dashboard: React.FC = () => {
             <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-amber-50 rounded-lg border border-orange-200">
               <Clock className="w-8 h-8 text-orange-600 mx-auto mb-2" />
               <p className="text-lg sm:text-xl font-bold text-gray-900">
-                {formatAriary(quotes.filter(q => q.paymentStatus === 'unpaid' || q.paymentStatus === 'partial').reduce((sum, q) => sum + q.remainingAmount, 0))}
+                {formatAriary(Math.round(quotes.filter(q => q.paymentStatus === 'unpaid' || q.paymentStatus === 'partial').reduce((sum, q) => sum + q.remainingAmount, 0)))}
               </p>
               <p className="text-sm text-orange-600 font-medium">Montants en Attente</p>
               <p className="text-xs text-gray-500 mt-1">

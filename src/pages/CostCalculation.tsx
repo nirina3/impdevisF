@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { Calculator, Plus, Trash2, Save, DollarSign, TrendingUp, ArrowRight, FileText, History, Edit } from 'lucide-react';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { formatNumberWithSpaces, parseFormattedNumber } from '../utils/formatters';
 import { useCostCalculation } from '../hooks/useCostCalculation';
 import { useCostHistory } from '../hooks/useCostHistory';
@@ -25,6 +26,7 @@ interface CostItem {
   hsCode?: string;
   category?: string;
   productLink?: string;
+  reference?: string;
 }
 
 interface ExchangeRates {
@@ -37,12 +39,12 @@ const CostCalculation: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { saveCalculation, hasCalculation, calculationData } = useCostCalculation();
-  const { calculations, getCalculationById } = useCostHistory();
+  const { calculations, getCalculationById, loading: costHistoryLoading } = useCostHistory();
   
   // Vérifier si on est en mode édition
   const editId = searchParams.get('edit');
   const isEditing = !!editId;
-
+  
   const [exchangeRates, setExchangeRates] = useState<ExchangeRates>({
     USD: 4500, // 1 USD = 4500 MGA
     EUR: 4900, // 1 EUR = 4900 MGA
@@ -63,39 +65,84 @@ const CostCalculation: React.FC = () => {
       customsFees: 0,
       margin: 20,
       sellingPrice: 0,
-      originCountry: 'Chine'
+      originCountry: 'Chine',
+      reference: ''
     }
   ]);
+  
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+
+  // Fonction de réinitialisation du formulaire
+  const resetFormForNewCalculation = useCallback(() => {
+    setExchangeRates({
+      USD: 4500,
+      EUR: 4900,
+      CNY: 620
+    });
+    setItems([
+      {
+        id: Date.now(),
+        description: '',
+        quantity: 1,
+        purchasePrice: 0,
+        mainCurrency: 'USD',
+        transportFees: 0,
+        transportFeesOriginal: 0,
+        transportCurrency: 'USD',
+        miscFees: 0,
+        customsFees: 0,
+        margin: 20,
+        sellingPrice: 0,
+        originCountry: 'Chine',
+        reference: ''
+      }
+    ]);
+  }, []);
 
   // Charger les données du calcul à modifier si on est en mode édition
   useEffect(() => {
-    if (editId && calculations.length > 0) {
+    if (costHistoryLoading) {
+      return; // Attendre que l'historique soit chargé
+    }
+
+    if (isEditing && editId) {
       const calculationToEdit = getCalculationById(editId);
       if (calculationToEdit) {
-        // Pré-remplir les taux de change
-        setExchangeRates(calculationToEdit.exchangeRates);
+        console.log('Chargement des données pour édition:', calculationToEdit.name);
+        setExchangeRates({ ...calculationToEdit.exchangeRates });
         
-        // Pré-remplir les articles
-        const editItems = calculationToEdit.items.map((item, index) => ({
-          id: index + 1,
-          description: item.description,
-          quantity: item.quantity,
-          purchasePrice: item.purchasePrice,
-          mainCurrency: item.mainCurrency,
-          transportFees: item.transportFees,
-          transportFeesOriginal: item.transportFeesOriginal,
-          transportCurrency: item.transportCurrency,
-          miscFees: item.miscFees,
-          customsFees: item.customsFees,
+        const editItems = calculationToEdit.items.map((item: any, index: number) => ({
+          id: Date.now() + index + Math.random() * 1000,
+          description: item.description || '',
+          quantity: item.quantity || 1,
+          purchasePrice: item.purchasePrice || 0,
+          mainCurrency: item.mainCurrency || 'USD',
+          transportFees: item.transportFees || 0,
+          transportFeesOriginal: item.transportFeesOriginal || 0,
+          transportCurrency: item.transportCurrency || 'USD',
+          miscFees: item.miscFees || 0,
+          customsFees: item.customsFees || 0,
           margin: item.margin || 20,
-          sellingPrice: item.sellingPrice,
-          originCountry: item.originCountry
+          sellingPrice: item.sellingPrice || 0,
+          originCountry: item.originCountry || 'Chine',
+          weight: item.weight || 0,
+          dimensions: item.dimensions || { length: 0, width: 0, height: 0 },
+          hsCode: item.hsCode || '',
+          category: item.category || '',
+          productLink: item.productLink || '',
+          reference: item.reference || ''
         }));
         
         setItems(editItems);
+      } else {
+        console.warn('Calcul non trouvé pour l\'ID:', editId);
+        resetFormForNewCalculation();
       }
+    } else if (!isEditing) {
+      // Mode nouveau calcul
+      resetFormForNewCalculation();
     }
-  }, [editId, calculations, getCalculationById]);
+  }, [costHistoryLoading, isEditing, editId, getCalculationById, resetFormForNewCalculation]);
 
   const convertToMGA = (amount: number, currency: 'USD' | 'EUR' | 'CNY' | 'MGA'): number => {
     if (currency === 'MGA') return amount;
@@ -123,47 +170,57 @@ const CostCalculation: React.FC = () => {
     // Recalculer tous les prix de vente
     setItems(prev => prev.map(item => ({
       ...item,
-      transportFees: convertToMGA(item.transportFeesOriginal, item.transportCurrency),
-      sellingPrice: calculateSellingPrice({ ...item, transportFees: convertToMGA(item.transportFeesOriginal, item.transportCurrency) })
+      sellingPrice: calculateSellingPrice(item)
     })));
   };
 
   const handleItemChange = (index: number, field: string, value: any) => {
-    setItems(prev => prev.map((item, i) => {
-      if (i === index) {
-        const updatedItem = { ...item, [field]: value };
-        
-        // Logique spéciale pour les frais de transport selon l'origine
-        if (field === 'originCountry') {
-          if (value === 'Chine') {
-            updatedItem.transportCurrency = 'MGA';
-            updatedItem.transportFeesOriginal = updatedItem.transportFees;
-          } else {
-            updatedItem.transportCurrency = 'USD';
-            updatedItem.transportFeesOriginal = updatedItem.transportFees / exchangeRates.USD;
-          }
+    setItems(prev => {
+      const newItems = [...prev];
+      const item = { ...newItems[index] };
+      
+      // Mise à jour simple du champ
+      item[field as keyof CostItem] = value;
+      
+      // Logique spéciale pour les frais de transport selon l'origine
+      if (field === 'originCountry') {
+        if (value === 'Chine') {
+          item.transportCurrency = 'MGA';
+          item.transportFeesOriginal = 0;
+          item.transportFees = 0;
+        } else {
+          item.transportCurrency = 'USD';
+          item.transportFeesOriginal = 0;
+          item.transportFees = 0;
         }
-        
-        // Mise à jour des frais de transport en MGA
-        if (field === 'transportFeesOriginal' || field === 'transportCurrency') {
-          updatedItem.transportFees = convertToMGA(
-            field === 'transportFeesOriginal' ? value : updatedItem.transportFeesOriginal,
-            field === 'transportCurrency' ? value : updatedItem.transportCurrency
-          );
-        }
-        
-        // Recalculer le prix de vente
-        updatedItem.sellingPrice = calculateSellingPrice(updatedItem);
-        
-        return updatedItem;
       }
-      return item;
-    }));
+      
+      // Synchronisation des devises pour EUR, USD et MGA (pas CNY)
+      if (field === 'mainCurrency' && ['EUR', 'USD', 'MGA'].includes(value)) {
+        item.transportCurrency = value;
+        item.transportFeesOriginal = 0;
+        item.transportFees = 0;
+      }
+      
+      // Mise à jour des frais de transport en MGA
+      if (field === 'transportFeesOriginal' || field === 'transportCurrency') {
+        item.transportFees = convertToMGA(
+          field === 'transportFeesOriginal' ? value : item.transportFeesOriginal,
+          field === 'transportCurrency' ? value : item.transportCurrency
+        );
+      }
+      
+      // Recalculer le prix de vente
+      item.sellingPrice = calculateSellingPrice(item);
+      
+      newItems[index] = item;
+      return newItems;
+    });
   };
 
   const addItem = () => {
     setItems(prev => [...prev, {
-      id: Date.now(),
+      id: Date.now() + Math.random(),
       description: '',
       quantity: 1,
       purchasePrice: 0,
@@ -175,7 +232,8 @@ const CostCalculation: React.FC = () => {
       customsFees: 0,
       margin: 20,
       sellingPrice: 0,
-      originCountry: 'Chine'
+      originCountry: 'Chine',
+      reference: ''
     }]);
   };
 
@@ -213,7 +271,8 @@ const CostCalculation: React.FC = () => {
         dimensions: item.dimensions || { length: 0, width: 0, height: 0 },
         hsCode: item.hsCode || '',
         category: item.category || '',
-        productLink: item.productLink || ''
+        productLink: item.productLink || '',
+        reference: item.reference || ''
       })),
       exchangeRates,
       totalCost,
@@ -237,7 +296,8 @@ const CostCalculation: React.FC = () => {
         dimensions: item.dimensions || { length: 0, width: 0, height: 0 },
         hsCode: item.hsCode || '',
         category: item.category || '',
-        productLink: item.productLink || ''
+        productLink: item.productLink || '',
+        reference: item.reference || ''
       })),
       exchangeRates,
       totalCost,
@@ -247,6 +307,10 @@ const CostCalculation: React.FC = () => {
 
     // Afficher une notification de succès (vous pouvez ajouter un toast ici)
     alert('Calcul sauvegardé avec succès !');
+  };
+
+  const formatAriary = (amount: number): string => {
+    return formatNumberWithSpaces(Math.round(amount)) + ' Ar';
   };
 
   return (
@@ -433,8 +497,9 @@ const CostCalculation: React.FC = () => {
 
       {/* Articles */}
       <div className="space-y-4 sm:space-y-6">
-        {items.map((item, index) => (
-          <div key={item.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6 mx-0 tablet-optimized mobile-card-stack">
+        {items.map((item, index) => { // Line 721
+          return (
+          <div key={`item-${item.id}-${index}`} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4 lg:p-6 mx-0 tablet-optimized mobile-card-stack">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-base sm:text-lg font-semibold text-gray-900">Article {index + 1}</h2>
               {items.length > 1 && (
@@ -463,10 +528,11 @@ const CostCalculation: React.FC = () => {
                         Description de l'article
                       </label>
                       <input
+                        key={`desc-${item.id}-${index}`}
                         type="text"
                         value={item.description}
                         onChange={(e) => handleItemChange(index, 'description', e.target.value)}
-                       className="input-field min-h-[44px] touch-input"
+                        className="input-field min-h-[44px] touch-input"
                         placeholder="Description de l'article..."
                       />
                     </div>
@@ -476,9 +542,10 @@ const CostCalculation: React.FC = () => {
                         Pays d'origine
                       </label>
                       <select
+                        key={`country-${item.id}-${index}`}
                         value={item.originCountry}
                         onChange={(e) => handleItemChange(index, 'originCountry', e.target.value)}
-                       className="input-field min-h-[44px] touch-input"
+                        className="input-field min-h-[44px] touch-input"
                       >
                         {countries.map(country => (
                           <option key={country} value={country}>{country}</option>
@@ -500,10 +567,11 @@ const CostCalculation: React.FC = () => {
                         Quantité
                       </label>
                       <input
+                        key={`qty-${item.id}-${index}`}
                         type="text"
                         value={formatNumberWithSpaces(item.quantity)}
                         onChange={(e) => handleItemChange(index, 'quantity', parseFormattedNumber(e.target.value))}
-                       className="input-field min-h-[44px] touch-input"
+                        className="input-field min-h-[44px] touch-input"
                         placeholder="1"
                       />
                     </div>
@@ -513,9 +581,10 @@ const CostCalculation: React.FC = () => {
                         Devise principale articles
                       </label>
                       <select
+                        key={`currency-${item.id}-${index}`}
                         value={item.mainCurrency}
                         onChange={(e) => handleItemChange(index, 'mainCurrency', e.target.value)}
-                       className="input-field min-h-[44px] touch-input"
+                        className="input-field min-h-[44px] touch-input"
                       >
                         <option value="USD">USD ($)</option>
                         <option value="EUR">EUR (€)</option>
@@ -532,6 +601,7 @@ const CostCalculation: React.FC = () => {
                           {item.mainCurrency === 'USD' ? '$' : item.mainCurrency === 'EUR' ? '€' : '¥'}
                         </span>
                         <input
+                          key={`price-${item.id}-${index}`}
                           type="text"
                           value={formatNumberWithSpaces(item.purchasePrice)}
                           onChange={(e) => handleItemChange(index, 'purchasePrice', parseFormattedNumber(e.target.value))}
@@ -558,6 +628,7 @@ const CostCalculation: React.FC = () => {
                         Frais de transport (MGA)
                       </label>
                       <input
+                        key={`transport-${item.id}-${index}`}
                         type="text"
                         value={formatNumberWithSpaces(item.transportFeesOriginal)}
                         onChange={(e) => {
@@ -596,6 +667,7 @@ const CostCalculation: React.FC = () => {
                             {item.transportCurrency === 'USD' ? '$' : item.transportCurrency === 'EUR' ? '€' : '¥'}
                           </span>
                           <input
+                            key={`transport-orig-${item.id}-${index}`}
                             type="text"
                             value={formatNumberWithSpaces(item.transportFeesOriginal)}
                             onChange={(e) => handleItemChange(index, 'transportFeesOriginal', parseFormattedNumber(e.target.value))}
@@ -611,6 +683,33 @@ const CostCalculation: React.FC = () => {
                   )}
                 </div>
 
+                {/* Champ Référence - uniquement pour CNY */}
+                {item.mainCurrency === 'CNY' && (
+                  <div>
+                    <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200 flex items-center">
+                      <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full text-sm font-medium mr-2">🔗</span>
+                      Référence produit
+                    </h3>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Référence (optionnel)
+                      </label>
+                      <input
+                        key={`ref-${item.id}-${index}`}
+                        type="text"
+                        value={item.reference || ''}
+                        onChange={(e) => handleItemChange(index, 'reference', e.target.value)}
+                        className="input-field touch-input"
+                        placeholder="YT7565094743690"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Référence du produit pour le suivi
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <h3 className="text-sm sm:text-base font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200 flex items-center">
                     <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-sm font-medium mr-2">📋</span>
@@ -623,6 +722,7 @@ const CostCalculation: React.FC = () => {
                         Frais divers (Ar)
                       </label>
                       <input
+                        key={`misc-${item.id}-${index}`}
                         type="text"
                         value={formatNumberWithSpaces(item.miscFees)}
                         onChange={(e) => handleItemChange(index, 'miscFees', parseFormattedNumber(e.target.value))}
@@ -636,6 +736,7 @@ const CostCalculation: React.FC = () => {
                         Frais de douane (Ar)
                       </label>
                       <input
+                        key={`customs-${item.id}-${index}`}
                         type="text"
                         value={formatNumberWithSpaces(item.customsFees)}
                         onChange={(e) => handleItemChange(index, 'customsFees', parseFormattedNumber(e.target.value))}
@@ -649,6 +750,7 @@ const CostCalculation: React.FC = () => {
                         Marge (%)
                       </label>
                       <input
+                        key={`margin-${item.id}-${index}`}
                         type="text"
                         value={formatNumberWithSpaces(item.margin)}
                         onChange={(e) => handleItemChange(index, 'margin', parseFormattedNumber(e.target.value))}
@@ -745,11 +847,11 @@ const CostCalculation: React.FC = () => {
                       </div>
                       <div className="flex justify-between">
                         <span>+ Frais divers:</span>
-                        <span>{formatNumberWithSpaces(item.miscFees)} Ar</span>
+                        <span>{formatNumberWithSpaces(Math.round(item.miscFees))} Ar</span>
                       </div>
                       <div className="flex justify-between">
                         <span>+ Frais douane:</span>
-                        <span>{formatNumberWithSpaces(item.customsFees)} Ar</span>
+                        <span>{formatNumberWithSpaces(Math.round(item.customsFees))} Ar</span>
                       </div>
                       <div className="border-t border-gray-200 pt-1.5 flex justify-between font-medium">
                         <span>= Coût total:</span>
@@ -769,7 +871,8 @@ const CostCalculation: React.FC = () => {
               </div>
             </div>
           </div>
-        ))}
+        );
+        })}
       </div>
 
       {/* Résumé global */}
@@ -789,7 +892,7 @@ const CostCalculation: React.FC = () => {
             </div>
             
             <div className="text-center p-4 bg-gradient-to-br from-red-50 to-pink-100 rounded-xl">
-              <p className="text-sm text-gray-500 mb-1">Coût total</p>
+              <p className="text-sm text-red-600 font-medium">Coût total</p>
               <p className="text-xl sm:text-2xl font-bold text-red-600">
                 {formatNumberWithSpaces(Math.round(items.reduce((sum, item) => sum + getTotalCostMGA(item), 0)))} Ar
               </p>

@@ -39,6 +39,8 @@ const CostHistory: React.FC = () => {
   } = useCostHistory();
   
   const [searchTerm, setSearchTerm] = useState('');
+  const [periodFilter, setPeriodFilter] = useState<string>('all');
+  const [referenceFilter, setReferenceFilter] = useState('');
   const [selectedCalculation, setSelectedCalculation] = useState<any>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [calculationToDelete, setCalculationToDelete] = useState<string | null>(null);
@@ -59,7 +61,52 @@ const CostHistory: React.FC = () => {
     );
   }
 
-  const filteredCalculations = searchTerm ? searchCalculations(searchTerm) : calculations;
+  // Filtrage avancé des calculs
+  const filteredCalculations = calculations.filter(calculation => {
+    // Filtre par terme de recherche
+    const matchesSearch = !searchTerm || 
+      calculation.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      calculation.items.some((item: any) => 
+        item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.originCountry.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.category && item.category.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+
+    // Filtre par référence
+    const matchesReference = !referenceFilter || 
+      calculation.items.some((item: any) => 
+        item.reference && item.reference.toLowerCase().includes(referenceFilter.toLowerCase())
+      );
+
+    // Filtre par période
+    let matchesPeriod = true;
+    if (periodFilter !== 'all') {
+      const now = new Date();
+      const calcDate = new Date(calculation.createdAt);
+      
+      switch (periodFilter) {
+        case 'week':
+          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          matchesPeriod = calcDate >= weekAgo;
+          break;
+        case 'month':
+          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          matchesPeriod = calcDate >= monthAgo;
+          break;
+        case 'quarter':
+          const quarterAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+          matchesPeriod = calcDate >= quarterAgo;
+          break;
+        case 'year':
+          const yearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+          matchesPeriod = calcDate >= yearAgo;
+          break;
+      }
+    }
+
+    return matchesSearch && matchesReference && matchesPeriod;
+  });
+
   const stats = getStatistics();
 
   const handleDelete = async () => {
@@ -152,7 +199,7 @@ const CostHistory: React.FC = () => {
               <div className="ml-4">
                 <h3 className="text-sm font-medium text-gray-500">Valeur Totale</h3>
                 <p className="text-2xl font-bold text-gray-900">
-                  {formatAriary(stats.totalValue)}
+                  {formatNumberWithSpaces(Math.round(stats.totalValue))} Ar
                 </p>
               </div>
             </div>
@@ -166,7 +213,7 @@ const CostHistory: React.FC = () => {
               <div className="ml-4">
                 <h3 className="text-sm font-medium text-gray-500">Valeur Moyenne</h3>
                 <p className="text-2xl font-bold text-gray-900">
-                  {formatAriary(stats.averageValue)}
+                  {formatNumberWithSpaces(Math.round(stats.averageValue))} Ar
                 </p>
               </div>
             </div>
@@ -190,39 +237,102 @@ const CostHistory: React.FC = () => {
 
       {/* Recherche */}
       {calculations.length > 0 && (
-        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mx-0 sm:mx-0">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Rechercher dans les calculs..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-full"
-            />
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mx-0 sm:mx-0 tablet-optimized mobile-card-stack">
+          <h3 className="text-base font-semibold text-gray-900 mb-4">Filtres et Recherche</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mobile-form-stack tablet-form-grid">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Recherche générale
+              </label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <input
+                  type="text"
+                  placeholder="Nom, description, pays..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-full touch-input"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Période
+              </label>
+              <select
+                value={periodFilter}
+                onChange={(e) => setPeriodFilter(e.target.value)}
+                className="input-field touch-input"
+              >
+                <option value="all">Toutes les périodes</option>
+                <option value="week">Cette semaine</option>
+                <option value="month">Ce mois</option>
+                <option value="quarter">Ce trimestre</option>
+                <option value="year">Cette année</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Référence
+              </label>
+              <input
+                type="text"
+                placeholder="Rechercher par référence..."
+                value={referenceFilter}
+                onChange={(e) => setReferenceFilter(e.target.value)}
+                className="input-field touch-input"
+              />
+            </div>
+          </div>
+
+          {/* Résumé des filtres */}
+          <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
+            <span>
+              {filteredCalculations.length} calcul{filteredCalculations.length > 1 ? 's' : ''} 
+              {filteredCalculations.length !== calculations.length && ` sur ${calculations.length}`}
+            </span>
+            {(searchTerm || periodFilter !== 'all' || referenceFilter) && (
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setPeriodFilter('all');
+                  setReferenceFilter('');
+                }}
+                className="text-primary-600 hover:text-primary-700 font-medium"
+              >
+                Effacer les filtres
+              </button>
+            )}
           </div>
         </div>
       )}
 
-      {/* Liste des calculs */}
-      {calculations.length === 0 ? (
+      {/* Message si aucun résultat après filtrage */}
+      {calculations.length > 0 && filteredCalculations.length === 0 && (
         <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200 mx-0 sm:mx-0">
-          <div className="p-6">
-            <History className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun calcul sauvegardé</h3>
-            <p className="text-gray-500 mb-6">
-              Commencez par créer votre premier calcul de coûts pour le voir apparaître ici.
-            </p>
-            <button
-              onClick={() => navigate('/cost-calculation')}
-              className="btn-primary flex items-center space-x-2 mx-auto"
-            >
-              <Calculator className="w-4 h-4" />
-              <span>Créer un calcul</span>
-            </button>
-          </div>
+          <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun résultat</h3>
+          <p className="text-gray-500 mb-4">
+            Aucun calcul ne correspond à vos critères de recherche.
+          </p>
+          <button
+            onClick={() => {
+              setSearchTerm('');
+              setPeriodFilter('all');
+              setReferenceFilter('');
+            }}
+            className="btn-secondary"
+          >
+            Effacer les filtres
+          </button>
         </div>
-      ) : (
+      )}
+
+      {/* Liste des calculs - seulement si on a des résultats */}
+      {filteredCalculations.length > 0 && (
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
           {filteredCalculations.map((calculation) => (
             <div key={calculation.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mx-0 sm:mx-0">
@@ -306,21 +416,21 @@ const CostHistory: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Coût total:</span>
                   <span className="font-medium text-red-600">
-                    {formatAriary(calculation.totalCost)}
+                    {formatNumberWithSpaces(Math.round(calculation.totalCost))} Ar
                   </span>
                 </div>
                 
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Marge:</span>
                   <span className="font-medium text-blue-600">
-                    {formatAriary(calculation.totalMargin)}
+                    {formatNumberWithSpaces(Math.round(calculation.totalMargin))} Ar
                   </span>
                 </div>
                 
                 <div className="flex justify-between items-center pt-2 border-t border-gray-200">
                   <span className="text-sm font-medium text-gray-900">Prix de vente:</span>
                   <span className="text-lg font-bold text-green-600">
-                    {formatAriary(calculation.totalSellingPrice)}
+                    {formatNumberWithSpaces(Math.round(calculation.totalSellingPrice))} Ar
                   </span>
                 </div>
               </div>
@@ -332,6 +442,9 @@ const CostHistory: React.FC = () => {
                   {calculation.items.slice(0, 2).map((item: any, index: number) => (
                     <div key={index} className="text-xs text-gray-600 truncate">
                       • {item.description} (×{formatNumberWithSpaces(item.quantity)})
+                      {item.reference && (
+                        <span className="text-indigo-600 ml-1">#{item.reference}</span>
+                      )}
                     </div>
                   ))}
                   {calculation.items.length > 2 && (
@@ -346,11 +459,25 @@ const CostHistory: React.FC = () => {
         </div>
       )}
 
-      {filteredCalculations.length === 0 && searchTerm && (
+      {/* Liste des calculs */}
+      {calculations.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200 mx-0 sm:mx-0">
-          <p className="text-gray-500">Aucun calcul trouvé pour "{searchTerm}"</p>
+          <div className="p-6">
+            <History className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun calcul sauvegardé</h3>
+            <p className="text-gray-500 mb-6">
+              Commencez par créer votre premier calcul de coûts pour le voir apparaître ici.
+            </p>
+            <button
+              onClick={() => navigate('/cost-calculation')}
+              className="btn-primary flex items-center space-x-2 mx-auto"
+            >
+              <Calculator className="w-4 h-4" />
+              <span>Créer un calcul</span>
+            </button>
+          </div>
         </div>
-      )}
+      ) : null}
 
       {/* Modal de détails */}
       <Modal
@@ -365,19 +492,19 @@ const CostHistory: React.FC = () => {
               <div className="text-center p-4 bg-red-50 rounded-lg">
                 <p className="text-sm text-red-600 font-medium">Coût Total</p>
                 <p className="text-2xl font-bold text-red-700">
-                  {formatAriary(selectedCalculation.totalCost)}
+                  {formatAriary(Math.round(selectedCalculation.totalCost))}
                 </p>
               </div>
               <div className="text-center p-4 bg-blue-50 rounded-lg">
                 <p className="text-sm text-blue-600 font-medium">Marge</p>
                 <p className="text-2xl font-bold text-blue-700">
-                  {formatAriary(selectedCalculation.totalMargin)}
+                  {formatAriary(Math.round(selectedCalculation.totalMargin))}
                 </p>
               </div>
               <div className="text-center p-4 bg-green-50 rounded-lg">
                 <p className="text-sm text-green-600 font-medium">Prix de Vente</p>
                 <p className="text-2xl font-bold text-green-700">
-                  {formatAriary(selectedCalculation.totalSellingPrice)}
+                  {formatAriary(Math.round(selectedCalculation.totalSellingPrice))}
                 </p>
               </div>
             </div>
@@ -389,6 +516,7 @@ const CostHistory: React.FC = () => {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Référence</th>
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Quantité</th>
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Prix d'achat</th>
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Prix de vente</th>
@@ -398,12 +526,15 @@ const CostHistory: React.FC = () => {
                     {selectedCalculation.items.map((item: any, index: number) => (
                       <tr key={index}>
                         <td className="px-4 py-2 text-sm text-gray-900">{item.description}</td>
+                        <td className="px-4 py-2 text-sm text-indigo-600">
+                          {item.reference || '-'}
+                        </td>
                         <td className="px-4 py-2 text-sm text-gray-900">{formatNumberWithSpaces(item.quantity)}</td>
                         <td className="px-4 py-2 text-sm text-gray-900">
                           {formatNumberWithSpaces(item.purchasePrice)} {item.mainCurrency}
                         </td>
                         <td className="px-4 py-2 text-sm font-medium text-gray-900">
-                          {formatAriary(item.sellingPrice)}
+                          {formatNumberWithSpaces(Math.round(item.sellingPrice))} Ar
                         </td>
                       </tr>
                     ))}
