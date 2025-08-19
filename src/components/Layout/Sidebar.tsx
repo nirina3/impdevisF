@@ -36,9 +36,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   }, [isQuotesSection]);
 
   const mainMenuItems = [
-    { path: '/', icon: LayoutDashboard, label: 'Dashboard', color: 'text-blue-500' },
-    { path: '/clients', icon: Users, label: 'Clients', color: 'text-cyan-500' },
     { path: '/cost-calculation', icon: Calculator, label: 'Calcul des coûts', color: 'text-amber-500' },
+    { path: '/clients', icon: Users, label: 'Clients', color: 'text-cyan-500' },
     { path: '/cost-history', icon: History, label: 'Historique Calculs', color: 'text-purple-500' },
     { path: '/analytics', icon: TrendingUp, label: 'Analyses', color: 'text-rose-500' },
     { path: '/settings', icon: SettingsIcon, label: 'Paramètres', color: 'text-neutral-500' },
@@ -74,8 +73,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
       {/* Navigation */}
       <nav className="mt-4 sm:mt-6 pb-6 px-2 sm:px-0 flex-1 overflow-y-auto">
         <div className="space-y-1">
-          {/* Menu principal */}
-          {mainMenuItems.map((item) => {
+          {/* Calcul des coûts - Premier élément */}
+          {mainMenuItems.slice(0, 1).map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
             
@@ -155,6 +154,31 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
               </div>
             )}
           </div>
+
+          {/* Reste du menu principal */}
+          {mainMenuItems.slice(1).map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={handleLinkClick}
+                className={`sidebar-item ${
+                  isActive ? 'sidebar-item-active' : 'sidebar-item-inactive'
+                } group mobile-nav-item touch-friendly`}
+              >
+                <div className={`stat-icon ${isActive ? 'bg-white/20' : 'bg-neutral-100'} mr-3 flex-shrink-0`}>
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-white' : item.color}`} />
+                </div>
+                <span className="font-medium text-sm sm:text-base truncate">{item.label}</span>
+                {isActive && (
+                  <div className="ml-auto w-2 h-2 bg-white rounded-full shadow-glow"></div>
+                )}
+              </Link>
+            );
+          })}
         </div>
       </nav>
 
