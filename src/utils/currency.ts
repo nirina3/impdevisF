@@ -1,11 +1,11 @@
 import { formatNumberWithSpaces } from './formatters';
 
 export const formatAriary = (amount: number): string => {
-  return `${formatNumberWithSpaces(Math.round(amount))} Ar`;
+  return `${formatNumberWithSpaces(amount)} Ar`;
 };
 
 export const formatAriarySimple = (amount: number): string => {
-  return `${formatNumberWithSpaces(Math.round(amount))} Ar`;
+  return `${formatNumberWithSpaces(amount)} Ar`;
 };
 
 export const calculateDownPayment = (totalAmount: number, percentage: number): number => {

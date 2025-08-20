@@ -94,8 +94,7 @@ const NewQuote: React.FC = () => {
         transportFees: calcItem.transportFees,
         transportFeesOriginal: calcItem.transportFeesOriginal,
         transportCurrency: calcItem.transportCurrency,
-        productLink: item.productLink || '',
-        reference: item.reference || ''
+        margin: calcItem.margin || 20
       }));
 
       setItems(calculatedItems);
@@ -245,8 +244,7 @@ const NewQuote: React.FC = () => {
       transportFees: 0,
       transportFeesOriginal: 0,
       transportCurrency: 'MGA',
-      margin: 20,
-      reference: ''
+      margin: 20
     }]);
   };
 

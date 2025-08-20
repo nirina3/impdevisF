@@ -20,7 +20,6 @@ export interface CostItem {
   hsCode?: string;
   category?: string;
   productLink?: string;
-  reference?: string;
 }
 
 export interface ExchangeRates {

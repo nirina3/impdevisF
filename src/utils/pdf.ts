@@ -453,21 +453,21 @@ export const generateQuoteHTML = (quote: any, userSettings?: UserSettings) => {
             <table class="totals-table">
                 <tr>
                     <td class="total-label">Sous-total</td>
-                    <td class="total-value">${formatNumberWithSpaces(Math.round(quote.totalAmount))} Ar</td>
+                    <td class="total-value">${formatNumberWithSpaces(quote.totalAmount)} Ar</td>
                 </tr>
                 ${quote.downPayment ? `
                     <tr>
                         <td class="total-label">Acompte (${quote.downPayment.percentage}%)</td>
-                        <td class="total-value">-${formatNumberWithSpaces(Math.round(quote.downPayment.amount))} Ar</td>
+                        <td class="total-value">-${formatNumberWithSpaces(quote.downPayment.amount)} Ar</td>
                     </tr>
                     <tr>
                         <td class="total-label">Solde restant</td>
-                        <td class="total-value">${formatNumberWithSpaces(Math.round(quote.remainingAmount))} Ar</td>
+                        <td class="total-value">${formatNumberWithSpaces(quote.remainingAmount)} Ar</td>
                     </tr>
                 ` : ''}
                 <tr class="grand-total">
                     <td class="total-label">Total</td>
-                    <td class="total-value">${formatNumberWithSpaces(Math.round(quote.totalAmount))} Ar</td>
+                    <td class="total-value">${formatNumberWithSpaces(quote.totalAmount)} Ar</td>
                 </tr>
             </table>
         </div>
