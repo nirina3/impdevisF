@@ -107,7 +107,6 @@ export const dataFormattingService = {
           currency: 'MGA' as const,
           shippingMethod: 'sea' as const,
           originCountry: 'Chine',
-          destinationPort: 'Toamasina',
           paymentStatus: 'partial' as const,
           notes: 'Commande urgente pour le client prioritaire',
           items: [
@@ -159,7 +158,6 @@ export const dataFormattingService = {
           currency: 'MGA' as const,
           shippingMethod: 'air' as const,
           originCountry: 'France',
-          destinationPort: 'Ivato',
           paymentStatus: 'paid' as const,
           notes: 'Livraison express demandée',
           items: [
@@ -211,7 +209,6 @@ export const dataFormattingService = {
           currency: 'MGA' as const,
           shippingMethod: 'sea' as const,
           originCountry: 'Chine',
-          destinationPort: 'Toamasina',
           paymentStatus: 'unpaid' as const,
           notes: 'Devis en attente de validation client',
           items: [

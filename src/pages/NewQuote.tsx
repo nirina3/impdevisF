@@ -30,7 +30,6 @@ const NewQuote: React.FC = () => {
     clientPhone: '',
     clientAddress: '',
     originCountry: 'Chine',
-    destinationPort: 'Toamasina',
     shippingMethod: 'sea' as Quote['shippingMethod'],
     currency: 'MGA' as Quote['currency'],
     validUntil: '',

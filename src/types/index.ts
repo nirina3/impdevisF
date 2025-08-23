@@ -16,7 +16,6 @@ export interface Quote {
   notes?: string;
   shippingMethod: 'air' | 'sea' | 'land';
   originCountry: string;
-  destinationPort: string;
   estimatedDelivery: Date;
   downPayment?: DownPayment;
   paymentStatus: 'unpaid' | 'partial' | 'paid';
