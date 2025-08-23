@@ -74,6 +74,9 @@ const Login: React.FC = () => {
         case 'auth/too-many-requests':
           setError('Trop de tentatives. Veuillez réessayer plus tard');
           break;
+        case 'auth/invalid-credential':
+          setError('Email ou mot de passe incorrect');
+          break;
         default:
           setError('Une erreur est survenue. Veuillez réessayer');
       }

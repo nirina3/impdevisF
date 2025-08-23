@@ -363,11 +363,11 @@ const QuoteManagement: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      {formatAriary(quote.totalAmount)}
+                      {formatAriary(Math.round(quote.totalAmount))}
                     </div>
                     {quote.remainingAmount > 0 && (
                       <div className="text-xs text-orange-600">
-                        Reste: {formatAriary(quote.remainingAmount)}
+                        Reste: {formatAriary(Math.round(quote.remainingAmount))}
                       </div>
                     )}
                   </td>
@@ -453,11 +453,11 @@ const QuoteManagement: React.FC = () => {
                 <PaymentStatusBadge status={quote.paymentStatus} />
                 <div className="text-right">
                   <div className="font-semibold text-gray-900 text-sm">
-                    {formatAriary(quote.totalAmount)}
+                    {formatAriary(Math.round(selectedQuote.totalAmount))}
                   </div>
                   {quote.remainingAmount > 0 && (
                     <div className="text-xs text-orange-600">
-                      Reste: {formatAriary(quote.remainingAmount)}
+                      Reste: {formatAriary(Math.round(selectedQuote.remainingAmount))}
                     </div>
                   )}
                 </div>
@@ -517,13 +517,11 @@ const QuoteManagement: React.FC = () => {
                 <h4 className="font-semibold text-gray-900 mb-2">Informations Livraison</h4>
                 <div className="space-y-1 text-sm">
                   <p><span className="font-medium">Origine:</span> {selectedQuote.originCountry}</p>
-                  <p><span className="font-medium">Destination:</span> {selectedQuote.destinationPort}</p>
                   <p><span className="font-medium">Mode:</span> {
                     selectedQuote.shippingMethod === 'sea' ? 'Maritime' :
                     selectedQuote.shippingMethod === 'air' ? 'Aérien' : 'Terrestre'
                   }</p>
                   <p><span className="font-medium">Livraison estimée:</span> {format(selectedQuote.estimatedDelivery, 'dd/MM/yyyy', { locale: fr })}</p>
-                  <p><span className="font-medium">Livraison estimée:</span> {safeFormatDate(selectedQuote.estimatedDelivery, 'dd/MM/yyyy', { locale: fr })}</p>
                 </div>
               </div>
             </div>
@@ -546,13 +544,13 @@ const QuoteManagement: React.FC = () => {
               <div>
                 <h4 className="font-semibold text-gray-900 mb-2">Informations Financières</h4>
                 <div className="space-y-1 text-sm">
-                  <p><span className="font-medium">Total:</span> {formatAriary(selectedQuote.totalAmount)}</p>
+                  <p><span className="font-medium">Total:</span> {formatAriary(Math.round(selectedQuote.totalAmount))}</p>
                   {selectedQuote.downPayment && (
-                    <p><span className="font-medium">Acompte:</span> {formatAriary(selectedQuote.downPayment.amount)} ({selectedQuote.downPayment.percentage}%)</p>
+                    <p><span className="font-medium">Acompte:</span> {formatAriary(Math.round(selectedQuote.downPayment.amount))} ({selectedQuote.downPayment.percentage}%)</p>
                   )}
                   <p><span className="font-medium">Solde restant:</span> 
                     <span className={selectedQuote.remainingAmount > 0 ? 'text-orange-600 font-medium ml-1' : 'text-green-600 ml-1'}>
-                      {formatAriary(selectedQuote.remainingAmount)}
+                      {formatAriary(Math.round(selectedQuote.remainingAmount))}
                     </span>
                   </p>
                 </div>
@@ -576,8 +574,8 @@ const QuoteManagement: React.FC = () => {
                       <tr key={item.id}>
                         <td className="px-4 py-2 text-sm text-gray-900">{item.description}</td>
                         <td className="px-4 py-2 text-sm text-gray-900">{formatNumberWithSpaces(item.quantity)}</td>
-                        <td className="px-4 py-2 text-sm text-gray-900">{formatAriary(item.unitPrice)}</td>
-                        <td className="px-4 py-2 text-sm text-gray-900">{formatAriary(item.quantity * item.unitPrice)}</td>
+                        <td className="px-4 py-2 text-sm text-gray-900">{formatAriary(Math.round(item.unitPrice))}</td>
+                        <td className="px-4 py-2 text-sm text-gray-900">{formatAriary(Math.round(item.quantity * item.unitPrice))}</td>
                       </tr>
                     ))}
                   </tbody>
