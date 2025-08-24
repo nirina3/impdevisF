@@ -478,7 +478,6 @@ export const generateQuoteHTML = (quote: any, userSettings?: UserSettings) => {
                 <div class="info-box-title">Expédition</div>
                 <div><strong>Origine:</strong> ${quote.originCountry}</div>
                 <div><strong>Mode:</strong> ${quote.shippingMethod === 'sea' ? 'Maritime' : quote.shippingMethod === 'air' ? 'Aérien' : 'Terrestre'}</div>
-                <div><strong>Destination:</strong> ${quote.destinationPort}</div>
             </div>
             <div class="info-box">
                 <div class="info-box-title">Délais</div>
