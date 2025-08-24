@@ -26,6 +26,7 @@ const EditQuote: React.FC = () => {
     clientPhone: '',
     clientAddress: '',
     originCountry: '',
+    destinationPort: '',
     shippingMethod: 'sea' as Quote['shippingMethod'],
     currency: 'MGA' as Quote['currency'],
     validUntil: '',
@@ -57,6 +58,7 @@ const EditQuote: React.FC = () => {
           clientPhone: foundQuote.clientPhone,
           clientAddress: foundQuote.clientAddress,
           originCountry: foundQuote.originCountry,
+          destinationPort: foundQuote.destinationPort,
           shippingMethod: foundQuote.shippingMethod,
           currency: foundQuote.currency,
           validUntil: foundQuote.validUntil.toISOString().split('T')[0],
@@ -93,8 +95,7 @@ const EditQuote: React.FC = () => {
           transportFees: item.transportFees || 0,
           transportFeesOriginal: item.transportFeesOriginal || 0,
           transportCurrency: item.transportCurrency || 'MGA',
-          margin: item.margin || 20,
-          reference: item.reference || ''
+          margin: item.margin || 20
         })));
       }
       setLoading(false);
@@ -208,8 +209,7 @@ const EditQuote: React.FC = () => {
       transportFees: 0,
       transportFeesOriginal: 0,
       transportCurrency: 'MGA',
-      margin: 20,
-      reference: ''
+      margin: 20
     }]);
   };
 
@@ -556,30 +556,20 @@ const EditQuote: React.FC = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Frais de transport ({item.transportCurrency})
+                      Frais de transport (MGA)
                     </label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm">
-                        {item.transportCurrency === 'USD' ? '$' : 
-                         item.transportCurrency === 'EUR' ? '€' : 
-                         item.transportCurrency === 'CNY' ? '¥' : 'Ar'}
-                      </span>
-                      <input
-                        type="text"
-                        value={formatNumberWithSpaces(item.transportFeesOriginal || 0)}
-                        onChange={(e) => {
-                          const value = parseFormattedNumber(e.target.value);
-                          handleItemChange(index, 'transportFeesOriginal', value);
-                        }}
-                        className="pl-10 input-field"
-                        placeholder="0"
-                      />
-                    </div>
-                    {item.transportCurrency !== 'MGA' && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        Équivalent: {formatNumberWithSpaces(Math.round(convertToMGA(item.transportFeesOriginal || 0, item.transportCurrency as 'USD' | 'EUR' | 'CNY')))} Ar
-                      </p>
-                    )}
+                    <input
+                      type="text"
+                      value={formatNumberWithSpaces(item.transportFeesOriginal || 0)}
+                      onChange={(e) => {
+                        const value = parseFormattedNumber(e.target.value);
+                        handleItemChange(index, 'transportFeesOriginal', value);
+                        handleItemChange(index, 'transportFees', value);
+                        handleItemChange(index, 'transportCurrency', 'MGA');
+                      }}
+                      className="input-field"
+                      placeholder="0"
+                    />
                   </div>
 
                   <div>

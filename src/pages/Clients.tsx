@@ -217,7 +217,7 @@ const Clients: React.FC = () => {
                 <div>
                   <p className="text-gray-500">Valeur totale</p>
                   <p className="font-semibold text-gray-900 truncate">
-                    {formatAriary(Math.round(client.totalValue))}
+                    {formatAriary(client.totalValue)}
                   </p>
                 </div>
               </div>

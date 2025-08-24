@@ -16,6 +16,7 @@ export interface Quote {
   notes?: string;
   shippingMethod: 'air' | 'sea' | 'land';
   originCountry: string;
+  destinationPort: string;
   estimatedDelivery: Date;
   downPayment?: DownPayment;
   paymentStatus: 'unpaid' | 'partial' | 'paid';
@@ -65,7 +66,6 @@ export interface QuoteItem {
   transportFeesOriginal?: number;
   transportCurrency?: string;
   margin?: number;
-  reference?: string;
 }
 
 export interface Client {
