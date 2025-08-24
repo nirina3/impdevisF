@@ -259,7 +259,7 @@ const Analytics: React.FC = () => {
         <StatCard
           icon={DollarSign}
           title="Chiffre d'Affaires"
-          value={formatAriary(profitAnalysis.totalRevenue)}
+          value={`${formatNumberWithSpaces(Math.round(profitAnalysis.totalRevenue))} Ar`}
           subtitle={`${formatNumberWithSpaces(profitAnalysis.quotesAnalyzed)} devis`}
           trend={trends.revenueTrend}
           color="text-blue-600"
@@ -269,7 +269,7 @@ const Analytics: React.FC = () => {
         <StatCard
           icon={Calculator}
           title="Coût Total"
-          value={formatAriary(profitAnalysis.totalCost)}
+          value={`${formatNumberWithSpaces(Math.round(profitAnalysis.totalCost))} Ar`}
           subtitle={`${Math.round(profitAnalysis.costRatio)}% du CA`}
           color="text-orange-600"
           bgColor="bg-orange-50"
@@ -278,7 +278,7 @@ const Analytics: React.FC = () => {
         <StatCard
           icon={TrendingUp}
           title="Bénéfice Net"
-          value={formatAriary(profitAnalysis.netProfit)}
+          value={`${formatNumberWithSpaces(Math.round(profitAnalysis.netProfit))} Ar`}
           subtitle={`Marge: ${Math.round(profitAnalysis.profitMargin)}%`}
           trend={trends.profitTrend}
           color="text-green-600"
@@ -321,22 +321,25 @@ const Analytics: React.FC = () => {
             <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg touch-friendly">
               <span className="text-sm font-medium text-gray-700">Valeur moyenne par devis</span>
               <span className="font-bold text-blue-600">
-                {formatAriary(performanceMetrics.averageQuoteValue)}
+                {formatAriary(Math.round(performanceMetrics.averageQuoteValue))}
               </span>
+              <p className="text-sm font-bold text-blue-600">{formatNumberWithSpaces(Math.round(performanceMetrics.averageQuoteValue))} Ar</p>
             </div>
             
             <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg touch-friendly">
               <span className="text-sm font-medium text-gray-700">Coût moyen par devis</span>
               <span className="font-bold text-orange-600">
-                {formatAriary(performanceMetrics.averageCostPerQuote)}
+                {formatAriary(Math.round(performanceMetrics.averageCostPerQuote))}
               </span>
+              <p className="text-sm font-bold text-orange-600">{formatNumberWithSpaces(Math.round(performanceMetrics.averageCostPerQuote))} Ar</p>
             </div>
             
             <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg touch-friendly">
               <span className="text-sm font-medium text-gray-700">Bénéfice moyen par devis</span>
               <span className="font-bold text-green-600">
-                {formatAriary(performanceMetrics.averageProfitPerQuote)}
+                {formatAriary(Math.round(performanceMetrics.averageProfitPerQuote))}
               </span>
+              <p className="text-sm font-bold text-green-600">{formatNumberWithSpaces(Math.round(performanceMetrics.averageProfitPerQuote))} Ar</p>
             </div>
             
             <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg touch-friendly">
@@ -375,7 +378,7 @@ const Analytics: React.FC = () => {
                     {formatNumberWithSpaces(statusCount)}
                   </p>
                   <p className={`text-xs text-${color}-600 mt-1 mobile-text-xs`}>
-                    {formatAriary(statusValue)}
+                    {formatNumberWithSpaces(Math.round(statusValue))} Ar
                   </p>
                 </div>
               </div>
@@ -410,11 +413,11 @@ const Analytics: React.FC = () => {
                     {formatNumberWithSpaces(paymentCount)}
                   </p>
                   <p className={`text-xs text-${color}-600 mt-1 mobile-text-xs`}>
-                    Valeur: {formatAriary(paymentValue)}
+                    Valeur: {formatNumberWithSpaces(Math.round(paymentValue))} Ar
                   </p>
                   {status !== 'paid' && remainingAmount > 0 && (
                     <p className={`text-xs text-${color}-700 mt-1 font-medium mobile-text-xs`}>
-                      Reste: {formatAriary(remainingAmount)}
+                      Reste: {formatNumberWithSpaces(Math.round(remainingAmount))} Ar
                     </p>
                   )}
                 </div>

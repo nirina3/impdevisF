@@ -22,8 +22,9 @@ export const formatNumberWithSpaces = (value: number | string): string => {
     return '0';
   }
 
-  // Formater avec des espaces comme séparateurs de milliers
-  return num.toLocaleString('fr-FR').replace(/,/g, ' ');
+  // Arrondir à l'entier le plus proche et formater avec des espaces
+  const roundedNum = Math.round(num);
+  return roundedNum.toLocaleString('fr-FR').replace(/,/g, ' ');
 };
 
 /**
@@ -49,7 +50,7 @@ export const parseFormattedNumber = (formattedValue: string): number => {
  * @returns Le montant formaté avec "Ar" à la fin
  */
 export const formatAriary = (amount: number): string => {
-  return `${formatNumberWithSpaces(amount)} Ar`;
+  return `${formatNumberWithSpaces(Math.round(amount))} Ar`;
 };
 
 /**
