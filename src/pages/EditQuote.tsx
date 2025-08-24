@@ -26,6 +26,7 @@ const EditQuote: React.FC = () => {
     clientPhone: '',
     clientAddress: '',
     originCountry: '',
+    destinationPort: '',
     shippingMethod: 'sea' as Quote['shippingMethod'],
     currency: 'MGA' as Quote['currency'],
     validUntil: '',
@@ -57,6 +58,7 @@ const EditQuote: React.FC = () => {
           clientPhone: foundQuote.clientPhone,
           clientAddress: foundQuote.clientAddress,
           originCountry: foundQuote.originCountry,
+          destinationPort: foundQuote.destinationPort,
           shippingMethod: foundQuote.shippingMethod,
           currency: foundQuote.currency,
           validUntil: foundQuote.validUntil.toISOString().split('T')[0],
@@ -93,8 +95,7 @@ const EditQuote: React.FC = () => {
           transportFees: item.transportFees || 0,
           transportFeesOriginal: item.transportFeesOriginal || 0,
           transportCurrency: item.transportCurrency || 'MGA',
-          margin: item.margin || 20,
-          reference: item.reference || ''
+          margin: item.margin || 20
         })));
       }
       setLoading(false);
@@ -208,8 +209,7 @@ const EditQuote: React.FC = () => {
       transportFees: 0,
       transportFeesOriginal: 0,
       transportCurrency: 'MGA',
-      margin: 20,
-      reference: ''
+      margin: 20
     }]);
   };
 

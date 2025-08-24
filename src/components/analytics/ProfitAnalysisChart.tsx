@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatAriary, formatNumberWithSpaces } from '../../utils/formatters';
+import { formatAriary } from '../../utils/formatters';
 
 interface ProfitAnalysisChartProps {
   totalCost: number;
@@ -103,7 +103,7 @@ const ProfitAnalysisChart: React.FC<ProfitAnalysisChartProps> = ({ totalCost, ne
           <div className="text-center">
             <p className="text-xs text-gray-500 font-medium">Total</p>
             <p className="text-lg font-bold text-gray-900">
-              {formatNumberWithSpaces(Math.round(total))} Ar
+              {formatAriary(total)}
             </p>
             <p className="text-xs text-gray-600 mt-1">
               Marge: {total > 0 ? Math.round(profitPercentage) : 0}%
@@ -120,7 +120,7 @@ const ProfitAnalysisChart: React.FC<ProfitAnalysisChartProps> = ({ totalCost, ne
             <span className="text-sm font-medium text-gray-700">Coût Total</span>
           </div>
           <div className="text-right">
-            <p className="text-sm font-bold text-gray-900">{formatNumberWithSpaces(Math.round(totalCost))} Ar</p>
+            <p className="text-sm font-bold text-gray-900">{formatAriary(totalCost)}</p>
             <p className="text-xs text-gray-500">{total > 0 ? Math.round(costPercentage) : 0}%</p>
           </div>
         </div>
@@ -131,7 +131,7 @@ const ProfitAnalysisChart: React.FC<ProfitAnalysisChartProps> = ({ totalCost, ne
             <span className="text-sm font-medium text-gray-700">Bénéfice Net</span>
           </div>
           <div className="text-right">
-            <p className="text-sm font-bold text-gray-900">{formatNumberWithSpaces(Math.round(netProfit))} Ar</p>
+            <p className="text-sm font-bold text-gray-900">{formatAriary(netProfit)}</p>
             <p className="text-xs text-gray-500">{total > 0 ? Math.round(profitPercentage) : 0}%</p>
           </div>
         </div>

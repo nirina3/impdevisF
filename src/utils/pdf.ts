@@ -453,21 +453,21 @@ export const generateQuoteHTML = (quote: any, userSettings?: UserSettings) => {
             <table class="totals-table">
                 <tr>
                     <td class="total-label">Sous-total</td>
-                    <td class="total-value">${formatNumberWithSpaces(Math.round(quote.totalAmount))} Ar</td>
+                    <td class="total-value">${formatNumberWithSpaces(quote.totalAmount)} Ar</td>
                 </tr>
                 ${quote.downPayment ? `
                     <tr>
                         <td class="total-label">Acompte (${quote.downPayment.percentage}%)</td>
-                        <td class="total-value">-${formatNumberWithSpaces(Math.round(quote.downPayment.amount))} Ar</td>
+                        <td class="total-value">-${formatNumberWithSpaces(quote.downPayment.amount)} Ar</td>
                     </tr>
                     <tr>
                         <td class="total-label">Solde restant</td>
-                        <td class="total-value">${formatNumberWithSpaces(Math.round(quote.remainingAmount))} Ar</td>
+                        <td class="total-value">${formatNumberWithSpaces(quote.remainingAmount)} Ar</td>
                     </tr>
                 ` : ''}
                 <tr class="grand-total">
                     <td class="total-label">Total</td>
-                    <td class="total-value">${formatNumberWithSpaces(Math.round(quote.totalAmount))} Ar</td>
+                    <td class="total-value">${formatNumberWithSpaces(quote.totalAmount)} Ar</td>
                 </tr>
             </table>
         </div>
@@ -478,6 +478,7 @@ export const generateQuoteHTML = (quote: any, userSettings?: UserSettings) => {
                 <div class="info-box-title">Expédition</div>
                 <div><strong>Origine:</strong> ${quote.originCountry}</div>
                 <div><strong>Mode:</strong> ${quote.shippingMethod === 'sea' ? 'Maritime' : quote.shippingMethod === 'air' ? 'Aérien' : 'Terrestre'}</div>
+                <div><strong>Destination:</strong> ${quote.destinationPort}</div>
             </div>
             <div class="info-box">
                 <div class="info-box-title">Délais</div>
